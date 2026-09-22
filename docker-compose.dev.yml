@@ -1,0 +1,44 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Ex-Farmer — Development Docker Compose Override
+# Provides hot-reloading for client and server during local development.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: ex-farmer
+
+services:
+
+  # Override nginx with the Vite dev server (hot reload)
+  nginx:
+    build:
+      context: ./client
+      target: builder          # stops after npm ci — no nginx in dev
+    command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./client/src:/app/src:ro
+      - ./client/public:/app/public:ro
+    environment:
+      VITE_API_URL: http://server:5000
+
+  # Server with nodemon for hot reload
+  server:
+    image: node:22-alpine
+    working_dir: /app
+    command: ["sh", "-c", "npm install && npx nodemon server.cjs"]
+    volumes:
+      - ./server:/app
+    environment:
+      NODE_ENV: development
+    ports:
+      - "5000:5000"
+    depends_on: []
+
+  # ML service — same image, just override workers to 1 for dev
+  ml-service:
+    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    volumes:
+      - ./ml-service:/app

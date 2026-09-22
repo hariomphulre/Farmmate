@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Apple, Grape, Carrot, Cherry, Leaf, Wheat, Sprout } from "lucide-react";
-import serverOutput from "../../../../server/crop_prediction/crop_data/output.json";
+import serverOutput from "../../../../ml-service/crop_prediction/crop_data/output.json";
 
 // UI component to render fertilizer recommendations from output.json
 export default function FertilizerRecommender() {

@@ -1,0 +1,12 @@
+node_modules
+.env
+.env.*
+crop_imgs
+detect_results
+Field_co-ordinates
+field_corrdinates
+*.log
+.git
+.gitignore
+README.md
+tempCodeRunnerFile.py

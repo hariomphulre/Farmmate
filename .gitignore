@@ -1,3 +1,34 @@
-# venv
-farm
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+farm/
+venv/
+.venv/
+
+# Node
+node_modules/
+dist/
+.cache/
+
+# Environment files — NEVER commit real secrets
 .env
+.env.*
+!.env.example
+!**/.env.example
+
+# Docker runtime artifacts
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Firebase
+.firebase/
+
+# IDE
+.vscode/
+.idea/

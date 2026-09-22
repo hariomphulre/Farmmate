@@ -5,19 +5,37 @@ const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-require('dotenv').config(); 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// ── CORS ─────────────────────────────────────────────────────────────────────
+// In production, set ALLOWED_ORIGINS="https://yourdomain.com" in your .env
+// Multiple origins: "https://yourdomain.com,https://www.yourdomain.com"
+const defaultOrigins = ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'];
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim()).concat(defaultOrigins)
+  : defaultOrigins;
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173'], // Allow requests from various development URLs
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, mobile apps, same-origin Nginx proxy)
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 app.use(bodyParser.json());
+
+// ── Health check (Docker HEALTHCHECK + load balancers) ───────────────────────
+app.get('/health', (_req, res) => {
+  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+});
+
+// ── ML service base URL ───────────────────────────────────────────────────────
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://ml-service:8000';
 
 // Configure multer for image uploads with plant name-based storage
 const diseaseUploadDir = path.join(__dirname, 'crop_imgs', 'disease');
@@ -491,6 +509,20 @@ app.get('/api/soil/:fieldId', (req, res) => {
 });
 
 const weatherapikey = process.env.OPENWEATHER_API_KEY;
+// WeatherAPI.com key for historical weather data
+const new_weather_api = process.env.WEATHER_API_KEY || '';
+
+// Helper: generate an array of date strings between start and end (inclusive)
+function getDatesBetween(start, end) {
+  const dates = [];
+  const current = new Date(start);
+  const last = new Date(end);
+  while (current <= last) {
+    dates.push(current.toISOString().split('T')[0]);
+    current.setDate(current.getDate() + 1);
+  }
+  return dates;
+}
 
 app.post("/api/weather-coordinates", async (req, res) => {
   try {
