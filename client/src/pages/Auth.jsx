@@ -14,9 +14,9 @@ const Auth = () => {
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your-google-client-id';
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI';
 
-  // Background image path (now in public folder)
-  const backgrd_img = "/forest_img.jpg";
-  
+  const backgroundVideoRef = useRef(null);
+  const BACKGROUND_VIDEO_SRC = "/newvideo.mp4";
+
   let usertype="";
 
   // Load Google OAuth script
@@ -62,6 +62,33 @@ const Auth = () => {
 
     loadGoogleScript();
   }, [GOOGLE_CLIENT_ID]);
+
+  // Keep the login background video playing whenever this page is shown
+  useEffect(() => {
+    const video = backgroundVideoRef.current;
+    if (!video) return;
+
+    video.muted = true;
+    video.defaultMuted = true;
+    video.loop = true;
+    video.playsInline = true;
+
+    const playVideo = () => {
+      const playPromise = video.play();
+      if (playPromise && typeof playPromise.catch === "function") {
+        playPromise.catch(() => {});
+      }
+    };
+
+    playVideo();
+    video.addEventListener("canplay", playVideo);
+    video.addEventListener("pause", playVideo);
+
+    return () => {
+      video.removeEventListener("canplay", playVideo);
+      video.removeEventListener("pause", playVideo);
+    };
+  }, []);
 
   // Load reCAPTCHA script
   useEffect(() => {
@@ -242,13 +269,21 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen">
-      <img 
-        src={backgrd_img} 
-        alt="Forest background" 
-        className="fixed brightness-80 inset-0 w-full h-full object-cover -z-10"
+    <div className="relative min-h-screen overflow-hidden">
+      <video
+        ref={backgroundVideoRef}
+        className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover"
+        src={BACKGROUND_VIDEO_SRC}
+        autoPlay
+        loop
+        muted
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+        aria-hidden="true"
       />
-      
+      <div className="pointer-events-none fixed inset-0 z-0 bg-black/35" aria-hidden="true" />
+
       <div className="flex flex-wrap relative z-10">
         <img src="/logo.png" alt="logo loading..." className="w-10 h-10 sm:w-15 sm:h-15 position-fixed overflow-y-hidden m-2 sm:m-3"/>
         <h1 style={{fontFamily: "sans-serif"}} className={`sm:pt-5 text-xl sm:text-3xl font-bold text-gray-200`}>Smart & Climate Resilient Agriculture</h1>
