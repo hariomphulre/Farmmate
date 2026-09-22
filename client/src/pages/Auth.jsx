@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { FcGoogle } from "react-icons/fc";
+import { Lock, Mail, Eye, EyeOff, ArrowRight } from "lucide-react";
+
+const BRAND_GREEN = "#052e16";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
   const [recaptchaVerified, setRecaptchaVerified] = useState(false);
   const recaptchaRef = useRef(null);
-  
-  // Error state
   const [errors, setErrors] = useState({});
+  const [usertype, setUsertype] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(true);
 
   // Google OAuth and reCAPTCHA configuration
   const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your-google-client-id';
@@ -16,8 +22,6 @@ const Auth = () => {
 
   const backgroundVideoRef = useRef(null);
   const BACKGROUND_VIDEO_SRC = "/newvideo.mp4";
-
-  let usertype="";
 
   // Load Google OAuth script
   useEffect(() => {
@@ -229,18 +233,13 @@ const Auth = () => {
 
   const checkDetails = (e) => {
     e.preventDefault();
-    console.log('Form submitted!');
     
-    const usernameInput = document.querySelector('input[placeholder="Username"]').value;
-    const passwordInput = document.querySelector('input[placeholder="Password"]').value;
-    
-    if (!usernameInput || !passwordInput) {
+    if (!username || !password) {
       setErrors({ general: 'Please enter both username and password' });
       return;
     }
     
     if (!recaptchaVerified) {
-      console.log('Validation failed: reCAPTCHA not verified');
       setErrors({ general: 'Please complete the reCAPTCHA verification' });
       return;
     }
@@ -249,17 +248,17 @@ const Auth = () => {
     setErrors({});
     
     setTimeout(() => {
-      if (passwordInput === "admin12345" && usernameInput === "Hariom") {
+      if (password === "admin12345" && username === "Hariom") {
         localStorage.setItem('authToken', 'mock-token-' + Date.now());
         localStorage.setItem('user', JSON.stringify({ 
-          username: usernameInput, 
-          loginTime: new Date().toISOString() 
+          username, 
+          loginTime: new Date().toISOString(),
+          rememberDevice
         }));
-        if(usertype=="Farmer" || usertype=="Trader"){
-          window.location.href = usertype=="Farmer" ? '/dashboard' : '/trader';
-        }
-        else{
-          setErrors({general: 'Please select user type.'});
+        if (usertype === "Farmer" || usertype === "Trader") {
+          window.location.href = usertype === "Farmer" ? '/dashboard' : '/trader';
+        } else {
+          setErrors({ general: 'Please select user type.' });
         }
       } else {
         setErrors({ general: 'Invalid username or password.' });
@@ -269,7 +268,7 @@ const Auth = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden overflow-y-auto">
       <video
         ref={backgroundVideoRef}
         className="pointer-events-none fixed inset-0 z-0 h-full w-full object-cover"
@@ -286,81 +285,140 @@ const Auth = () => {
 
       <div className="flex flex-wrap relative z-10">
         <img src="/logo.png" alt="logo loading..." className="w-10 h-10 sm:w-15 sm:h-15 position-fixed overflow-y-hidden m-2 sm:m-3"/>
-        <h1 style={{fontFamily: "sans-serif"}} className={`sm:pt-5 text-xl sm:text-3xl font-bold text-gray-200`}>Smart & Climate Resilient Agriculture</h1>
+        <div className='flex gap-4'>
+          <h1 style={{fontFamily: "sans-serif"}} className={`sm:pt-5 text-xl text-[#052e16] sm:text-3xl font-bold `}>Ex-Farmer</h1>
+          <h2 style={{fontFamily: "sans-serif"}} className={`sm:pt-5 text-[10px] sm:text-3xl font-medium text-gray-200`}>Smart & Climate Resilient Agriculture</h2>
+        </div>
+        
       </div>
 
-      <div style={{justifySelf: "center"}} className="flex items-center flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 max-w-sm w-full space-y-8 relative z-10">
+      <div className="relative z-10 mx-auto flex w-full max-w-[640px] flex-col items-center px-4 py-8 sm:py-10">
+        <div className="w-full rounded-[28px] border border-white/70 bg-white px-7 sm:px-10 py-8 shadow-[0_24px_60px_rgba(5,46,22,0.18)]">
+          
+          <h1 className="text-[32px] font-bold leading-tight tracking-tight text-slate-900">Welcome back</h1>
+          <p className="mt-1 text-[15px] text-slate-500 mb-4">Sign in to continue to your Ex-Farmer dashboard.</p>
 
-        <div className="flex flex-col bg-white backdrop-blur-sm shadow-2xl rounded-2xl pl-6 pr-6 pb-6 pt-3 space-y-0">
+
+          <form onSubmit={checkDetails} className="space-y-4">
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold tracking-wide text-slate-700">
+                USER TYPE <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={usertype}
+                onChange={(e) => setUsertype(e.target.value)}
+                className="h-12 w-full rounded-xl border border-slate-200 bg-white px-3 text-[15px] text-slate-800 outline-none transition focus:border-[#052e16] focus:ring-2 focus:ring-[#052e16]/15"
+              >
+                <option value="" disabled>Select User</option>
+                <option value="Farmer">Farmer</option>
+                <option value="Trader">Trader</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-[11px] font-bold tracking-wide text-slate-700">
+                USERNAME <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <Mail size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter Username"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-3 text-[15px] text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#052e16] focus:ring-2 focus:ring-[#052e16]/15"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <div className="mb-1.5 flex items-center justify-between">
+                <label className="block text-[11px] font-bold tracking-wide text-slate-700">
+                  PASSWORD <span className="text-red-500">*</span>
+                </label>
+                <button
+                  type="button"
+                  className="text-[13px] font-medium"
+                  style={{ color: BRAND_GREEN }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+              <div className="relative">
+                <Lock size={16} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter Password"
+                  className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-11 text-[15px] text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-[#052e16] focus:ring-2 focus:ring-[#052e16]/15"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-2.5 text-[14px] text-slate-700">
+              <input
+                type="checkbox"
+                checked={rememberDevice}
+                onChange={(e) => setRememberDevice(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 accent-[#052e16]"
+              />
+              Remember device for 30 days
+            </label>
+
+            <div>
+              <div ref={recaptchaRef} className="flex justify-center overflow-x-auto"></div>
+              {errors.recaptcha && <p className="mt-2 text-center text-sm text-red-500">{errors.recaptcha}</p>}
+            </div>
+            <button
+              type="submit"
+              disabled={loading || !recaptchaVerified}
+              className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full py-3.5 text-[15px] font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed"
+              style={{ backgroundColor: BRAND_GREEN }}
+            >
+              {loading ? "Signing in..." : "Sign In"}
+             
+            </button>
+
+          <div className="my-5 flex items-center gap-3">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[11px] font-semibold tracking-[0.14em] text-slate-400">OR SIGN IN WITH GOOGLE</span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
           {errors.general && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {errors.general}
             </div>
           )}
 
-          <form onSubmit={checkDetails} className="space-y-4">
-            <div>
-              <h1 style={{fontFamily: "arial"}} className="font-bold text-3xl">Sign in</h1>
-            </div>
-            <div className="flex flex-col gap-3 pt-0">
-              <select onChange={(e)=>{usertype=e.target.value; console.log(usertype)}} className="pl-1 text-lg border w-76 h-9 rounded-xs" id="">
-                <option disabled selected hidden>Select User</option>
-                <option>Farmer</option>
-                <option>Trader</option>
-              </select>
-              <input 
-                type="text" 
-                placeholder='Username' 
-                className="border black rounded-xs p-1 pl-2 text-lg"
-                required
-              />
-              <input 
-                type="password" 
-                placeholder='Password' 
-                className="border black rounded-xs p-1 pl-2 text-lg"
-                required
-              />
-            </div>
-            <div>
-              <div 
-                ref={recaptchaRef}
-                className="flex justify-center"
-              ></div>
-              {errors.recaptcha && <p className="mt-2 text-sm text-red-500 text-center">{errors.recaptcha}</p>}
-            </div>
+          <button
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-[15px] font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <FcGoogle className="text-xl" />
+            Continue with Google
+          </button>
 
-            <button
-              type="submit"
-              disabled={loading || !recaptchaVerified}
-              className="w-full cursor-pointer hover:bg-blue-700 flex justify-center py-3 px-4 border border-transparent rounded-xs shadow-sm text-white bg-blue-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-            >
-              Sign in
-            </button>
           </form>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
-            </div>
-            <div className="relative flex justify-center text-sm pt-1 pb-1">
-              <span className="px-2 bg-white text-gray-500">or</span> 
-            </div>
-          </div>
-          <div>
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={loading || !recaptchaVerified}
-              className="w-full cursor-pointer flex flex-row gap-12 items-center py-3 border border-gray-300 rounded-xs shadow-sm bg-white hover:bg-gray-100 transition-all disabled:cursor-not-allowed"
-            >
-              <FcGoogle className="ml-4 text-2xl"/>
-              Sign in with Google
-            </button>
-          </div>
-        </div>
 
-        {/* Footer */}
-        <div className="text-center text-sm text-white">
-          <p>Secured with Google OAuth 2.0 and reCAPTCHA</p>
+          <p className="mt-5 text-center text-sm text-slate-500">
+            Don&apos;t have an account?{" "}
+            <span className="font-semibold" style={{ color: BRAND_GREEN }}>
+              Contact your administrator
+            </span>
+          </p>
         </div>
       </div>
     </div>
