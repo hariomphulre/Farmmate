@@ -1,0 +1,7 @@
+earthengine-api
+firebase-admin
+google-cloud-storage
+google-auth
+python-dotenv
+pandas
+matplotlib

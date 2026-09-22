@@ -1,0 +1,21 @@
+services:
+  client:
+    build:
+      context: ./client
+    container_name: client
+    ports:
+      - "5173:5173"
+    
+
+  # server:
+  #   build:
+  #     context: ./server
+  #   container_name: server
+
+  # GEE:
+  #   build:
+  #     context: ./Google_Earth_Engine
+  #   container_name: GEE
+  
+
+
