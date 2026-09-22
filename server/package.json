@@ -1,12 +1,22 @@
 {
-  "name": "server",
+  "name": "smart-agri-server",
   "version": "1.0.0",
-  "description": "",
-  "license": "ISC",
-  "author": "",
-  "type": "module",
-  "main": "nodemon index.js",
+  "description": "Server for SmartAgri application",
+  "main": "server.cjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run dev",
+    "dev": "nodemon server.cjs"
+  },
+  "dependencies": {
+    "axios": "^1.12.2",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^4.21.2",
+    "multer": "^2.0.2",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
   }
 }

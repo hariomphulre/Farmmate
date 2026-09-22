@@ -1,0 +1,1 @@
+subprocess.Popen(['python', 'I://Projects//Climate-Resilient-Agriculture//System//server//crop_prediction//trigger_crop_predict.py'])

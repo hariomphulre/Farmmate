@@ -1,0 +1,359 @@
+{
+    "rice": {
+        "reason": {
+            "english": "Staple food crop with high demand; reliable yield; suitable for monsoon season",
+            "hindi": "मुख्य खाद्य फसल, उच्च मांग वाली; विश्वसनीय पैदावार; मानसूनी मौसम के लिए उपयुक्त",
+            "marathi": "मुख्य अन्न पीक, उच्च मागणीसह; विश्वासार्ह उत्पादन; पावसाळ्यासाठी योग्य"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Requires flooded fields during initial growth; high water requirement",
+            "hindi": "प्रारंभिक विकास के दौरान जलमग्न खेतों की आवश्यकता; उच्च जल आवश्यकता",
+            "marathi": "सुरुवातीच्या वाढीसाठी पाण्यात बुडवलेले शेत आवश्यक; उच्च पाण्याची गरज"
+        }
+    },
+    "maize": {
+        "reason": {
+            "english": "Versatile cereal crop used for food and feed; moderate input cost; good market demand",
+            "hindi": "बहुपरकारी अनाज की फसल, खाद्य और चारे के लिए उपयोगी; मध्यम लागत; अच्छा बाजार मांग",
+            "marathi": "बहुउद्देशीय धान्य पीक, अन्न आणि चाऱ्यासाठी; मध्यम खर्च; चांगली बाजार मागणी"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Requires well-drained soil; tolerant to moderate drought",
+            "hindi": "अच्छी जल निकासी वाली मिट्टी की आवश्यकता; मध्यम सूखे के प्रति सहिष्णु",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; मध्यम दुष्काळ सहिष्णु"
+        }
+    },
+    "chickpea": {
+        "reason": {
+            "english": "High-protein pulse crop; supports soil nitrogen; drought tolerant",
+            "hindi": "उच्च प्रोटीन वाली दाल; मिट्टी में नाइट्रोजन बढ़ाती है; सूखा सहिष्णु",
+            "marathi": "उच्च प्रथिने असलेली डाळ; मातीतील नायट्रोजन वाढवते; दुष्काळ सहिष्णु"
+        },
+        "season": {
+            "english": "Rabi",
+            "hindi": "रबी",
+            "marathi": "रबी"
+        },
+        "notes": {
+            "english": "Minimal irrigation needed; good for crop rotation",
+            "hindi": "कम से कम सिंचाई की आवश्यकता; फसल चक्रण के लिए उपयुक्त",
+            "marathi": "कमी सिंचन आवश्यक; पिकांच्या फेरसिंचनासाठी योग्य"
+        }
+    },
+    "kidneybeans": {
+        "reason": {
+            "english": "Cash crop with high market value; nitrogen-fixing; improves soil fertility",
+            "hindi": "उच्च मूल्य वाली नकदी फसल; नाइट्रोजन स्थिर करती है; मिट्टी की उर्वरता बढ़ाती है",
+            "marathi": "उच्च मूल्याची रोख पीक; नायट्रोजन स्थिर करते; मातीची सुपीकता सुधारते"
+        },
+        "season": {
+            "english": "Rabi",
+            "hindi": "रबी",
+            "marathi": "रबी"
+        },
+        "notes": {
+            "english": "Requires well-drained soil; susceptible to fungal diseases",
+            "hindi": "अच्छी जल निकासी वाली मिट्टी आवश्यक; फफूंदी रोगों के प्रति संवेदनशील",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; बुरशीजन्य रोगांना संवेदनशील"
+        }
+    },
+    "pigeonpeas": {
+        "reason": {
+            "english": "Drought tolerant pulse crop; improves soil fertility; good for intercropping",
+            "hindi": "सूखा सहिष्णु दाल; मिट्टी की उर्वरता बढ़ाती है; अंतर फसल के लिए अच्छी",
+            "marathi": "दुष्काळ सहिष्णु डाळ पीक; मातीची सुपीकता वाढवते; अंतर पीकासाठी योग्य"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Requires moderate water; long growing period",
+            "hindi": "मध्यम जल की आवश्यकता; लंबा विकास काल",
+            "marathi": "मध्यम पाणी आवश्यक; वाढीची लांब कालावधी"
+        }
+    },
+    "mothbeans": {
+        "reason": {
+            "english": "Legume crop suited for arid regions; low maintenance",
+            "hindi": "सूखी क्षेत्रों के लिए उपयुक्त दाल; कम देखभाल वाली फसल",
+            "marathi": "कोरड्या प्रदेशासाठी योग्य डाळ; कमी देखभाल आवश्यक"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Minimal irrigation; tolerant to high temperatures",
+            "hindi": "कम से कम सिंचाई; उच्च तापमान सहिष्णु",
+            "marathi": "कमी सिंचन; उच्च तापमान सहिष्णु"
+        }
+    },
+    "mungbean": {
+        "reason": {
+            "english": "Short-duration pulse crop; improves soil fertility; good protein source",
+            "hindi": "कम अवधि वाली दाल; मिट्टी की उर्वरता बढ़ाती है; अच्छा प्रोटीन स्रोत",
+            "marathi": "लघुकालीन डाळ पीक; मातीची सुपीकता वाढवते; चांगला प्रथिन स्रोत"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Requires well-drained soil; sensitive to waterlogging",
+            "hindi": "अच्छी जल निकासी वाली मिट्टी आवश्यक; जलभराव के प्रति संवेदनशील",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; पाणी साचण्यास संवेदनशील"
+        }
+    },
+    "blackgram": {
+        "reason": {
+            "english": "Short-duration legume; enriches soil; high market value",
+            "hindi": "कम अवधि वाली दाल; मिट्टी में पोषण बढ़ाती है; उच्च बाजार मूल्य",
+            "marathi": "लघुकालीन डाळ; माती समृद्ध करते; उच्च बाजार मूल्य"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Needs warm climate; sensitive to frost",
+            "hindi": "गर्म जलवायु की आवश्यकता; ठंड के प्रति संवेदनशील",
+            "marathi": "उष्ण हवामान आवश्यक; थंडीत संवेदनशील"
+        }
+    },
+    "lentil": {
+        "reason": {
+            "english": "Protein-rich pulse; improves soil nitrogen; good Rabi crop",
+            "hindi": "प्रोटीन समृद्ध दाल; मिट्टी में नाइट्रोजन बढ़ाती है; अच्छी रबी फसल",
+            "marathi": "प्रथिन समृद्ध डाळ; मातीतील नायट्रोजन वाढवते; चांगले रबी पीक"
+        },
+        "season": {
+            "english": "Rabi",
+            "hindi": "रबी",
+            "marathi": "रबी"
+        },
+        "notes": {
+            "english": "Requires minimal irrigation; susceptible to fungal diseases",
+            "hindi": "कम सिंचाई की आवश्यकता; फफूंदी रोगों के प्रति संवेदनशील",
+            "marathi": "कमी सिंचन आवश्यक; बुरशीजन्य रोगांना संवेदनशील"
+        }
+    },
+    "pomegranate": {
+        "reason": {
+            "english": "High-value fruit crop; drought tolerant; suitable for semi-arid regions",
+            "hindi": "उच्च मूल्य वाला फल; सूखा सहिष्णु; अर्ध शुष्क क्षेत्रों के लिए उपयुक्त",
+            "marathi": "उच्च-मूल्य फळ; दुष्काळ सहिष्णु; अर्ध-कोरड्या प्रदेशासाठी योग्य"
+        },
+        "season": {
+            "english": "All year",
+            "hindi": "साल भर",
+            "marathi": "संपूर्ण वर्ष"
+        },
+        "notes": {
+            "english": "Requires good drainage; prune regularly for better yield",
+            "hindi": "अच्छी जल निकासी आवश्यक; बेहतर उत्पादन के लिए नियमित छंटाई",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; चांगल्या उत्पादनासाठी नियमित कापणी"
+        }
+    },
+    "banana": {
+        "reason": {
+            "english": "High market demand, good profitability, perennial crop providing regular yield, suitable for tropical climates",
+            "hindi": "उच्च बाजार की मांग, अच्छी लाभप्रदता, बार-बार फसल देने वाली स्थायी फसल, उष्णकटिबंधीय जलवायु के लिए उपयुक्त",
+            "marathi": "उच्च बाजारातील मागणी, चांगला नफा, नियमित उत्पादन देणारी वार्षिक पिके, उष्णकटिबंधीय हवामानासाठी योग्य"
+        },
+        "season": {
+            "english": "All year",
+            "hindi": "साल भर",
+            "marathi": "संपूर्ण वर्ष"
+        },
+        "notes": {
+            "english": "Requires sufficient water and sunlight; good for large-scale plantations",
+            "hindi": "पर्याप्त पानी और धूप की आवश्यकता; बड़े पैमाने पर बागायती के लिए उपयुक्त",
+            "marathi": "पुरेशी पाणी आणि सूर्यप्रकाश आवश्यक; मोठ्या प्रमाणावर लागवडीसाठी योग्य"
+        }
+    },
+    "mango": {
+        "reason": {
+            "english": "High-value fruit crop; popular market demand; suitable for tropical climates",
+            "hindi": "उच्च मूल्य वाला फल; लोकप्रिय बाजार मांग; उष्णकटिबंधीय जलवायु के लिए उपयुक्त",
+            "marathi": "उच्च-मूल्य फळ; लोकप्रिय बाजार मागणी; उष्णकटिबंधीय हवामानासाठी योग्य"
+        },
+        "season": {
+            "english": "Summer",
+            "hindi": "गर्मी",
+            "marathi": "उन्हाळा"
+        },
+        "notes": {
+            "english": "Requires well-drained soil; sensitive to frost",
+            "hindi": "अच्छी जल निकासी वाली मिट्टी की आवश्यकता; ठंड के प्रति संवेदनशील",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; थंडीत संवेदनशील"
+        }
+    },
+    "grapes": {
+        "reason": {
+            "english": "High-value vineyard crop; good export potential; supports income diversification",
+            "hindi": "उच्च मूल्य वाली अंगूर की फसल; अच्छा निर्यात संभावित; आय विविधता का समर्थन करता है",
+            "marathi": "उच्च-मूल्य वाइनयार्ड पीक; चांगली निर्यात क्षमता; उत्पन्न विविधीकरणास समर्थन"
+        },
+        "season": {
+            "english": "All year",
+            "hindi": "साल भर",
+            "marathi": "संपूर्ण वर्ष"
+        },
+        "notes": {
+            "english": "Requires trellis support; needs careful pruning",
+            "hindi": "ट्रेलिस समर्थन की आवश्यकता; सावधानीपूर्वक छंटाई आवश्यक",
+            "marathi": "त्रेलिस समर्थन आवश्यक; काळजीपूर्वक कापणी आवश्यक"
+        }
+    },
+    "watermelon": {
+        "reason": {
+            "english": "Seasonal fruit crop with high market demand; short-duration crop",
+            "hindi": "मौसमी फल की फसल; उच्च बाजार मांग; कम अवधि वाली फसल",
+            "marathi": "हंगामी फळ पीक; उच्च बाजार मागणी; लघुकालीन पीक"
+        },
+        "season": {
+            "english": "Summer",
+            "hindi": "गर्मी",
+            "marathi": "उन्हाळा"
+        },
+        "notes": {
+            "english": "Requires sandy loam soil; sensitive to waterlogging",
+            "hindi": "रेतीली दोमट मिट्टी की आवश्यकता; जलभराव के प्रति संवेदनशील",
+            "marathi": "वाळूदार दोमट माती आवश्यक; पाणी साचण्यास संवेदनशील"
+        }
+    },
+    "muskmelon": {
+        "reason": {
+            "english": "High-value seasonal fruit; short-duration crop; good market potential",
+            "hindi": "उच्च मूल्य वाला मौसमी फल; कम अवधि वाली फसल; अच्छा बाजार संभावित",
+            "marathi": "उच्च-मूल्य हंगामी फळ; लघुकालीन पीक; चांगली बाजार क्षमता"
+        },
+        "season": {
+            "english": "Summer",
+            "hindi": "गर्मी",
+            "marathi": "उन्हाळा"
+        },
+        "notes": {
+            "english": "Requires well-drained soil; moderate irrigation",
+            "hindi": "अच्छी जल निकासी वाली मिट्टी की आवश्यकता; मध्यम सिंचाई",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; मध्यम सिंचन"
+        }
+    },
+    "apple": {
+        "reason": {
+            "english": "High-value fruit crop, good for orchards, suitable for temperate regions, supports farm income",
+            "hindi": "उच्च मूल्य वाला फल, बागों के लिए अच्छा, समशीतोष्ण क्षेत्रों के लिए उपयुक्त, किसान की आय में सहायक",
+            "marathi": "उच्च-मूल्य फळ, बागेसाठी चांगले, समशीतोष्ण प्रदेशांसाठी योग्य, शेतकर्‍याच्या उत्पन्नास समर्थन"
+        },
+        "season": {
+            "english": "Winter",
+            "hindi": "सर्दी",
+            "marathi": "हिवाळा"
+        },
+        "notes": {
+            "english": "Requires chilling hours; frost protection needed",
+            "hindi": "ठंड समय की आवश्यकता; ओलाव संरक्षण आवश्यक",
+            "marathi": "थंडीची आवश्यकता; हिम संरक्षण आवश्यक"
+        }
+    },
+    "orange": {
+        "reason": {
+            "english": "Citrus crop with high market demand; perennial fruit crop",
+            "hindi": "संतरे की फसल; उच्च बाजार मांग; स्थायी फल फसल",
+            "marathi": "सिट्रस पीक; उच्च बाजार मागणी; वार्षिक फळ पीक"
+        },
+        "season": {
+            "english": "Winter",
+            "hindi": "सर्दी",
+            "marathi": "हिवाळा"
+        },
+        "notes": {
+            "english": "Requires well-drained soil; sensitive to waterlogging",
+            "hindi": "अच्छी जल निकासी वाली मिट्टी की आवश्यकता; जलभराव के प्रति संवेदनशील",
+            "marathi": "चांगली जलनिरोधक माती आवश्यक; पाणी साचण्यास संवेदनशील"
+        }
+    },
+    "papaya": {
+        "reason": {
+            "english": "Fast-growing tropical fruit; high market demand; continuous yield",
+            "hindi": "तेज़ बढ़ने वाला उष्णकटिबंधीय फल; उच्च बाजार मांग; लगातार उत्पादन",
+            "marathi": "जलद वाढणारे उष्णकटिबंधीय फळ; उच्च बाजार मागणी; सतत उत्पादन"
+        },
+        "season": {
+            "english": "All year",
+            "hindi": "साल भर",
+            "marathi": "संपूर्ण वर्ष"
+        },
+        "notes": {
+            "english": "Requires fertile soil and sufficient water; sensitive to frost",
+            "hindi": "उर्वर मिट्टी और पर्याप्त पानी की आवश्यकता; ठंड के प्रति संवेदनशील",
+            "marathi": "सुपीक माती आणि पुरेसे पाणी आवश्यक; थंडीत संवेदनशील"
+        }
+    },
+    "coffee": {
+        "reason": {
+            "english": "Export-oriented cash crop, evergreen, suitable for tropical shaded areas, high-value beans",
+            "hindi": "निर्यात उन्मुख नकदी फसल, सदाहरित, उष्णकटिबंधीय छायादार क्षेत्रों के लिए उपयुक्त, उच्च मूल्य वाली बीन",
+            "marathi": "निर्याताभिमुख रोख पीक, सदाहरित, उष्णकटिबंधीय सावली असलेल्या क्षेत्रासाठी योग्य, उच्च-मूल्याची बीन"
+        },
+        "season": {
+            "english": "All year",
+            "hindi": "साल भर",
+            "marathi": "संपूर्ण वर्ष"
+        },
+        "notes": {
+            "english": "Needs shade and well-drained soil; labor-intensive but profitable",
+            "hindi": "छाया और अच्छी जल निकासी वाली मिट्टी की आवश्यकता; श्रम-सघन लेकिन लाभकारी",
+            "marathi": "सावली आणि चांगली जलनिरोधक माती आवश्यक; श्रम-सघन परंतु फायदेशीर"
+        }
+    },
+    "cotton": {
+        "reason": {
+            "english": "Cash crop with industrial demand; suitable for arid to semi-arid regions",
+            "hindi": "औद्योगिक मांग वाली नकदी फसल; शुष्क से अर्ध-शुष्क क्षेत्रों के लिए उपयुक्त",
+            "marathi": "औद्योगिक मागणीसह रोख पीक; कोरड्या ते अर्ध-कोरड्या प्रदेशासाठी योग्य"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Requires warm climate; sensitive to frost; moderate irrigation",
+            "hindi": "गर्म जलवायु की आवश्यकता; ठंड के प्रति संवेदनशील; मध्यम सिंचाई",
+            "marathi": "उष्ण हवामान आवश्यक; थंडीत संवेदनशील; मध्यम सिंचन"
+        }
+    },
+    "jute": {
+        "reason": {
+            "english": "Fiber crop with high industrial demand; suitable for alluvial soils; cash crop",
+            "hindi": "उद्योगिक मांग वाली रेशमी फसल; प्रयुक्त अलुवियल मिट्टी के लिए उपयुक्त; नकदी फसल",
+            "marathi": "उद्योगासाठी फायबर पीक; अलुवियल मातीसाठी योग्य; रोख पीक"
+        },
+        "season": {
+            "english": "Kharif",
+            "hindi": "खरीफ",
+            "marathi": "खरीप"
+        },
+        "notes": {
+            "english": "Requires warm, humid climate; well-drained fertile soil",
+            "hindi": "गर्म, आर्द्र जलवायु की आवश्यकता; अच्छी जल निकासी वाली उर्वर मिट्टी",
+            "marathi": "उष्ण, आर्द्र हवामान आवश्यक; चांगली जलनिरोधक सुपीक माती"
+        }
+    }
+}
