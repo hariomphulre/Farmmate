@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
-import ChatbotButton from '../common/ChatbotButton';
 import { Menu, X } from 'lucide-react';
 
 const Layout = () => {
@@ -78,7 +77,6 @@ const Layout = () => {
         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
       
-      <ChatbotButton />
       
       {sidebarOpen && isMobile && (
         <div 
