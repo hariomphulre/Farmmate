@@ -6,8 +6,11 @@ import {
   faUniversity,
   faBell,
   faGift,
-  faQuestionCircle
+  faQuestionCircle,
+  faListAlt,
+  faSearch
 } from '@fortawesome/free-solid-svg-icons';
+import GovernmentSchemes from '../components/financial-aid/GovernmentSchemes';
 import SchemeEligibilityRecommender from '../components/financial-aid/SchemeEligibilityRecommender';
 import LoanBankFinder from '../components/financial-aid/LoanBankFinder';
 import SubsidiesFreebies from '../components/financial-aid/SubsidiesFreebies';
@@ -18,6 +21,7 @@ import SupportGuide from '../components/financial-aid/SupportGuide';
  * Financial Aid Main Page Component
  * 
  * This is the main container for all financial aid features including:
+ * - All government schemes (cards view)
  * - Government scheme recommendations
  * - Bank and loan comparisons
  * - Subsidies and freebies
@@ -25,13 +29,19 @@ import SupportGuide from '../components/financial-aid/SupportGuide';
  * - Support and application guides
  */
 const FinancialAid = () => {
-  const [activeTab, setActiveTab] = useState('schemes');
+  const [activeTab, setActiveTab] = useState('all-schemes');
 
   const tabs = [
     {
+      id: 'all-schemes',
+      label: 'All Schemes',
+      icon: faListAlt,
+      component: GovernmentSchemes
+    },
+    {
       id: 'schemes',
-      label: 'Government Schemes',
-      icon: faHandshake,
+      label: 'Eligibility Finder',
+      icon: faSearch,
       component: SchemeEligibilityRecommender
     },
     {
@@ -63,11 +73,11 @@ const FinancialAid = () => {
   const ActiveComponent = tabs.find(tab => tab.id === activeTab)?.component;
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Financial Aid & Support</h1>
-        <p className="text-gray-600">
+      <div className="mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-1">Financial Aid & Support</h1>
+        <p className="text-sm sm:text-base text-gray-500">
           Access government schemes, compare loans, find subsidies, and get financial support for your agricultural needs
         </p>
       </div>
@@ -75,12 +85,12 @@ const FinancialAid = () => {
       {/* Tab Navigation */}
       <div className="mb-6">
         <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 overflow-x-auto">
+          <nav className="flex space-x-6 sm:space-x-8 overflow-x-auto scrollbar-hide pb-px">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+                className={`py-3 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 ${
                   activeTab === tab.id
                     ? 'border-green-500 text-green-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -95,7 +105,7 @@ const FinancialAid = () => {
       </div>
 
       {/* Tab Content */}
-      <div className="min-h-screen">
+      <div className="min-h-[60vh]">
         {ActiveComponent && <ActiveComponent />}
       </div>
     </div>

@@ -1,0 +1,189 @@
+[
+  {
+    "id": "pm-kisan",
+    "name": "PM Kisan Samman Nidhi (PM-KISAN)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2019,
+    "benefit": "Rs. 6,000 per year to landholding farmer families, paid in 3 installments of Rs. 2,000 via Direct Benefit Transfer",
+    "eligibility": "Landholding farmer families, subject to exclusion criteria (income tax payees, pensioners above a threshold, etc.)",
+    "apply_url": "https://pmkisan.gov.in/",
+    "category": "Income support",
+    "level": "Central"
+  },
+  {
+    "id": "pmfby",
+    "name": "Pradhan Mantri Fasal Bima Yojana (PMFBY)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2016,
+    "benefit": "Crop insurance covering yield loss from natural calamities, pests and diseases; low farmer premium (1.5-5% of sum insured)",
+    "eligibility": "All farmers, including sharecroppers and tenant farmers, growing notified crops in notified areas",
+    "apply_url": "https://pmfby.gov.in/",
+    "category": "Insurance",
+    "level": "Central"
+  },
+  {
+    "id": "pm-kisan-maandhan",
+    "name": "PM Kisan Maandhan Yojana (PM-KMY)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2019,
+    "benefit": "Pension of Rs. 3,000 per month after age 60 for small and marginal farmers",
+    "eligibility": "Small/marginal farmers aged 18-40 with up to 2 hectares of land",
+    "apply_url": "https://maandhan.in/",
+    "category": "Pension",
+    "level": "Central"
+  },
+  {
+    "id": "soil-health-card",
+    "name": "Soil Health Card Scheme",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2015,
+    "benefit": "Free soil testing every 2 years with nutrient and fertilizer recommendations",
+    "eligibility": "All farmers",
+    "apply_url": "https://soilhealth.dac.gov.in/",
+    "category": "Advisory",
+    "level": "Central"
+  },
+  {
+    "id": "pkvy",
+    "name": "Paramparagat Krishi Vikas Yojana (PKVY)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2015,
+    "benefit": "Financial assistance for adopting organic farming in clusters, including certification support",
+    "eligibility": "Farmer groups/clusters willing to adopt organic farming",
+    "apply_url": "https://pgsindia-ncof.gov.in/",
+    "category": "Sustainable farming",
+    "level": "Central"
+  },
+  {
+    "id": "pmksy",
+    "name": "PM Krishi Sinchayee Yojana (PMKSY) - Per Drop More Crop",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2015,
+    "benefit": "Subsidy on drip and sprinkler irrigation equipment to improve water use efficiency",
+    "eligibility": "All farmers; subsidy percentage varies by state and farmer category",
+    "apply_url": "https://pmksy.gov.in/",
+    "category": "Irrigation",
+    "level": "Central"
+  },
+  {
+    "id": "agri-infra-fund",
+    "name": "Agriculture Infrastructure Fund (AIF)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2020,
+    "benefit": "Medium-to-long term debt financing for post-harvest management and community farming assets, with interest subvention",
+    "eligibility": "Farmers, FPOs, agri-entrepreneurs, cooperatives, and startups",
+    "apply_url": "https://agriinfra.dac.gov.in/",
+    "category": "Infrastructure",
+    "level": "Central"
+  },
+  {
+    "id": "mis-pss",
+    "name": "Market Intervention Scheme and Price Support Scheme (MIS-PSS)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": null,
+    "benefit": "Procurement of pulses, oilseeds, copra and perishable horticultural produce to protect farmers from distress sales during bumper harvests",
+    "eligibility": "Farmers growing covered commodities in notified procurement areas",
+    "apply_url": "https://www.nafed-india.com/",
+    "category": "Price support",
+    "level": "Central"
+  },
+  {
+    "id": "namo-drone-didi",
+    "name": "Namo Drone Didi",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2024,
+    "benefit": "Provides drones to Women Self Help Groups for custom-hire agricultural spraying services, generating income and improving spray efficiency",
+    "eligibility": "Women Self Help Groups (SHGs), selected in phases",
+    "apply_url": "https://dackkms.gov.in/",
+    "category": "Mechanization",
+    "level": "Central"
+  },
+  {
+    "id": "pm-dhan-dhaanya",
+    "name": "PM Dhan-Dhaanya Krishi Yojana",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2025,
+    "benefit": "Convergence programme targeting 100 low-productivity agricultural districts, with an outlay of about Rs. 24,000 crore over six years",
+    "eligibility": "Farmers located within the identified low-productivity districts",
+    "apply_url": "https://agriwelfare.gov.in/",
+    "category": "Development",
+    "level": "Central"
+  },
+  {
+    "id": "gramin-bhandaran",
+    "name": "Gramin Bhandaran Yojana (Rural Godown Scheme)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2001,
+    "benefit": "Subsidy for construction/renovation of rural godowns to reduce post-harvest storage losses",
+    "eligibility": "Farmers, farmer groups, cooperatives, and agri-entrepreneurs",
+    "apply_url": "https://www.nabard.org/",
+    "category": "Infrastructure",
+    "level": "Central"
+  },
+  {
+    "id": "nmsa",
+    "name": "National Mission for Sustainable Agriculture (NMSA)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2014,
+    "benefit": "Promotes sustainable agriculture practices including rainfed area development, soil and water conservation, and climate resilience",
+    "eligibility": "Farmers in target rainfed and climate-vulnerable districts",
+    "apply_url": "https://nmsa.dac.gov.in/",
+    "category": "Sustainable farming",
+    "level": "Central"
+  },
+  {
+    "id": "pm-matsya-sampada",
+    "name": "PM Matsya Sampada Yojana (PMMSY)",
+    "ministry": "Fisheries, Animal Husbandry and Dairying",
+    "launched": 2020,
+    "benefit": "Investment support for fisheries infrastructure, aquaculture, and welfare of fisherfolk",
+    "eligibility": "Fish farmers, fisherfolk, fish cooperatives, and entrepreneurs in aquaculture",
+    "apply_url": "https://pmmsy.dof.gov.in/",
+    "category": "Fisheries",
+    "level": "Central"
+  },
+  {
+    "id": "kisan-call-centre",
+    "name": "Kisan Call Centre (KCC Helpline)",
+    "ministry": "Agriculture and Farmers Welfare",
+    "launched": 2004,
+    "benefit": "Free telephonic advisory on crops, pests, weather and schemes in local languages, toll-free number 1800-180-1551",
+    "eligibility": "All farmers",
+    "apply_url": "https://dackkms.gov.in/",
+    "category": "Advisory",
+    "level": "Central"
+  },
+  {
+    "id": "namo-shetkari",
+    "name": "Namo Shetkari Mahasanman Nidhi (Maharashtra)",
+    "ministry": "Maharashtra Department of Agriculture",
+    "launched": 2023,
+    "benefit": "Rs. 6,000 per year state top-up to farmers, in addition to PM-KISAN, paid in 3 installments",
+    "eligibility": "PM-KISAN eligible farmer families registered in Maharashtra",
+    "apply_url": "https://mahadbt.maharashtra.gov.in/",
+    "category": "Income support",
+    "level": "State (Maharashtra)"
+  },
+  {
+    "id": "mahadbt-farmer-schemes",
+    "name": "MahaDBT Farmer Mechanization & Subsidy Schemes (Maharashtra)",
+    "ministry": "Maharashtra Department of Agriculture",
+    "launched": null,
+    "benefit": "Subsidies on tractors, farm equipment, solar pumps, and irrigation sets disbursed via direct benefit transfer",
+    "eligibility": "Registered farmers in Maharashtra applying through the MahaDBT portal lottery system",
+    "apply_url": "https://mahadbt.maharashtra.gov.in/",
+    "category": "Mechanization",
+    "level": "State (Maharashtra)"
+  },
+  {
+    "id": "krishi-bhagya-karnataka",
+    "name": "Krishi Bhagya (Karnataka)",
+    "ministry": "Karnataka Department of Agriculture",
+    "launched": null,
+    "benefit": "Support for farm pond-based rainwater harvesting and micro-irrigation in rainfed districts",
+    "eligibility": "Farmers in Karnataka, particularly in rainfed/drought-prone districts",
+    "apply_url": "https://raitamitra.karnataka.gov.in/",
+    "category": "Irrigation",
+    "level": "State (Karnataka)"
+  }
+]
