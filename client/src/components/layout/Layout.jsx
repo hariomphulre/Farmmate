@@ -3,8 +3,7 @@ import { Outlet } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import ChatbotButton from '../common/ChatbotButton';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faXmark } from '@fortawesome/free-solid-svg-icons';
+import { Menu, X } from 'lucide-react';
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,18 +11,15 @@ const Layout = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isPageTransitioning, setIsPageTransitioning] = useState(false);
   
-  // Check screen size
   useEffect(() => {
     const checkIfMobile = () => {
       const isMobileView = window.innerWidth < 768;
       setIsMobile(isMobileView);
       
-      // Close sidebar when switching between mobile and desktop
       if (isMobileView !== isMobile) {
         setSidebarOpen(false);
       }
       
-      // Auto-collapse sidebar on small screens (but not mobile)
       if (window.innerWidth >= 768 && window.innerWidth < 1024) {
         setIsCollapsed(true);
       } else if (window.innerWidth >= 1024) {
@@ -36,7 +32,6 @@ const Layout = () => {
     return () => window.removeEventListener('resize', checkIfMobile);
   }, [isMobile]);
   
-  // Close sidebar when clicking outside on mobile
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (isMobile && sidebarOpen && 
@@ -50,7 +45,6 @@ const Layout = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isMobile, sidebarOpen]);
   
-  // Page transition effect
   useEffect(() => {
     setIsPageTransitioning(true);
     const timer = setTimeout(() => {
@@ -60,7 +54,6 @@ const Layout = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Toggle sidebar visibility on mobile or desktop
   const toggleSidebar = () => {
     if (isMobile) {
       setSidebarOpen(!sidebarOpen);
@@ -70,26 +63,23 @@ const Layout = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-100 border-r border-green-200 shadow-sm overflow-hidden">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-100 to-gray-100 overflow-hidden">
       <Navbar />
       
-      {/* Mobile Menu Button */}
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         type="button"
-        className="md:hidden fixed bottom-6 left-6 z-50 inline-flex items-center p-2 text-sm rounded-full bg-green-600 text-white hover:bg-green-700 w-14 h-14 justify-center shadow-xl"
+        className="md:hidden fixed bottom-6 left-6 z-50 inline-flex items-center p-2 text-sm rounded-full bg-[#111827] text-white hover:bg-[#374151] w-14 h-14 justify-center shadow-xl"
         aria-controls="sidebar"
         aria-expanded={sidebarOpen}
         aria-label="Toggle sidebar"
       >
         <span className="sr-only">Toggle sidebar</span>
-        <FontAwesomeIcon icon={sidebarOpen ? faXmark : faBars} className="text-xl" />
+        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
       
-      {/* Chatbot Button - available on all screen sizes */}
       <ChatbotButton />
       
-      {/* Dark Overlay - visible when mobile sidebar is open */}
       {sidebarOpen && isMobile && (
         <div 
           onClick={() => setSidebarOpen(false)} 
@@ -98,10 +88,8 @@ const Layout = () => {
         ></div>
       )}
       
-      {/* Sidebar */}
       <Sidebar isSidebarOpen={sidebarOpen} isCollapsed={isCollapsed} toggleSidebar={toggleSidebar} />
       
-      {/* Main Content */}
       <div className={`flex-1 transition-all duration-300 mt-[60px] ${
         isMobile ? 'ml-0' : (isCollapsed ? 'md:ml-20' : 'md:ml-64')
       }`}>
