@@ -1,12 +1,12 @@
 # ─────────────────────────────────────────────────────────────────────────────
-# Ex-Farmer — Development Docker Compose Override
+# Farmmate — Development Docker Compose Override
 # Provides hot-reloading for client and server during local development.
 #
 # Usage:
 #   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 # ─────────────────────────────────────────────────────────────────────────────
 
-name: ex-farmer
+name: farmmate
 
 services:
 

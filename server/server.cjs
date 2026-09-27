@@ -34,6 +34,10 @@ app.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok', uptime: process.uptime() });
 });
 
+// ── Auth routes ──────────────────────────────────────────────────────────────
+const authRoutes = require('./AuthRoutes');
+app.use('/api/auth', authRoutes);
+
 // ── ML service base URL ───────────────────────────────────────────────────────
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://ml-service:8000';
 

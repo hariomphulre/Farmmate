@@ -32,15 +32,16 @@ const TranslateComponent = () => {
 
   const style = {
     position: "fixed",
-    top: "1px",
-    right: "1px",
-    zIndex: 70,
+    bottom: "24px",
+    left: "24px",
+    zIndex: 9999,
     height: "auto",
-    weight: "300px",
+    minWidth: "150px",
     backgroundColor: "white",
-    padding: "1px",
-    borderRadius: "4px",
-    boxShadow: "0 0px 0px rgba(0,0,0,0.2)",
+    padding: "6px 8px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
+    border: "1px solid #e2e8f0",
   };
 
   return <div id="google_translate_element" style={style}></div>;

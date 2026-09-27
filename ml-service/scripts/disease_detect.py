@@ -20,8 +20,8 @@ _here     = Path(__file__).resolve().parent
 _base     = _here.parent                          # /app or project root
 
 MODEL_PATH  = os.environ.get("DISEASE_MODEL_PATH",  str(_base / "models" / "tea1.pt"))
-IMG_SOURCE  = os.environ.get("DISEASE_IMG_SOURCE",  str(_base / "crop_imgs" / "disease"))
-OUTPUT_DIR  = os.environ.get("DISEASE_OUTPUT_DIR",  str(_base / "detect_results" / "disease"))
+IMG_SOURCE  = os.environ.get("DISEASE_IMG_SOURCE",  str(_base / "ml-service" / "test-data" / "tea"/"tea.png"))
+OUTPUT_DIR  = os.environ.get("DISEASE_OUTPUT_DIR",  str(_base / "ml-service" /"output"))
 MIN_THRESH  = float(os.environ.get("YOLO_MIN_CONF", "0.5"))
 USER_RES    = os.environ.get("YOLO_RESOLUTION",     "480x480")
 

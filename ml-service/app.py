@@ -81,7 +81,7 @@ def get_yolo_model(plant_name: str) -> YOLO | None:
 # FastAPI app
 # ──────────────────────────────────────────────────────────────────────────────
 app = FastAPI(
-    title="Ex-Farmer ML Service",
+    title="Farmmate ML Service",
     version="1.0.0",
     docs_url="/docs",
     redoc_url=None,
