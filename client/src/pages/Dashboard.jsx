@@ -136,15 +136,21 @@ const Dashboard = () => {
   };
 
   useEffect(() => {
-    if (!mapRef.current || mapObj.current) return;
+    if (!mapRef.current) return;
+    
+    // Create a fresh div for the main map to avoid React 18 strict mode Leaflet bugs
+    const mapContainer = document.createElement('div');
+    mapContainer.className = 'absolute inset-0';
+    mapRef.current.appendChild(mapContainer);
 
-    const map = L.map(mapRef.current, {
+    const map = L.map(mapContainer, {
       center: MAP_CENTER,
       zoom: MAP_ZOOM,
       zoomControl: false,
       attributionControl: true,
     });
     mapObj.current = map;
+    map.on("zoomend", () => setZoom(map.getZoom()));
 
     satLayer.current = L.tileLayer(ESRI_SATELLITE, {
       attribution: 'Tiles © Esri',
@@ -199,7 +205,11 @@ const Dashboard = () => {
 
     let mini;
     if (miniRef.current) {
-      mini = L.map(miniRef.current, {
+      const miniContainer = document.createElement('div');
+      miniContainer.style.width = '100%';
+      miniContainer.style.height = '100%';
+      miniRef.current.appendChild(miniContainer);
+      mini = L.map(miniContainer, {
         center: MAP_CENTER,
         zoom: MAP_ZOOM - 3,
         zoomControl: false,
@@ -235,8 +245,12 @@ const Dashboard = () => {
 
     return () => {
       ro.disconnect();
-      mini?.remove();
+      if (mini) {
+        mini.remove();
+        if (miniRef.current) miniRef.current.innerHTML = '';
+      }
       map.remove();
+      if (mapRef.current) mapRef.current.innerHTML = '';
       mapObj.current = null;
     };
   }, []);

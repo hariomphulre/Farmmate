@@ -49,7 +49,7 @@ const ChatbotButton = () => {
               <FontAwesomeIcon icon={faLeaf} className="text-white" />
             </div>
             <div>
-              <p className="text-sm font-medium text-green-800">AgriSense AI at your service!</p>
+              <p className="text-sm font-medium text-green-800">Farmmate AI at your service!</p>
               <p className="text-xs text-gray-600 mt-1">
                 Get smart farming assistance with our AI-powered assistant!
               </p>

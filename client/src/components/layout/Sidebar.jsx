@@ -143,6 +143,11 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                 {!isCollapsed && <span className="ml-3 text-sm truncate">Dashboard</span>}
               </Link>
 
+              <Link to="/field-list" className={pill(isActive('/field-list'))}>
+                <MapPin size={16} className={ic(isActive('/field-list'))} />
+                {!isCollapsed && <span className="ml-3 text-sm truncate">My Fields</span>}
+              </Link>
+
               <Link to="/crop-management" className={pill(isActive('/crop-management'))}>
                 <Sprout size={16} className={ic(isActive('/crop-management'))} />
                 {!isCollapsed && <span className="ml-3 text-sm truncate">Crop Management</span>}
@@ -167,42 +172,6 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                 <Bot size={16} className={ic(isActive('/ai-assistant'))} />
                 {!isCollapsed && <span className="ml-3 text-sm truncate">AI Assistant</span>}
               </Link>
-            </div>
-
-            {/* ── Fields ── */}
-            <div className="mt-3">
-              {!isCollapsed && (
-                <div className="px-2 mb-1">
-                  <h3 className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-wider">Field Management</h3>
-                </div>
-              )}
-
-              <button type="button" className={expander(expandedMenus.fields)} onClick={() => toggleMenu('fields')}>
-                <MapPin size={16} />
-                {!isCollapsed && (
-                  <>
-                    <span className="ml-3 mr-auto text-sm font-medium">Fields</span>
-                    <ChevronDown size={14} className={`transition-transform duration-200 ${expandedMenus.fields ? '' : '-rotate-90'}`} />
-                  </>
-                )}
-              </button>
-
-              {expandedMenus.fields && !isCollapsed && (
-                <ul className="mt-1 pl-7 space-y-0.5">
-                  <li>
-                    <Link to="/create-field" className={sub(isActive('/create-field'))}>
-                      <PlusCircle size={14} className={`mr-2 ${ic(isActive('/create-field'))}`} />
-                      <span>Create New Field</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/field-list" className={sub(isActive('/field-list'))}>
-                      <List size={14} className={`mr-2 ${ic(isActive('/field-list'))}`} />
-                      <span>My Fields</span>
-                    </Link>
-                  </li>
-                </ul>
-              )}
             </div>
 
             {/* ── Analytics ── */}

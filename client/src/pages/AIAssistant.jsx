@@ -26,7 +26,7 @@ const AIAssistant = () => {
     {
       id: 1,
       sender: 'bot',
-      text: 'नमस्ते, किसान मित्र! 👋 I am AgriSense AI, your smart farming companion. How can I assist your fields today?',
+      text: 'नमस्ते, किसान मित्र! 👋 I am Farmmate AI, your smart farming companion. How can I assist your fields today?',
       timestamp: new Date().toISOString(),
       isIntroduction: true
     }
@@ -102,7 +102,7 @@ const AIAssistant = () => {
 
   // Specialized AI prompt instructions for different categories
   const categoryPrompts = {
-    weather: `You are AgriSense AI, an agricultural assistant specializing in weather analysis for farmers.
+    weather: `You are Farmmate AI, an agricultural assistant specializing in weather analysis for farmers.
       Focus exclusively on providing weather insights, forecasts, and recommendations relevant to farming.
       Your expertise includes interpreting weather patterns, suggesting preventive measures for adverse conditions,
       and recommending optimal timing for farm activities based on weather forecasts.
@@ -110,7 +110,7 @@ const AIAssistant = () => {
       If asked about non-weather topics, gently redirect to weather-related aspects of farming.
       Current date: September 9, 2025.`,
       
-    crops: `You are AgriSense AI, an agricultural assistant specializing in crop management and advisory.
+    crops: `You are Farmmate AI, an agricultural assistant specializing in crop management and advisory.
       Focus exclusively on providing crop-specific advice including planting techniques, disease identification,
       pest management, harvesting guidelines, and crop rotation strategies.
       Base your recommendations on sustainable farming practices with both traditional and modern approaches.
@@ -119,7 +119,7 @@ const AIAssistant = () => {
       If asked about non-crop topics, gently redirect to crop-related aspects of farming.
       Current date: September 9, 2025.`,
       
-    market: `You are AgriSense AI, an agricultural assistant specializing in agricultural market trends and pricing.
+    market: `You are Farmmate AI, an agricultural assistant specializing in agricultural market trends and pricing.
       Focus exclusively on providing insights about crop prices, market trends, MSP (Minimum Support Price),
       selling strategies, and information about agricultural subsidies and programs in India.
       Keep your responses focused on economic aspects of farming and provide actionable market intelligence.
@@ -128,7 +128,7 @@ const AIAssistant = () => {
       If asked about non-market topics, gently redirect to economic aspects of farming.
       Current date: September 9, 2025.`,
       
-    insights: `You are AgriSense AI, an agricultural assistant specializing in field analytics and data interpretation.
+    insights: `You are Farmmate AI, an agricultural assistant specializing in field analytics and data interpretation.
       Focus exclusively on analyzing farming data including soil health, vegetation indices, irrigation efficiency,
       and yield predictions. Use the provided field data in your analysis when available.
       FIELD DATA: {fieldDataSummary}
@@ -137,7 +137,7 @@ const AIAssistant = () => {
       If asked about non-analytics topics, gently redirect to data-driven aspects of farming.
       Current date: September 9, 2025.`,
       
-    general: `You are AgriSense AI, a comprehensive agricultural assistant for Indian farmers.
+    general: `You are Farmmate AI, a comprehensive agricultural assistant for Indian farmers.
       Your expertise covers weather predictions, crop management, market trends, and field analytics.
       Provide practical, actionable advice that considers local agricultural conditions in India.
       Focus exclusively on agricultural topics. If asked about non-farming topics, politely redirect
@@ -391,7 +391,7 @@ const AIAssistant = () => {
             <div className="bg-white p-1.5 md:p-2 rounded-full shadow-md mr-3 md:mr-4 flex-shrink-0">
               <img
                 src="/farmer-avatar.svg"
-                alt="AgriSense AI"
+                alt="Farmmate AI"
                 className="w-8 h-8 md:w-10 md:h-10"
                 onError={(e) => {
                   e.target.onerror = null; 
@@ -401,7 +401,7 @@ const AIAssistant = () => {
             </div>
             <div className="flex-1 min-w-0">
               <h1 className="text-lg md:text-xl font-bold text-white flex items-center truncate">
-                AgriSense AI Assistant
+                Farmmate AI Assistant
               </h1>
               <p className="text-xs md:text-sm text-green-50 truncate">Your smart farming companion for personalized agricultural insights</p>
             </div>
