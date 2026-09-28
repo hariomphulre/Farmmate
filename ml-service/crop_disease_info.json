@@ -1,0 +1,554 @@
+{
+    "wheat": {
+        "BlackPoint": {
+            "Why & How this happen": "Triggered by high humidity, frequent rain, or heavy dew during the grain-filling stage, allowing fungi (Alternaria, Bipolaris, or Fusarium) to infect the developing kernel.",
+            "What is BlackPoint": "A fungal grain disease that causes dark brown to black discoloration at the embryo tip of wheat kernels, reducing seed germination and market value.",
+            "Steps to cure": [
+                "1. Stop late irrigation and avoid excess nitrogen fertilizer during flowering and grain filling to keep field humidity low.",
+                "2. Harvest the crop immediately once grains mature rather than leaving ripe wheat standing in damp or rainy weather.",
+                "3. Dry harvested grains thoroughly to below 12% moisture before storage to stop fungal spread.",
+                "4. Do not use infected grains as seed for the next season; always use clean, fungicide-treated seeds."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Propiconazole / Tebuconazole",
+                "2. Mancozeb / Captan",
+                "3. Carboxin + Thiram / Carbendazim"
+            ]
+        },
+        "FusariumFootRot": {
+            "Why & How this happen": "Caused by soil-borne and seed-borne Fusarium fungi that infect roots and lower stems, spreading rapidly in warm, dry soils and water-stressed crops.",
+            "What is FusariumFootRot": "A fungal root and crown rot disease that turns the lower wheat stem dark brown, blocking water flow and causing premature bleached, empty ears (whiteheads).",
+            "Steps to cure": [
+                "1. Uproot and destroy severely infected plants showing dark brown stem bases and premature whiteheads.",
+                "2. Provide light, timely irrigation if the soil is dry, as moisture stress makes foot rot much worse.",
+                "3. Apply adequate Zinc and Phosphorus while avoiding heavy Nitrogen doses that increase plant water stress.",
+                "4. Rotate wheat with non-host crops like pulses, mustard, or legumes for 1 to 2 years to starve the soil fungus."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Trichoderma viride / Pseudomonas fluorescens",
+                "2. Carbendazim / Tebuconazole",
+                "3. Thiram / Carboxin + Thiram"
+            ]
+        },
+        "HealthyLeaf": {
+            "Why & How this happen": "Result of using clean, disease-free seeds, balanced NPK and micronutrient nutrition, timely irrigation, and good field hygiene.",
+            "What is HealthyLeaf": "The wheat plant is completely healthy with vibrant green leaves, active photosynthesis, and zero signs of fungal spots, blight, or pest attack.",
+            "Steps to cure": [
+                "1. No cure needed; maintain timely irrigation at critical stages (crown root initiation, tillering, flowering, and milk stage).",
+                "2. Inspect lower leaves every 7 to 10 days to catch early signs of rust, blight, or aphids before they spread.",
+                "3. Keep field bunds and borders free of weeds to remove hiding spots for pests and fungal spores.",
+                "4. Apply scheduled split doses of fertilizers on time to keep plant immunity strong."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. None required",
+                "2. Neem Oil / NPK 19:19:19 (Optional Preventive)"
+            ]
+        },
+        "LeafBlight": {
+            "Why & How this happen": "Caused by Bipolaris and Alternaria fungi surviving in old crop residue or seeds, spreading fast across leaves via wind and rain in warm, humid weather (25°C to 30°C).",
+            "What is LeafBlight": "A fungal leaf disease that starts as small oval yellow-brown spots on lower leaves and merges into large dead patches, drying the leaf and shriveling grains.",
+            "Steps to cure": [
+                "1. Spray a systemic fungicide immediately when brown spots appear on lower leaves to protect the top flag leaf.",
+                "2. Avoid overhead sprinkler irrigation and dense nitrogen growth, which trap moisture inside the crop canopy.",
+                "3. Maintain proper Potassium levels in the soil to strengthen leaf cell walls against fungal penetration.",
+                "4. Remove or deep-plow infected wheat straw after harvest so the fungus cannot survive in the field."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Chlorothalonil",
+                "2. Propiconazole / Hexaconazole",
+                "3. Azoxystrobin + Difenoconazole / Tebuconazole + Trifloxystrobin"
+            ]
+        },
+        "WheatBlast": {
+            "Why & How this happen": "Caused by the fungus Magnaporthe oryzae (Triticum), spreading rapidly through infected seeds and wind-borne spores during warm, rainy, and humid weather at the heading stage.",
+            "What is WheatBlast": "A severe fungal disease that attacks the wheat ear (spike) and leaves, bleaching the head white above the infection point and leaving grains empty or shriveled.",
+            "Steps to cure": [
+                "1. Spray a dual-action fungicide immediately at the ear-emergence (heading) stage to shield the wheat spike.",
+                "2. Never save or reuse seeds harvested from a blast-infected field, as the fungus lives inside the seed.",
+                "3. Destroy grassy weeds around field borders because they act as alternate hosts for the blast fungus.",
+                "4. Avoid late sowing in blast-prone areas to prevent the heading stage from coinciding with warm, humid rains."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Tebuconazole + Trifloxystrobin / Azoxystrobin + Tebuconazole",
+                "2. Propiconazole / Tricyclazole",
+                "3. Carbendazim + Mancozeb / Carboxin + Thiram"
+            ]
+        }
+    },
+    "turmeric": {
+        "dry_leaf": {
+            "Why & How this happen": "Caused by severe soil moisture stress, Potassium deficiency, or advanced Colletotrichum fungal infection under high temperatures and poor shade management.",
+            "What is dry_leaf": "A condition where turmeric leaves lose moisture and dry up into brown, papery blades from the tips and margins inward, stopping photosynthesis and stunting rhizome growth.",
+            "Steps to cure": [
+                "1. Cut and destroy completely dried leaves to prevent secondary fungal spores from spreading to healthy foliage.",
+                "2. Provide light, frequent irrigation to maintain steady soil moisture without flooding the beds.",
+                "3. Apply a foliar Potassium spray to restore leaf turgor and improve drought and disease resistance.",
+                "4. Spray a broad-spectrum fungicide immediately if small brown spots with yellow halos appear on the drying leaves."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Copper Oxychloride",
+                "2. Carbendazim + Mancozeb / Propiconazole",
+                "3. NPK 00:00:50 / Potassium Schoenite (For Moisture Stress Recovery)"
+            ]
+        },
+        "leaf_blotch": {
+            "Why & How this happen": "Caused by the fungus Taphrina maculans surviving in old crop debris and soil, spreading rapidly via wind and rain splashes during humid, cloudy weather.",
+            "What is leaf_blotch": "A fungal leaf disease that creates numerous small, oval, reddish-brown spots on both sides of the leaves, which quickly merge to turn the entire leaf yellow and dry.",
+            "Steps to cure": [
+                "1. Clip and burn heavily infected lower leaves as soon as reddish-brown blotches appear.",
+                "2. Avoid excess Nitrogen fertilizer and keep proper spacing between plants so sunlight and air can dry the canopy.",
+                "3. Spray a contact fungicide at the initial stage, followed by a systemic fungicide 15 days later if weather stays humid.",
+                "4. Clear and burn all dried turmeric foliage after harvest and rotate the field with maize or pulses."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Chlorothalonil",
+                "2. Propiconazole / Hexaconazole",
+                "3. Azoxystrobin + Tebuconazole / Carbendazim + Mancozeb"
+            ]
+        },
+        "Rhizome_rot": {
+            "Why & How this happen": "Caused by soil-borne and seed-borne Pythium fungi that multiply rapidly in heavy, waterlogged, poorly drained soils during warm monsoon rains.",
+            "What is Rhizome_rot": "A deadly underground disease that turns firm turmeric rhizomes into a soft, dark brown, foul-smelling mush while causing the upper green shoots to yellow, wilt, and topple.",
+            "Steps to cure": [
+                "1. Uproot and destroy infected plant clumps along with the surrounding soil immediately to stop underground spread.",
+                "2. Dig drainage trenches right away to remove standing rainwater and keep raised beds well-aerated.",
+                "3. Drench the soil around the collar base of the remaining crop with a systemic fungicide.",
+                "4. Treat seed rhizomes before planting and apply Trichoderma mixed with neem cake to the soil."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Metalaxyl + Mancozeb / Cymoxanil + Mancozeb",
+                "2. Copper Oxychloride / Captan",
+                "3. Trichoderma viride / Pseudomonas fluorescens"
+            ]
+        }
+    },
+
+    "corn": {
+        "Blight": {
+            "Why & How this happen": "Caused by Exserohilum or Bipolaris fungi surviving in old corn residue, spreading rapidly via wind and rain splashes during warm, humid, and wet weather.",
+            "What is Blight": "A fungal leaf disease that creates long, cigar-shaped grayish-green or tan lesions on lower leaves first, gradually drying out the foliage and reducing cob weight.",
+            "Steps to cure": [
+                "1. Spray a fungicide immediately when cigar-shaped lesions appear on lower leaves before the tassel emerges.",
+                "2. Avoid overhead irrigation and maintain proper plant spacing so sunlight and airflow can dry the leaf canopy.",
+                "3. Apply balanced Potassium and Nitrogen fertilizers to keep leaf tissues strong against fungal entry.",
+                "4. Deep-plow infected corn stalks after harvest and rotate the field with soybean, pulses, or oilseeds."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Zineb",
+                "2. Propiconazole / Hexaconazole",
+                "3. Azoxystrobin + Tebuconazole / Pyraclostrobin + Epoxiconazole"
+            ]
+        },
+        "Common_Rust": {
+            "Why & How this happen": "Caused by the airborne fungus Puccinia sorghi, whose wind-blown spores infect corn leaves during cool to moderate temperatures (16°C to 25°C) with heavy morning dew or high humidity.",
+            "What is Common_Rust": "A fungal disease that produces small, raised, brick-red to cinnamon-brown powdery pustules on both sides of the leaves, weakening photosynthesis and stunting grain filling.",
+            "Steps to cure": [
+                "1. Inspect leaves during cool, damp weather and spray a fungicide immediately if red pustules spread before silking.",
+                "2. Destroy volunteer corn plants and Oxalis weeds around field bunds, as they act as alternate hosts for the rust fungus.",
+                "3. Avoid late sowing and excess Nitrogen fertilizer, which make young, tender leaves highly vulnerable to rust.",
+                "4. Sow rust-resistant corn hybrids in the following season to prevent recurring outbreaks."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Chlorothalonil",
+                "2. Propiconazole / Tebuconazole",
+                "3. Azoxystrobin + Difenoconazole / Tebuconazole + Trifloxystrobin"
+            ]
+        },
+        "Gray_Leaf_Spot": {
+            "Why & How this happen": "Caused by the fungus Cercospora zeae-maydis surviving in surface crop debris, multiplying rapidly during prolonged warm, foggy, and humid conditions with poor air circulation.",
+            "What is Gray_Leaf_Spot": "A severe fungal leaf disease that forms narrow, rectangular, grayish-brown spots strictly bordered by the leaf veins, eventually merging to blight and kill the entire leaf.",
+            "Steps to cure": [
+                "1. Spray a systemic fungicide as soon as rectangular lesions start moving up toward the ear leaf during tasseling.",
+                "2. Avoid overly dense planting and keep field drainage clear to lower humidity inside the crop canopy.",
+                "3. Bury infected corn stubble through deep tillage after harvest to speed up the breakdown of fungal spores.",
+                "4. Rotate corn for 1 to 2 years with non-host crops like pulses, mustard, or vegetables."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Captan",
+                "2. Propiconazole / Difenoconazole",
+                "3. Azoxystrobin + Propiconazole / Pyraclostrobin + Metconazole"
+            ]
+        }
+    },
+
+    "banana": {
+        "BACTERIAL_SOFT_ROT": {
+            "Why & How this happen": "Caused by soil-borne Erwinia (Pectobacterium) bacteria entering through root or corm wounds, spreading rapidly in hot, humid weather and poorly drained, waterlogged soils.",
+            "What is BACTERIAL_SOFT_ROT": "A bacterial disease that rots the underground rhizome and inner pseudostem into a dark, slimy, foul-smelling mass, causing banana plants to yellow, wilt, and snap at the base.",
+            "Steps to cure": [
+                "1. Uproot and burn severely rotted plants along with the surrounding soil, and disinfect digging tools with bleach.",
+                "2. Improve field drainage immediately and stop irrigation water from flowing from infected pits to healthy plants.",
+                "3. Drench the soil and collar base of surrounding plants with an antibacterial solution mixed with a copper fungicide.",
+                "4. Plant only certified disease-free tissue-culture plantlets or pared, treated suckers in well-aerated soil."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Streptocycline + Copper Oxychloride / Kasugamycin + Copper Oxychloride",
+                "2. Bleaching Powder / Bordeaux Mixture (For Soil Pit Drenching)",
+                "3. Pseudomonas fluorescens / Bacillus subtilis"
+            ]
+        },
+        "BANANA_APHIDS": {
+            "Why & How this happen": "Caused by tiny reddish-brown to black aphids (Pentalonia nigronervosa) that multiply inside sheltered leaf sheaths during warm, humid weather and spread via ants, wind, and infected suckers.",
+            "What is BANANA_APHIDS": "Sap-sucking insect pests that cluster around the pseudostem base and unfurling leaves, weakening the plant and acting as the main carrier of the deadly Banana Bunchy Top Virus (BBTV).",
+            "Steps to cure": [
+                "1. Spray or pour a systemic insecticide directly into the central leaf whorl and behind loose leaf sheaths where aphids hide.",
+                "2. Control ant colonies around the base of the banana mat, as ants protect and carry aphids from plant to plant.",
+                "3. Uproot and destroy any plants showing stunted, bunched-up top leaves (Bunchy Top Virus) only after spraying them first to kill the aphids.",
+                "4. Trim away old, dried outer leaf sheaths and clear weeds to remove sheltered hiding spots."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Imidacloprid / Thiamethoxam",
+                "2. Dimethoate / Acephate",
+                "3. Neem Oil (Azadirachtin) / Flonicamid"
+            ]
+        },
+        "BANANA_FRUIT_SCARRING_BEETLE": {
+            "Why & How this happen": "Caused by small beetles (Basilepta subcostatum) that hide inside the central leaf whorl and emerge during warm, rainy monsoon months to feed on tender leaves and young banana fingers.",
+            "What is BANANA_FRUIT_SCARRING_BEETLE": "An insect pest that scrapes the skin of young developing banana fruits and unfurling leaves, leaving ugly brown scars and corky spots that ruin the fruit's market value.",
+            "Steps to cure": [
+                "1. Pour or spray an insecticide directly into the central leaf whorl before bunch emergence and right after the flower bud opens.",
+                "2. Cover newly emerged banana bunches with perforated polyethylene bunch sleeves (skirts) to physically block beetles.",
+                "3. Keep the orchard floor and field bunds completely free of grassy weeds, which serve as breeding grounds for the beetles.",
+                "4. Plough the inter-row spaces before the monsoon to expose and destroy beetle pupae hiding in the soil."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Chlorpyrifos / Quinalphos",
+                "2. Acephate / Carbaryl",
+                "3. Lambda-cyhalothrin / Neem Oil (Azadirachtin)"
+            ]
+        },
+        "BLACK_SIGATOKA": {
+            "Why & How this happen": "Caused by the airborne fungus Mycosphaerella fijiensis, whose spores spread rapidly via wind and rain splashes during warm (25°C to 28°C), wet, and high-humidity conditions.",
+            "What is BLACK_SIGATOKA": "A destructive fungal leaf disease that starts as tiny reddish-brown streaks on the underside of leaves and turns into black patches, rapidly killing leaves and causing bunches to ripen prematurely.",
+            "Steps to cure": [
+                "1. Cut off and burn heavily spotted lower leaves or dead leaf tips (de-leafing) to reduce fungal spore buildup in the orchard.",
+                "2. Remove excess suckers and keep field drainage channels clear to improve airflow and lower canopy humidity.",
+                "3. Spray a systemic fungicide mixed with mineral spray oil or a wetting agent so the chemical sticks to the waxy banana leaves.",
+                "4. Apply balanced Potassium and Nitrogen fertilizers to help the plant produce healthy leaves faster."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Propiconazole / Difenoconazole",
+                "2. Azoxystrobin + Tebuconazole / Trifloxystrobin + Tebuconazole",
+                "3. Mancozeb / Chlorothalonil"
+            ]
+        },
+        "PANAMA_DISEASE": {
+            "Why & How this happen": "Caused by the soil-borne fungus Fusarium oxysporum f. sp. cubense entering through the roots via infected suckers, contaminated farm tools, or floodwater in acidic, poorly drained soils.",
+            "What is PANAMA_DISEASE": "A lethal fungal wilt disease that blocks the plant's internal water vessels, causing older leaves to turn bright yellow from the margins inward, collapse around the trunk, and split the stem base.",
+            "Steps to cure": [
+                "1. Uproot and burn infected plants inside the pit, apply agricultural lime to the soil, and isolate the spot so infected mud does not wash onto healthy plants.",
+                "2. Drench the root zone of surrounding healthy plants with a systemic fungicide followed by bio-control agents 15 days later.",
+                "3. Disinfect spades, knives, and footwear with bleach or formalin before moving from infected mats to healthy areas.",
+                "4. Plant only disease-free tissue-culture plantlets and rotate infected fields with paddy or sugarcane for 2 to 3 years."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Carbendazim / Tebuconazole",
+                "2. Copper Oxychloride / Captan",
+                "3. Trichoderma viride / Pseudomonas fluorescens"
+            ]
+        },
+        "PSEUDOSTEM_WEEVIL": {
+            "Why & How this happen": "Caused by adult weevils (Odoiporus longicollis) laying eggs inside the leaf sheaths of 5-to-7-month-old banana plants, thriving in neglected orchards with rotting plant debris.",
+            "What is PSEUDOSTEM_WEEVIL": "A boring insect pest whose grubs tunnel inside the banana trunk (pseudostem), causing gummy sap and sawdust-like waste to ooze from small holes until the weakened stem snaps in the wind.",
+            "Steps to cure": [
+                "1. Split harvested pseudostems into 30 cm long halves and lay them cut-side down on the soil as traps to attract and hand-destroy adult weevils.",
+                "2. Inject a systemic insecticide into the pseudostem (at 2 feet and 4 feet height) or swab the trunk when pinholes and jelly-like sap are seen.",
+                "3. Uproot severely riddled plants, chop the trunk into small pieces, and dry or burn them so the grubs inside cannot mature.",
+                "4. Keep the orchard clean by removing dried outer leaf sheaths and old pseudostem stumps immediately after harvest."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Chlorpyrifos / Triazophos",
+                "2. Imidacloprid / Profenofos",
+                "3. Beauveria bassiana / Metarhizium anisopliae"
+            ]
+        },
+        "RANDOM_IMAGE": {
+            "Why & How this happen": "Triggered when the uploaded photo does not contain a recognizable banana leaf, stem, or fruit, or when the camera image is too blurry, dark, or far away.",
+            "What is RANDOM_IMAGE": "An invalid or unrelated image input where no banana crop or specific plant disease can be detected.",
+            "Steps to cure": [
+                "1. Retake the photo in bright, natural daylight, focusing closely on the affected banana leaf, pseudostem, or fruit bunch.",
+                "2. Wipe the camera lens clean and hold the phone steady so spots, pests, or rot symptoms are sharp and clearly visible.",
+                "3. Avoid capturing unrelated background objects, people, farm tools, or bare soil without the banana plant in the frame."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. None required (Upload a clear banana plant photo)"
+            ]
+        },
+        "YELLOW_SIGATOKA": {
+            "Why & How this happen": "Caused by the fungus Mycosphaerella musicola, spreading via wind and rain droplets during rainy, humid weather with moderate temperatures (20°C to 26°C) and poor orchard airflow.",
+            "What is YELLOW_SIGATOKA": "A fungal leaf spot disease that begins as pale yellow streaks parallel to the side veins on upper leaves and expands into brown blotches with bright yellow halos, drying out the leaf margins.",
+            "Steps to cure": [
+                "1. Prune and burn infected drying leaf blades early to stop fungal spores from spreading to young emerging leaves.",
+                "2. Remove extra suckers (desuckering) and clear weeds to improve air circulation and speed up leaf drying after rain.",
+                "3. Spray a systemic or contact fungicide mixed with a sticker/wetting agent across both upper and lower leaf surfaces.",
+                "4. Keep drainage trenches clear so rainwater does not stagnate between banana rows."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Propiconazole / Hexaconazole",
+                "2. Carbendazim + Mancozeb / Chlorothalonil",
+                "3. Azoxystrobin + Difenoconazole / Tebuconazole + Trifloxystrobin"
+            ]
+        }
+    }
+,
+    "cotton": {
+        "Aphids": {
+            "Why & How this happen": "Caused by tiny sap-sucking insects (Aphis gossypii) multiplying rapidly under warm, cloudy, humid weather and lush, nitrogen-heavy cotton growth.",
+            "What is Aphids": "Small yellow-to-dark-green soft-bodied insects that cluster under tender leaves and shoots, sucking sap, curling leaves downward, and excreting sticky honeydew that causes black sooty mold.",
+            "Steps to cure": [
+                "1. Install yellow sticky traps (10 to 12 per acre) just above the crop canopy to monitor and trap winged aphids.",
+                "2. Spray a systemic insecticide directed at the underside of leaves where aphid colonies hide.",
+                "3. Avoid excess Urea fertilizer and stop using synthetic pyrethroid sprays, which trigger severe aphid flare-ups.",
+                "4. Conserve natural predators like ladybird beetles and lacewings by using neem-based sprays in the early stage."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Flonicamid / Imidacloprid",
+                "2. Thiamethoxam / Acetamiprid",
+                "3. Diafenthiuron / Neem Oil (Azadirachtin)"
+            ]
+        },
+        "Armyworm": {
+            "Why & How this happen": "Caused by night-flying Spodoptera moths laying egg masses on cotton leaves, with caterpillars hatching and spreading rapidly during warm, humid, post-rainy weather.",
+            "What is Armyworm": "Voracious caterpillars that feed in groups to skeletonize leaves into papery mesh and later bore into flower buds (squares) and bolls, causing severe defoliation.",
+            "Steps to cure": [
+                "1. Handpick and crush egg masses and young gregarious caterpillars found on skeletonized leaves early in the morning.",
+                "2. Install Spodoptera pheromone traps (5 per acre) to monitor moth flights and mass-trap adult males.",
+                "3. Spray targeted larvicides during late afternoon or evening hours when caterpillars come out to feed actively.",
+                "4. Deep-plow the field in summer after harvest to expose underground pupae to harsh sunlight and predatory birds."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Emamectin Benzoate / Chlorantraniliprole",
+                "2. Spinosad / Indoxacarb",
+                "3. Novaluron / Thiodicarb"
+            ]
+        },
+        "Bacterial Blight": {
+            "Why & How this happen": "Caused by Xanthomonas bacteria surviving in infected seeds and old crop residue, spreading rapidly across fields via wind-driven rain splashes in warm, humid weather.",
+            "What is Bacterial Blight": "A bacterial disease that creates dark green, water-soaked angular spots on leaves, black lesions on stems (blackarm), and sunken black rotting spots on cotton bolls.",
+            "Steps to cure": [
+                "1. Spray a bactericide mixed with a copper fungicide immediately after heavy wind or rainstorms to seal plant wounds.",
+                "2. Collect and burn fallen leaves, blackened twigs, and rotted bolls to stop bacterial carryover.",
+                "3. Apply adequate Potassium fertilizer to strengthen plant cell walls and avoid heavy Nitrogen doses.",
+                "4. Always sow acid-delinted, bactericide-treated seeds and rotate cotton with non-host crops."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Streptocycline + Copper Oxychloride / Kasugamycin + Copper Oxychloride",
+                "2. Bronopol + Copper Hydroxide / Bordeaux Mixture",
+                "3. Carboxin + Thiram / Imidacloprid (For Pre-Sowing Seed Treatment)"
+            ]
+        },
+        "Fusarium Wilt": {
+            "Why & How this happen": "Caused by the soil-borne and seed-borne fungus Fusarium oxysporum entering through the roots, thriving in warm soils and worsening when root-knot nematodes damage the roots.",
+            "What is Fusarium Wilt": "A deadly fungal disease that blocks water flow inside the stem, causing leaves to turn yellow-brown and droop from the bottom upward, with a dark brown ring visible inside the cut stem.",
+            "Steps to cure": [
+                "1. Uproot and burn wilted plants immediately and prevent irrigation water from flowing through infected spots to healthy rows.",
+                "2. Drench the soil around the base of affected and neighboring plants with a systemic fungicide.",
+                "3. Apply well-rotted farmyard manure enriched with Trichoderma along with higher Potash and Zinc doses.",
+                "4. Treat seeds with fungicides before sowing and rotate infected fields with sorghum, maize, or pearl millet."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Carbendazim / Tebuconazole",
+                "2. Copper Oxychloride / Thiophanate-methyl",
+                "3. Trichoderma viride / Pseudomonas fluorescens"
+            ]
+        },
+        "Grey milddew": {
+            "Why & How this happen": "Caused by the fungus Ramularia areola thriving inside dense, shady cotton canopies during wet, humid, and cool-to-moderate weather from flowering to boll maturity.",
+            "What is Grey milddew": "A fungal leaf disease that produces irregular, angular pale spots bounded by leaf veins, covered with a frosty white-to-grey powdery fungal growth on the underside of lower leaves.",
+            "Steps to cure": [
+                "1. Spray a systemic fungicide or wettable sulphur as soon as white powdery patches appear on the underside of lower leaves.",
+                "2. Maintain proper plant spacing and avoid excess Urea so sunlight and wind can dry the lower crop canopy.",
+                "3. Apply foliar Potassium and Magnesium sprays alongside fungicides to prevent premature leaf shedding.",
+                "4. Destroy crop residue and volunteer cotton plants after harvest so the fungus cannot survive off-season."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Carbendazim / Wettable Sulphur",
+                "2. Propiconazole / Hexaconazole",
+                "3. Azoxystrobin + Difenoconazole / Kresoxim-methyl"
+            ]
+        },
+        "Leaf Curl": {
+            "Why & How this happen": "Caused by the Cotton Leaf Curl Virus (CLCuV), which is spread from infected plants and weeds to healthy cotton exclusively by sap-sucking whiteflies (Bemisia tabaci).",
+            "What is Leaf Curl": "A viral disease where leaves curl upward or downward with thickened dark-green veins and tiny cup-like outgrowths underneath, leaving the plant severely stunted with very few bolls.",
+            "Steps to cure": [
+                "1. Uproot and bury or burn virus-infected plants early in the season so whiteflies cannot spread the virus across the field.",
+                "2. Control the whitefly vector immediately using yellow sticky traps and targeted systemic insecticides.",
+                "3. Destroy alternate weed hosts like Kanghi buti (Sida) and Peeli buti (Abutilon) on field borders before and during the season.",
+                "4. Avoid late sowing and heavy Nitrogen fertilizer, which make foliage overly succulent and attractive to whiteflies."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Diafenthiuron / Flonicamid (To Control Whitefly Vector)",
+                "2. Pyriproxyfen / Spiromesifen",
+                "3. Afidopyropen / Neem Oil (Azadirachtin)"
+            ]
+        },
+        "leaf spot": {
+            "Why & How this happen": "Caused by Alternaria, Cercospora, or Myrothecium fungi surviving in old crop debris, spreading fast via wind and rain splashes in humid weather and Potassium-deficient crops.",
+            "What is leaf spot": "A fungal disease that forms circular brown spots with target-like concentric rings or purple-brown margins on leaves, causing them to turn yellow, dry out, and drop early.",
+            "Steps to cure": [
+                "1. Spray a contact or systemic fungicide immediately when brown target-like spots appear on lower and middle leaves.",
+                "2. Apply a foliar Potassium spray (NPK 00:00:50 or 13:00:45), as Potassium deficiency makes cotton highly vulnerable to leaf spot.",
+                "3. Ensure proper field drainage and avoid waterlogging to reduce humidity inside the plant canopy.",
+                "4. Shred and deep-plow infected cotton stalks after the final picking to destroy overwintering fungal spores."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Copper Oxychloride",
+                "2. Propiconazole / Tebuconazole",
+                "3. Metiram + Pyraclostrobin / Azoxystrobin + Tebuconazole"
+            ]
+        }
+    }
+,
+    "sugarcane": {
+        "banded_chlorosis": {
+            "Why & How this happen": "Caused by sudden extreme temperature fluctuations—especially cold night spells below 10°C or intense summer heat—which temporarily halt chlorophyll production inside the young unfurling leaf whorl.",
+            "What is banded_chlorosis": "A physiological disorder that creates distinct horizontal yellow-to-white bleached bands across the green sugarcane leaf blade, temporarily slowing leaf photosynthesis.",
+            "Steps to cure": [
+                "1. Provide light, timely irrigation during extreme cold or heat waves to buffer soil temperature and reduce thermal shock.",
+                "2. Spray a foliar micronutrient mixture containing Iron and Zinc to help bleached bands recover green chlorophyll quickly.",
+                "3. Apply a balanced foliar NPK spray with seaweed extract to boost plant recovery from weather stress.",
+                "4. Avoid spraying harsh post-emergent herbicides while the crop is stressed by extreme temperatures."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Chelated Iron + Zinc Sulphate / Ferrous Sulphate + Manganese Sulphate",
+                "2. NPK 19:19:19 / NPK 13:00:45",
+                "3. Seaweed Extract / Amino Acid Biostimulant"
+            ]
+        },
+        "brown_spot": {
+            "Why & How this happen": "Caused by the airborne fungus Cercospora longipes surviving in old crop trash, spreading rapidly across leaves via wind and rain splashes during warm, humid monsoon weather.",
+            "What is brown_spot": "A fungal leaf disease that produces small, oval, reddish-brown spots surrounded by yellow halos on both leaf surfaces, causing premature leaf drying and lower sugar content.",
+            "Steps to cure": [
+                "1. Strip away and burn heavily spotted lower dry leaves (detrashing) to improve air circulation and sunlight inside the cane rows.",
+                "2. Spray a contact or systemic fungicide across the foliage as soon as reddish-brown spots start multiplying.",
+                "3. Apply adequate Potassium fertilizer and avoid excessive Nitrogen to strengthen leaf resistance against fungal entry.",
+                "4. Keep drainage channels clear so water does not stagnate inside the field during heavy rains."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Mancozeb / Copper Oxychloride",
+                "2. Propiconazole / Hexaconazole",
+                "3. Carbendazim + Mancozeb / Azoxystrobin + Tebuconazole"
+            ]
+        },
+        "brownrust": {
+            "Why & How this happen": "Caused by the wind-borne fungus Puccinia melanocephala, which infects young sugarcane leaves during cool-to-moderate weather (15°C to 25°C) with heavy morning dew and high humidity.",
+            "What is brownrust": "A fungal disease that forms tiny, elongated, reddish-brown powdery blisters (pustules) mainly on the underside of leaves, rupturing the leaf surface and stunting cane thickness.",
+            "Steps to cure": [
+                "1. Spray a systemic fungicide immediately when rust pustules appear on young 2-to-5-month-old plants.",
+                "2. Strip old lower leaves and clear field weeds to lower canopy humidity and speed up morning dew drying.",
+                "3. Avoid excess Nitrogen fertilizer, which promotes soft, lush leaf growth that is easily infected by rust.",
+                "4. Replace highly susceptible cane varieties with rust-resistant cultivars in the next planting season."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Propiconazole / Tebuconazole",
+                "2. Mancozeb / Chlorothalonil",
+                "3. Azoxystrobin + Difenoconazole / Trifloxystrobin + Tebuconazole"
+            ]
+        },
+        "dried_leaf": {
+            "Why & How this happen": "Caused by severe soil moisture stress, Potassium deficiency, high soil salinity, or unchecked root borer and fungal damage cutting off water supply to the leaves.",
+            "What is dried_leaf": "A condition where sugarcane leaf blades lose moisture, turn pale brown, and dry into brittle, papery strips from the tips and margins inward, reducing stalk growth and cane weight.",
+            "Steps to cure": [
+                "1. Provide immediate irrigation and spread dry cane trash mulch in the furrows to conserve soil moisture during hot weather.",
+                "2. Strip off and remove completely dead lower leaves (detrashing) to reduce pest hiding spots and fire risk.",
+                "3. Apply a foliar Potassium spray to improve water retention and drought tolerance in the remaining green canopy.",
+                "4. Inspect the root zone for grubs or fungal rot and drench the soil if leaves are drying despite adequate moisture."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. NPK 00:00:50 / Potassium Schoenite",
+                "2. Mancozeb / Carbendazim + Mancozeb",
+                "3. Chlorantraniliprole / Fipronil"
+            ]
+        },
+        "grassy_shoot": {
+            "Why & How this happen": "Caused by a phytoplasma pathogen spread primarily by planting infected seed setts and secondarily transmitted across fields by sap-sucking aphids and leafhoppers.",
+            "What is grassy_shoot": "A destructive disease where the sugarcane base produces dozens of thin, crowded, grass-like shoots with pale yellow or white papery leaves instead of forming thick millable canes.",
+            "Steps to cure": [
+                "1. Dig out and burn infected grassy clumps completely from the root base as soon as they appear, and never ratoon an infected field.",
+                "2. Spray a systemic insecticide to kill aphids and leafhoppers that carry the phytoplasma to healthy plants.",
+                "3. Treat seed setts with Moist Hot Air Therapy (54°C for 2.5 hours) or Hot Water Treatment (50°C for 2 hours) before planting.",
+                "4. Always source certified disease-free seed cane raised from tissue-culture nurseries."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Imidacloprid / Thiamethoxam",
+                "2. Flonicamid / Dimethoate",
+                "3. Tetracycline Hydrochloride / Oxytetracycline"
+            ]
+        },
+        "pokkah_boeng": {
+            "Why & How this happen": "Caused by the airborne fungus Fusarium moniliforme, whose spores wash into the central leaf spindle during hot, humid pre-monsoon showers and heavy monsoon rains.",
+            "What is pokkah_boeng": "A fungal crown disease that causes yellow-white patches at the base of young spindle leaves, twisting, wrinkling, and rotting the top crown along with knife-cut cracks on the stalk.",
+            "Steps to cure": [
+                "1. Spray a systemic or copper fungicide directly into the central leaf whorl (spindle) as soon as twisted or bleached top leaves appear.",
+                "2. Cut off and destroy severely rotted top spindles so the fungal rot does not travel down into the growing stalk.",
+                "3. Avoid excessive Nitrogen fertilizer before the monsoon, as soft, succulent spindles are easily infected.",
+                "4. Improve field drainage and strip lower leaves to keep humidity low inside the cane crop."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Carbendazim / Copper Oxychloride",
+                "2. Propiconazole / Tebuconazole",
+                "3. Azoxystrobin + Tebuconazole / Mancozeb"
+            ]
+        },
+        "sett_rot": {
+            "Why & How this happen": "Caused by the soil-borne fungus Ceratocystis paradoxa entering through the cut ends of planted seed canes, thriving in heavy, waterlogged, poorly drained, or cold soils.",
+            "What is sett_rot": "A fungal disease (also called Pineapple disease) that rots the inside of planted sugarcane setts into a black, sooty core smelling like ripe pineapple, causing buds to fail before sprouting.",
+            "Steps to cure": [
+                "1. Dip all sugarcane seed setts in a systemic fungicide solution for 15 to 20 minutes immediately before planting.",
+                "2. Remove rotting, ungerminated setts from the furrow, drench the soil gap with fungicide, and replant with treated healthy setts.",
+                "3. Avoid deep planting and ensure proper drainage so irrigation or rainwater never stagnates over newly planted furrows.",
+                "4. Apply Trichoderma viride mixed with well-rotted farmyard manure in the planting trenches to protect sprouting buds."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Carbendazim / Thiophanate-methyl",
+                "2. Propiconazole / Tebuconazole",
+                "3. Trichoderma viride / Captan"
+            ]
+        },
+        "smut": {
+            "Why & How this happen": "Caused by the fungus Sporisorium scitamineum, which spreads through infected planting setts and wind-blown black spores that infect dormant cane buds during hot, dry weather.",
+            "What is smut": "A major fungal disease where the growing tip of the sugarcane turns into a long, curved, black whip-like structure covered in dusty black spores, producing thin, useless canes.",
+            "Steps to cure": [
+                "1. Carefully cover the black whip with a cloth or plastic bag and cut it off before uprooting the entire infected clump, then burn it outside the field.",
+                "2. Never keep a ratoon crop or collect seed setts from a smut-infected field.",
+                "3. Disinfect seed setts before planting using Hot Water Treatment (52°C for 30 minutes) combined with a triazole fungicide dip.",
+                "4. Rotate heavily infected fields with paddy, soybean, or green manure crops for at least 1 year."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Propiconazole / Triadimefon",
+                "2. Tebuconazole / Carbendazim",
+                "3. Carboxin + Thiram / Mancozeb"
+            ]
+        },
+        "viral_disease": {
+            "Why & How this happen": "Caused by Sugarcane Mosaic Virus (SCMV) or Streak Mosaic Virus, transmitted primarily by planting infected seed cane and spread across fields by sap-sucking aphids.",
+            "What is viral_disease": "A viral infection that creates mottled light-green and pale-yellow mosaic patterns on young spindle leaves, slowing photosynthesis and stunting overall cane height and yield.",
+            "Steps to cure": [
+                "1. Uproot and destroy virus-infected clumps showing mosaic leaf patterns early in the crop cycle.",
+                "2. Spray a systemic insecticide to control aphids and remove grassy weeds like Johnson grass that harbor both the virus and insect vectors.",
+                "3. Avoid intercropping susceptible maize or sorghum varieties next to sugarcane, as aphids easily carry the virus between them.",
+                "4. Plant only virus-free tissue-culture plantlets or heat-treated certified seed setts."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Imidacloprid / Thiamethoxam",
+                "2. Flonicamid / Acetamiprid",
+                "3. Neem Oil (Azadirachtin) / Dimethoate"
+            ]
+        },
+        "yellow_leaf": {
+            "Why & How this happen": "Caused by the Sugarcane Yellow Leaf Virus (ScYLV), spread by planting infected seed setts and transmitted from plant to plant by sugarcane aphids, worsening under drought or cold stress.",
+            "What is yellow_leaf": "A viral disease where the midrib on the underside of mature leaves turns bright canary-yellow while the leaf blade stays green, eventually yellowing and drying the entire top crown.",
+            "Steps to cure": [
+                "1. Uproot and destroy severely yellowed stools early on and never collect seed setts from an infected field.",
+                "2. Spray a systemic insecticide on the underside of leaves to wipe out sugarcane aphid colonies that spread the virus.",
+                "3. Maintain timely irrigation and apply a foliar nutrient spray to reduce plant stress and minimize sugar loss in maturing cane.",
+                "4. Establish new fields using virus-indexed tissue-culture (meristem) seedlings."
+            ],
+            "Recommended Pesticites/Fungicides/Bactericides/etc... ": [
+                "1. Flonicamid / Thiamethoxam",
+                "2. Imidacloprid / Dimethoate",
+                "3. NPK 19:19:19 / Neem Oil (Azadirachtin)"
+            ]
+        }
+    }
+} 
