@@ -38,6 +38,28 @@ app.get('/health', (_req, res) => {
 const authRoutes = require('./AuthRoutes');
 app.use('/api/auth', authRoutes);
 
+const { sql } = require('./NeonSetup');
+
+// Initialize disease detection history table
+(async () => {
+  try {
+    await sql`
+      CREATE TABLE IF NOT EXISTS disease_detections (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER REFERENCES auth_users(id) ON DELETE CASCADE,
+        plant_name VARCHAR(50) NOT NULL,
+        image_filename VARCHAR(255),
+        detections JSONB DEFAULT '[]',
+        total_detections INTEGER DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+    console.log('✅ disease_detections table ready');
+  } catch (err) {
+    console.error('Failed to init disease_detections table:', err.message);
+  }
+})();
+
 // ── ML service base URL ───────────────────────────────────────────────────────
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://ml-service:8000';
 
@@ -105,64 +127,139 @@ if (!fs.existsSync(fieldCoordsDir)) {
 // Directory for disease detection results is already created above
 
 // API endpoint for plant disease detection
-app.post('/api/upload-disease-image', upload.single('image'), (req, res) => {
+app.post('/api/upload-disease-image', upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: 'No image file uploaded'
-      });
+      return res.status(400).json({ success: false, message: 'No image file uploaded' });
     }
 
-    // Get plant name from request body
-    const plantName = req.body.plantName || 'unknown_plant';
-    const sanitizedPlantName = plantName.toLowerCase().replace(/\s+/g, '_');
+    const plantName = (req.body.plantName || 'unknown').toLowerCase().trim();
+    const userId = req.body.userId ? parseInt(req.body.userId, 10) : null;
     
-    // Create the final filename with plant name
-    const finalFilename = `${sanitizedPlantName}.png`;
+    // Rename uploaded file with timestamp to avoid collisions
+    const timestamp = Date.now();
+    const finalFilename = `${plantName}_${timestamp}.png`;
     const finalPath = path.join(diseaseUploadDir, finalFilename);
-    
-    // Rename the temporary file to the plant name
     fs.renameSync(req.file.path, finalPath);
-    
-    console.log(`Image uploaded and renamed successfully: ${finalPath}`);
 
-    // Create result filename with plant name
-    const resultFilename = `${sanitizedPlantName}.png`;
-    const resultImagePath = path.join(diseaseResultsDir, resultFilename);
+    console.log(`[Disease] Image saved: ${finalFilename}, plant: ${plantName}`);
 
-    // Simulate disease detection processing
-    setTimeout(() => {
+    // Call ML service
+    let mlResult;
+    try {
+      const FormData = (await import('form-data')).default;
+      const formData = new FormData();
+      formData.append('image', fs.createReadStream(finalPath), { filename: finalFilename, contentType: 'image/png' });
+      formData.append('plant_name', plantName);
+
+      const axios = require('axios');
+      const axiosConfig = {
+        headers: formData.getHeaders(),
+        timeout: 60000,
+        maxContentLength: 50 * 1024 * 1024,
+      };
+      
+      let mlResponse;
       try {
-        // Copy uploaded image to result path as demo processed output
-        fs.copyFileSync(finalPath, resultImagePath);
-        console.log('Disease detection completed, result saved to:', resultImagePath);
-      } catch (error) {
-        console.error('Error creating result image:', error);
+        mlResponse = await axios.post(`${ML_SERVICE_URL}/api/disease-detect`, formData, axiosConfig);
+      } catch (err) {
+        if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED') {
+          console.log('[Disease] ML_SERVICE_URL failed, falling back to localhost:8000');
+          mlResponse = await axios.post(`http://localhost:8000/api/disease-detect`, formData, axiosConfig);
+        } else {
+          throw err;
+        }
       }
-    }, 1000);
+      mlResult = mlResponse.data;
+    } catch (mlErr) {
+      console.error('[Disease] ML service error:', mlErr.message);
+      mlResult = {
+        success: false,
+        plant: plantName,
+        detections: [],
+        total_detections: 0,
+        error: mlErr.message,
+      };
+    }
 
-    const mockDiseaseInfo = {
-      name: 'Analysis Complete',
-      description: 'The leaf image has been processed successfully. Check the result image for detailed analysis.',
-      treatment: 'Based on the analysis, consider the following: 1) Ensure proper watering schedule, 2) Check for pest infestation, 3) Apply appropriate organic fungicides if needed, 4) Maintain proper soil nutrition levels.',
-      confidence: '87%'
-    };
+    // Save to database if userId is provided
+    if (userId) {
+      try {
+        await sql`
+          INSERT INTO disease_detections (user_id, plant_name, image_filename, detections, total_detections)
+          VALUES (${userId}, ${plantName}, ${finalFilename}, ${JSON.stringify(mlResult.detections || [])}, ${mlResult.total_detections || 0})
+        `;
+      } catch (dbErr) {
+        console.error('[Disease] DB save error:', dbErr.message);
+      }
+    }
+
+    // Build response
+    const detections = mlResult.detections || [];
+    const topDetection = detections.length > 0
+      ? detections.reduce((a, b) => (a.confidence > b.confidence ? a : b))
+      : null;
 
     return res.status(200).json({
       success: true,
-      message: 'Image uploaded and analyzed successfully',
-      diseaseInfo: mockDiseaseInfo,
-      resultImagePath: `/detect_results/disease/${resultFilename}`,
-      uploadedAs: finalFilename
+      message: mlResult.success ? 'Disease detection completed' : 'Detection completed with fallback',
+      diseaseInfo: {
+        name: topDetection ? topDetection.class : 'No disease detected',
+        description: topDetection
+          ? `Detected ${topDetection.class} in ${plantName} leaf with ${(topDetection.confidence * 100).toFixed(1)}% confidence.`
+          : `No significant disease patterns were detected in the ${plantName} leaf image. The plant appears healthy.`,
+        treatment: topDetection
+          ? `Disease "${topDetection.class}" detected. Consult an agricultural expert for specific treatment. General recommendations: 1) Isolate affected plants, 2) Remove infected leaves, 3) Apply appropriate fungicide/pesticide, 4) Improve air circulation.`
+          : 'No treatment required. Continue regular care and monitoring.',
+        confidence: topDetection ? `${(topDetection.confidence * 100).toFixed(1)}%` : 'N/A',
+      },
+      detections: detections,
+      totalDetections: mlResult.total_detections || 0,
+      plant: plantName,
+      imageUrl: `/crop_imgs/disease/${finalFilename}`,
     });
-
   } catch (error) {
-    console.error('Error processing disease detection:', error);
+    console.error('[Disease] Error:', error);
     return res.status(500).json({
       success: false,
-      message: 'Server error during disease detection: ' + error.message
+      message: 'Server error during disease detection: ' + error.message,
     });
+  }
+});
+
+// Get disease detection history for a user
+app.get('/api/disease-history/:userId', async (req, res) => {
+  try {
+    const userId = parseInt(req.params.userId, 10);
+    if (isNaN(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+    const rows = await sql`
+      SELECT id, plant_name, image_filename, detections, total_detections, created_at
+      FROM disease_detections
+      WHERE user_id = ${userId}
+      ORDER BY created_at DESC
+      LIMIT 50
+    `;
+    return res.status(200).json({ success: true, history: rows });
+  } catch (error) {
+    console.error('[Disease] History fetch error:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// Delete a specific detection record
+app.delete('/api/disease-history/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid ID' });
+    }
+    await sql`DELETE FROM disease_detections WHERE id = ${id}`;
+    return res.status(200).json({ success: true, message: 'Record deleted' });
+  } catch (error) {
+    console.error('[Disease] Delete error:', error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 });
 

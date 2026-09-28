@@ -12,6 +12,7 @@ import os
 import shutil
 import tempfile
 import traceback
+import importlib
 from pathlib import Path
 
 import cv2
@@ -23,6 +24,9 @@ from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from ultralytics import YOLO
+
+# Supported roboflow crop scripts
+ROBOFLOW_CROPS = ["banana", "turmeric", "corn", "wheat"]
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Paths (all relative to /app inside container, env-override friendly)
@@ -101,6 +105,7 @@ def health():
         "status": "ok",
         "crop_model_loaded": crop_model is not None,
         "available_yolo_models": list(PLANT_MODEL_MAP.keys()),
+        "available_roboflow_models": ROBOFLOW_CROPS,
     }
 
 
@@ -160,6 +165,47 @@ async def disease_detect(
     Accepts a plant leaf image, runs YOLO inference, returns detection results.
     plant_name: "tea" | "tomato"  (determines which model to load)
     """
+    key = plant_name.lower()
+    contents = await image.read()
+    
+    if key in ROBOFLOW_CROPS:
+        try:
+            # Dynamically import the script for the specific crop (e.g. scripts.banana)
+            module = importlib.import_module(f"scripts.{key}")
+            
+            # Pass the raw image bytes to the specific script's run_model function
+            result_raw = module.run_model(contents)
+            
+            # Parse result safely
+            detections = []
+            predictions = result_raw.get("predictions", [])
+            
+            if isinstance(predictions, list):
+                for p in predictions:
+                    if isinstance(p, dict) and "class" in p and "confidence" in p:
+                        detections.append({
+                            "class": p["class"],
+                            "confidence": float(p["confidence"])
+                        })
+            elif isinstance(predictions, dict):
+                for class_name, data in predictions.items():
+                    if isinstance(data, dict) and "confidence" in data:
+                        detections.append({
+                            "class": class_name,
+                            "confidence": float(data["confidence"])
+                        })
+                        
+            normalized_result = {
+                "success": True,
+                "plant": key,
+                "detections": detections,
+                "total_detections": len(detections)
+            }
+            
+            return JSONResponse(normalized_result)
+        except Exception as exc:
+            traceback.print_exc()
+            raise HTTPException(status_code=500, detail=f"Roboflow Script Error: {str(exc)}")
     model = get_yolo_model(plant_name)
     if model is None:
         # Fall back to mock response if no model exists for this plant
@@ -172,8 +218,6 @@ async def disease_detect(
         })
 
     try:
-        # Read image bytes
-        contents = await image.read()
         img_array = np.frombuffer(contents, np.uint8)
         frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
         if frame is None:
