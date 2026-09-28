@@ -1,7 +1,7 @@
 {
   "id": "1757358003838_461",
   "name": "farm_1",
-  "location": "pune",
+  "location": "Theur, Pune District, Maharashtra",
   "crop": "Coffee",
   "coordinates": [
     {
@@ -21,5 +21,18 @@
       "lng": 74.02250697863835
     }
   ],
-  "createdAt": "2025-09-08T19:00:03.838Z"
+  "createdAt": "2025-09-08T19:00:03.838Z",
+  "location_details": {
+    "village": "Theur",
+    "county": "Haveli Subdistrict",
+    "state_district": "Pune District",
+    "state": "Maharashtra",
+    "ISO3166-2-lvl4": "IN-MH",
+    "postcode": "412200",
+    "country": "India",
+    "country_code": "in",
+    "displayName": "Theur, Haveli Subdistrict, Pune District, Maharashtra, 412200, India"
+  },
+  "soil_color": "",
+  "soilColor": ""
 }

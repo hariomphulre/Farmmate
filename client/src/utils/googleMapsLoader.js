@@ -7,9 +7,26 @@ class GoogleMapsLoader {
     this.callbacks = [];
   }
 
-  loadGoogleMaps(libraries = ['geometry']) {
-    // If already loaded, resolve immediately
+  async loadGoogleMaps(libraries = ['drawing', 'geometry', 'places']) {
+    // If already loaded, ensure requested libraries are available
     if (this.isLoaded && window.google && window.google.maps) {
+      if (window.google.maps.importLibrary) {
+        try {
+          await Promise.all(
+            libraries.map(async (lib) => {
+              if (!window.google.maps[lib]) {
+                try {
+                  await window.google.maps.importLibrary(lib);
+                } catch (err) {
+                  console.warn(`Could not import Google Maps library: ${lib}`, err);
+                }
+              }
+            })
+          );
+        } catch (e) {
+          console.warn('Error importing libraries:', e);
+        }
+      }
       return Promise.resolve();
     }
 
@@ -32,7 +49,8 @@ class GoogleMapsLoader {
 
       const apiKey = "AIzaSyA3vUl0jnyrAi_awYheUAYjFNDKCUaDpeU";
       const script = document.createElement('script');
-      const libraryString = libraries.length > 0 ? `&libraries=${libraries.join(',')}` : '';
+      const allLibs = Array.from(new Set([...libraries, 'drawing', 'geometry', 'places']));
+      const libraryString = `&libraries=${allLibs.join(',')}`;
       const callbackName = `initGoogleMaps_${Date.now()}`;
       
       script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}${libraryString}&loading=async&callback=${callbackName}`;

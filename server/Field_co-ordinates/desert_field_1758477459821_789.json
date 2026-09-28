@@ -1,7 +1,7 @@
 {
   "id": "1758477459821_789",
   "name": "desert_field",
-  "location": "pune",
+  "location": "Akarli Bakshiram, Balotra, Rajasthan",
   "crop": "Wheat",
   "coordinates": [
     {
@@ -17,5 +17,17 @@
       "lng": 72.11431099492286
     }
   ],
-  "createdAt": "2025-09-21T17:57:39.821Z"
+  "createdAt": "2025-09-21T17:57:39.821Z",
+  "location_details": {
+    "village": "Akarli Bakshiram",
+    "town": "Pachpadra Tehsil",
+    "state_district": "Balotra",
+    "state": "Rajasthan",
+    "ISO3166-2-lvl4": "IN-RJ",
+    "country": "India",
+    "country_code": "in",
+    "displayName": "Akarli Bakshiram, Pachpadra Tehsil, Balotra, Rajasthan, India"
+  },
+  "soil_color": "",
+  "soilColor": ""
 }

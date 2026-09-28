@@ -202,6 +202,20 @@ const FieldDetail = () => {
                     <h3 className="text-sm text-gray-500">Crop</h3>
                     <p className="font-medium">{field.crop || 'Not specified'}</p>
                   </div>
+                  {field.soil_color && (
+                    <div>
+                      <h3 className="text-sm text-gray-500">Soil Color & Type</h3>
+                      <div className="flex items-center mt-1 gap-2">
+                        <span 
+                          className="w-4 h-4 rounded-full border border-gray-300 shadow-xs flex-shrink-0" 
+                          style={{ 
+                            backgroundColor: field.soil_color.match(/#[0-9a-fA-F]{3,6}/)?.[0] || '#4A3728' 
+                          }}
+                        ></span>
+                        <p className="font-medium text-gray-800">{field.soil_color}</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               

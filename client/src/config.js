@@ -17,7 +17,8 @@ export const API_URLS = {
   UPDATE_MANIPAL: `${API_BASE_URL}/api/update-manipal`,
   WEATHER_COORDINATES: `${API_BASE_URL}/api/weather-coordinates`,
   WEATHER_LOCATION: `${API_BASE_URL}/api/weather-location`,
-  NEW_WEATHER_LOCATION: `${API_BASE_URL}/api/weather-for-farmer`
+  NEW_WEATHER_LOCATION: `${API_BASE_URL}/api/weather-for-farmer`,
+  REVERSE_GEOCODE: `${API_BASE_URL}/api/fields/reverse-geocode`
 };
 
 export default {

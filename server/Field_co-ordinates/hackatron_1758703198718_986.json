@@ -1,7 +1,7 @@
 {
   "id": "1758703198718_986",
   "name": "hackatron",
-  "location": "pune",
+  "location": "Betul, Madhya Pradesh",
   "crop": "Sugarcane",
   "coordinates": [
     {
@@ -17,5 +17,17 @@
       "lng": 77.30725652501245
     }
   ],
-  "createdAt": "2025-09-24T08:39:58.718Z"
+  "createdAt": "2025-09-24T08:39:58.718Z",
+  "location_details": {
+    "city_district": "Ankhi",
+    "county": "Bhimpur Tahsil",
+    "state_district": "Betul",
+    "state": "Madhya Pradesh",
+    "ISO3166-2-lvl4": "IN-MP",
+    "country": "India",
+    "country_code": "in",
+    "displayName": "Ankhi, Bhimpur Tahsil, Betul, Madhya Pradesh, India"
+  },
+  "soil_color": "",
+  "soilColor": ""
 }
