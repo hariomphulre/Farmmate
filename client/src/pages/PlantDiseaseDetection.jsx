@@ -23,6 +23,10 @@ const CROPS = [
   { value: 'turmeric', label: 'Turmeric' },
   { value: 'corn',     label: 'Corn'   },
   { value: 'wheat',    label: 'Wheat',  },
+  { value: 'cotton',    label: 'Cotton',  },
+  { value: 'sugarcane',    label: 'Sugarcane',  },
+  { value: 'tea',    label: 'Tea',  },
+  { value: 'tomato',    label: 'Tomato',  },
 ];
 
 const API_BASE = '/api';
