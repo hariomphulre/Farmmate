@@ -197,7 +197,7 @@ const PlantDiseaseDetection = () => {
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-6">
         <div className="flex items-center gap-3 mb-1">
-          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#111827] text-white">
+          <div className="grid h-10 w-10 place-items-center rounded-xl bg-[#052e16] text-white">
             <Leaf size={18} />
           </div>
           <div>
@@ -233,7 +233,7 @@ const PlantDiseaseDetection = () => {
                   type="button"
                   onClick={() => setDropdownOpen(!dropdownOpen)}
                   className={`w-full flex items-center justify-between px-4 py-2.5 rounded-xl border ${
-                    dropdownOpen ? 'border-[#111827] ring-1 ring-[#111827]' : 'border-gray-200'
+                    dropdownOpen ? 'border-[#052e16] ring-1 ring-[#052e16]' : 'border-gray-200'
                   } bg-white text-left transition-all`}
                 >
                   <span className={selectedCrop ? 'text-gray-900' : 'text-gray-400'}>
@@ -288,7 +288,7 @@ const PlantDiseaseDetection = () => {
                     <div>
                       <p className="text-gray-600">
                         Drag and drop your leaf image, or{' '}
-                        <span className="text-[#111827] font-medium cursor-pointer">browse</span>
+                        <span className="text-[#052e16] font-medium cursor-pointer">browse</span>
                       </p>
                       <p className="text-xs text-gray-400 mt-1">PNG, JPG, JPEG · Max 10 MB</p>
                     </div>
@@ -302,7 +302,7 @@ const PlantDiseaseDetection = () => {
               <button
                 onClick={handleAnalyze}
                 disabled={!selectedFile || !plantName || isAnalyzing}
-                className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-white bg-[#111827] hover:bg-[#1f2937] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-medium text-white bg-[#052e16] hover:bg-[#06401e] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {isAnalyzing ? (
                   <>
@@ -375,7 +375,7 @@ const PlantDiseaseDetection = () => {
                           <div className="flex items-center gap-2">
                             <div className="w-20 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                               <div
-                                className="h-full bg-[#111827] rounded-full transition-all"
+                                className="h-full bg-[#052e16] rounded-full transition-all"
                                 style={{ width: `${(det.confidence * 100).toFixed(0)}%` }}
                               />
                             </div>
@@ -393,13 +393,13 @@ const PlantDiseaseDetection = () => {
                     <h4 className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
                       <Eye size={14} /> Description
                     </h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">{diseaseInfo.description}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{diseaseInfo.description}</p>
                   </div>
                   <div className="rounded-xl bg-gray-50 p-4">
                     <h4 className="text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-1.5">
                       <Stethoscope size={14} /> Treatment
                     </h4>
-                    <p className="text-sm text-gray-600 leading-relaxed">{diseaseInfo.treatment}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{diseaseInfo.treatment}</p>
                   </div>
                 </div>
               </div>
