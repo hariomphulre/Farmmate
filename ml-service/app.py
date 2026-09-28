@@ -3,7 +3,7 @@ ML Microservice — FastAPI
 Exposes:
   GET  /health                  — liveness probe
   POST /api/crop-predict        — sklearn crop recommendation
-  POST /api/disease-detect      — YOLO disease detection on uploaded image
+  POST /api/disease-detect      — YOLO / Roboflow disease detection on uploaded image
 """
 
 import io
@@ -15,17 +15,41 @@ import traceback
 import importlib
 from pathlib import Path
 
-import cv2
-import joblib
-import numpy as np
-import pandas as pd
+try:
+    import cv2
+    import numpy as np
+    CV2_AVAILABLE = True
+except ImportError:
+    cv2 = None
+    np = None
+    CV2_AVAILABLE = False
+
+try:
+    import joblib
+except ImportError:
+    joblib = None
+
+try:
+    import pandas as pd
+except ImportError:
+    pd = None
+
 import uvicorn
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from ultralytics import YOLO
 
-# Supported roboflow crop scripts
+try:
+    from ultralytics import YOLO
+    YOLO_AVAILABLE = True
+except ImportError:
+    YOLO = None
+    YOLO_AVAILABLE = False
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Roboflow crop scripts — dynamically loaded from scripts/<crop>.py
+# Each script exposes run_model(image_bytes) → dict
+# ──────────────────────────────────────────────────────────────────────────────
 ROBOFLOW_CROPS = ["banana", "turmeric", "corn", "wheat"]
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -38,7 +62,7 @@ MODELS_DIR        = Path(os.environ.get("MODELS_DIR",      str(BASE_DIR / "model
 MIN_CONFIDENCE    = float(os.environ.get("YOLO_MIN_CONF", "0.5"))
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Load crop model at startup (fail fast if missing)
+# Load crop model at startup
 # ──────────────────────────────────────────────────────────────────────────────
 crop_model = None
 crop_info: dict = {}
@@ -46,7 +70,7 @@ fertilizer_info: dict = {}
 
 def load_crop_artifacts():
     global crop_model, crop_info, fertilizer_info
-    if CROP_MODEL_PATH.exists():
+    if joblib and CROP_MODEL_PATH.exists():
         crop_model = joblib.load(str(CROP_MODEL_PATH))
     info_path = CROP_DATA_DIR / "crop_info.json"
     fert_path = CROP_DATA_DIR / "fertilizer_schedule.json"
@@ -67,7 +91,9 @@ PLANT_MODEL_MAP = {
     "tomato": "tomato_leaf.pt",
 }
 
-def get_yolo_model(plant_name: str) -> YOLO | None:
+def get_yolo_model(plant_name: str):
+    if not YOLO_AVAILABLE:
+        return None
     key = plant_name.lower()
     if key in _yolo_cache:
         return _yolo_cache[key]
@@ -93,7 +119,7 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # The Node server is the only caller; restrict further if needed
+    allow_origins=["*"],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -114,24 +140,16 @@ def health():
 # ──────────────────────────────────────────────────────────────────────────────
 @app.post("/api/crop-predict")
 def crop_predict(parameters: dict):
-    """
-    Body: { "N": 90, "P": 42, "K": 43, "temperature": 20.8,
-            "humidity": 82, "ph": 6.5, "rainfall": 202.9 }
-    Returns top-5 crop recommendations with info + fertilizer schedule.
-    """
     if crop_model is None:
         raise HTTPException(status_code=503, detail="Crop model not loaded")
-
     try:
         input_df = pd.DataFrame([parameters])
         probs = crop_model.predict_proba(input_df)[0]
         crop_classes = crop_model.classes_
-
         crop_scores = (
             pd.DataFrame({"Crop": crop_classes, "Probability": probs})
             .sort_values("Probability", ascending=False)
         )
-
         output = {"Top_5_Crop_Recommendations": []}
         for _, row in crop_scores.head(5).iterrows():
             name = row["Crop"]
@@ -141,13 +159,9 @@ def crop_predict(parameters: dict):
             if name in fertilizer_info:
                 entry["Fertilizer_Schedule"] = fertilizer_info[name]
             output["Top_5_Crop_Recommendations"].append(entry)
-
-        # Persist output.json so server can also serve it via /api/crop/output
         out_file = CROP_DATA_DIR / "output.json"
         out_file.write_text(json.dumps(output, ensure_ascii=False, indent=2), encoding="utf-8")
-
         return JSONResponse(content=output)
-
     except Exception as exc:
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(exc))
@@ -155,66 +169,85 @@ def crop_predict(parameters: dict):
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Disease Detection
+#
+# Flow:
+#   1. Read uploaded image bytes
+#   2. If plant_name is in ROBOFLOW_CROPS → dynamically import
+#      scripts/<plant_name>.py and call run_model(bytes)
+#   3. Else if plant_name has a local YOLO model → run YOLO inference
+#   4. Else → return mock "no model" response
 # ──────────────────────────────────────────────────────────────────────────────
 @app.post("/api/disease-detect")
 async def disease_detect(
     image: UploadFile = File(...),
     plant_name: str = Form("unknown"),
 ):
-    """
-    Accepts a plant leaf image, runs YOLO inference, returns detection results.
-    plant_name: "tea" | "tomato"  (determines which model to load)
-    """
-    key = plant_name.lower()
+    key = plant_name.lower().strip()
     contents = await image.read()
-    
+
+    # ── Route 1: Roboflow cloud models via per-crop scripts ──────────────
     if key in ROBOFLOW_CROPS:
         try:
-            # Dynamically import the script for the specific crop (e.g. scripts.banana)
+            # Dynamic import: scripts/banana.py, scripts/corn.py, etc.
             module = importlib.import_module(f"scripts.{key}")
-            
-            # Pass the raw image bytes to the specific script's run_model function
+
+            # Each script exposes run_model(image_data) → dict
             result_raw = module.run_model(contents)
-            
-            # Parse result safely
+
+            # Normalise the Roboflow response into our standard shape
             detections = []
             predictions = result_raw.get("predictions", [])
-            
+
             if isinstance(predictions, list):
                 for p in predictions:
                     if isinstance(p, dict) and "class" in p and "confidence" in p:
                         detections.append({
                             "class": p["class"],
-                            "confidence": float(p["confidence"])
+                            "confidence": round(float(p["confidence"]), 4),
                         })
             elif isinstance(predictions, dict):
-                for class_name, data in predictions.items():
+                for cls_name, data in predictions.items():
                     if isinstance(data, dict) and "confidence" in data:
                         detections.append({
-                            "class": class_name,
-                            "confidence": float(data["confidence"])
+                            "class": cls_name,
+                            "confidence": round(float(data["confidence"]), 4),
                         })
-                        
-            normalized_result = {
+
+            # If classification model returns top/predicted_classes but no predictions list
+            if not detections and "predicted_classes" in result_raw:
+                for cls_name in result_raw["predicted_classes"]:
+                    detections.append({"class": cls_name, "confidence": 1.0})
+
+            # Also handle single top class
+            if not detections and "top" in result_raw:
+                detections.append({
+                    "class": result_raw["top"],
+                    "confidence": round(float(result_raw.get("confidence", 0)), 4),
+                })
+
+            return JSONResponse({
                 "success": True,
                 "plant": key,
                 "detections": detections,
-                "total_detections": len(detections)
-            }
-            
-            return JSONResponse(normalized_result)
+                "total_detections": len(detections),
+            })
+
         except Exception as exc:
             traceback.print_exc()
-            raise HTTPException(status_code=500, detail=f"Roboflow Script Error: {str(exc)}")
-    model = get_yolo_model(plant_name)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Roboflow script error ({key}): {str(exc)}",
+            )
+
+    # ── Route 2: Local YOLO models (tea, tomato) ─────────────────────────
+    model = get_yolo_model(key)
     if model is None:
-        # Fall back to mock response if no model exists for this plant
         return JSONResponse({
             "success": True,
             "mock": True,
-            "plant": plant_name,
+            "plant": key,
             "detections": [],
-            "message": f"No YOLO model available for '{plant_name}'. Returning mock.",
+            "message": f"No model available for '{key}'. Returning empty.",
         })
 
     try:
@@ -223,10 +256,7 @@ async def disease_detect(
         if frame is None:
             raise HTTPException(status_code=400, detail="Could not decode image")
 
-        # Resize to 480×480 for consistent inference
         frame = cv2.resize(frame, (480, 480))
-
-        # Run inference
         results = model(frame, verbose=False)
         detections = results[0].boxes
         labels = model.names
@@ -246,7 +276,7 @@ async def disease_detect(
 
         return JSONResponse({
             "success": True,
-            "plant": plant_name,
+            "plant": key,
             "total_detections": len(found),
             "detections": found,
         })
