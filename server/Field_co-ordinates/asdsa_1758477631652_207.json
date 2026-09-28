@@ -1,7 +1,7 @@
 {
   "id": "1758477631652_207",
   "name": "asdsa",
-  "location": "pune",
+  "location": "Pachpadra Tehsil, Balotra, Rajasthan",
   "crop": "Tea",
   "coordinates": [
     {
@@ -17,5 +17,17 @@
       "lng": 72.10469795781349
     }
   ],
-  "createdAt": "2025-09-21T18:00:31.652Z"
+  "createdAt": "2025-09-21T18:00:31.652Z",
+  "location_details": {
+    "town": "Pachpadra Tehsil",
+    "county": "Gira Tehsil",
+    "state_district": "Balotra",
+    "state": "Rajasthan",
+    "ISO3166-2-lvl4": "IN-RJ",
+    "country": "India",
+    "country_code": "in",
+    "displayName": "Pachpadra Tehsil, Gira Tehsil, Balotra, Rajasthan, India"
+  },
+  "soil_color": "",
+  "soilColor": ""
 }

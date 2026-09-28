@@ -1,7 +1,7 @@
 {
   "id": "1757403511763_598",
   "name": "demo",
-  "location": "pune",
+  "location": "Bhatna, Betul, Madhya Pradesh",
   "crop": "Sugarcane",
   "coordinates": [
     {
@@ -29,5 +29,19 @@
       "lng": 77.96086432713037
     }
   ],
-  "createdAt": "2025-09-09T07:38:31.763Z"
+  "createdAt": "2025-09-09T07:38:31.763Z",
+  "location_details": {
+    "hamlet": "Ranapura",
+    "city_district": "Ranapura",
+    "village": "Bhatna",
+    "county": "Shahpur Tahsil",
+    "state_district": "Betul",
+    "state": "Madhya Pradesh",
+    "ISO3166-2-lvl4": "IN-MP",
+    "country": "India",
+    "country_code": "in",
+    "displayName": "Ranapura, Bhatna, Shahpur Tahsil, Betul, Madhya Pradesh, India"
+  },
+  "soil_color": "",
+  "soilColor": ""
 }

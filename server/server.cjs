@@ -38,27 +38,8 @@ app.get('/health', (_req, res) => {
 const authRoutes = require('./AuthRoutes');
 app.use('/api/auth', authRoutes);
 
-const { sql } = require('./NeonSetup');
-
-// Initialize disease detection history table
-(async () => {
-  try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS disease_detections (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER REFERENCES auth_users(id) ON DELETE CASCADE,
-        plant_name VARCHAR(50) NOT NULL,
-        image_filename VARCHAR(255),
-        detections JSONB DEFAULT '[]',
-        total_detections INTEGER DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
-    `;
-    console.log('✅ disease_detections table ready');
-  } catch (err) {
-    console.error('Failed to init disease_detections table:', err.message);
-  }
-})();
+// ── Field service (PostgreSQL DB + reverse geocoding + JSON sync) ───────────
+const fieldService = require('./fieldService');
 
 // ── ML service base URL ───────────────────────────────────────────────────────
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://ml-service:8000';
@@ -127,21 +108,31 @@ if (!fs.existsSync(fieldCoordsDir)) {
 // Directory for disease detection results is already created above
 
 // API endpoint for plant disease detection
-app.post('/api/upload-disease-image', upload.single('image'), async (req, res) => {
+app.post('/api/upload-disease-image', upload.single('image'), (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No image file uploaded' });
+      return res.status(400).json({
+        success: false,
+        message: 'No image file uploaded'
+      });
     }
 
-    const plantName = (req.body.plantName || 'unknown').toLowerCase().trim();
-    const userId = req.body.userId ? parseInt(req.body.userId, 10) : null;
+    // Get plant name from request body
+    const plantName = req.body.plantName || 'unknown_plant';
+    const sanitizedPlantName = plantName.toLowerCase().replace(/\s+/g, '_');
     
-    // Rename uploaded file with timestamp to avoid collisions
-    const timestamp = Date.now();
-    const finalFilename = `${plantName}_${timestamp}.png`;
+    // Create the final filename with plant name
+    const finalFilename = `${sanitizedPlantName}.png`;
     const finalPath = path.join(diseaseUploadDir, finalFilename);
+    
+    // Rename the temporary file to the plant name
     fs.renameSync(req.file.path, finalPath);
+    
+    console.log(`Image uploaded and renamed successfully: ${finalPath}`);
 
+    // Create result filename with plant name
+    const resultFilename = `${sanitizedPlantName}.png`;
+    const resultImagePath = path.join(diseaseResultsDir, resultFilename);
     console.log(`[Disease] Image saved: ${finalFilename}, plant: ${plantName}`);
 
     // Call ML service
@@ -193,23 +184,23 @@ app.post('/api/upload-disease-image', upload.single('image'), async (req, res) =
       });
     }
 
-    // Save to database if userId is provided
-    if (userId) {
+    // Simulate disease detection processing
+    setTimeout(() => {
       try {
-        await sql`
-          INSERT INTO disease_detections (user_id, plant_name, image_filename, detections, total_detections)
-          VALUES (${userId}, ${plantName}, ${finalFilename}, ${JSON.stringify(mlResult.detections || [])}, ${mlResult.total_detections || 0})
-        `;
-      } catch (dbErr) {
-        console.error('[Disease] DB save error:', dbErr.message);
+        // Copy uploaded image to result path as demo processed output
+        fs.copyFileSync(finalPath, resultImagePath);
+        console.log('Disease detection completed, result saved to:', resultImagePath);
+      } catch (error) {
+        console.error('Error creating result image:', error);
       }
-    }
+    }, 1000);
 
-    // Build response
-    const detections = mlResult.detections || [];
-    const topDetection = detections.length > 0
-      ? detections.reduce((a, b) => (a.confidence > b.confidence ? a : b))
-      : null;
+    const mockDiseaseInfo = {
+      name: 'Analysis Complete',
+      description: 'The leaf image has been processed successfully. Check the result image for detailed analysis.',
+      treatment: 'Based on the analysis, consider the following: 1) Ensure proper watering schedule, 2) Check for pest infestation, 3) Apply appropriate organic fungicides if needed, 4) Maintain proper soil nutrition levels.',
+      confidence: '87%'
+    };
 
     const isHealthy = topDetection ? topDetection.class.toLowerCase().includes('healthy') : true;
 
@@ -271,6 +262,10 @@ app.post('/api/upload-disease-image', upload.single('image'), async (req, res) =
 
     return res.status(200).json({
       success: true,
+      message: 'Image uploaded and analyzed successfully',
+      diseaseInfo: mockDiseaseInfo,
+      resultImagePath: `/detect_results/disease/${resultFilename}`,
+      uploadedAs: finalFilename
       message: 'Disease detection completed',
       diseaseInfo: {
         name: topDetection && !isHealthy ? topDetection.class : 'No disease detected',
@@ -291,87 +286,86 @@ app.post('/api/upload-disease-image', upload.single('image'), async (req, res) =
       plant: plantName,
       imageUrl: `/crop_imgs/disease/${finalFilename}`,
     });
+
   } catch (error) {
-    console.error('[Disease] Error:', error);
+    console.error('Error processing disease detection:', error);
     return res.status(500).json({
       success: false,
-      message: 'Server error during disease detection: ' + error.message,
+      message: 'Server error during disease detection: ' + error.message
     });
   }
 });
 
-// Get disease detection history for a user
-app.get('/api/disease-history/:userId', async (req, res) => {
+// API endpoint for reverse geocoding coordinates to a precise place name
+app.post('/api/fields/reverse-geocode', async (req, res) => {
   try {
-    const userId = parseInt(req.params.userId, 10);
-    if (isNaN(userId)) {
-      return res.status(400).json({ success: false, message: 'Invalid user ID' });
-    }
-    const rows = await sql`
-      SELECT id, plant_name, image_filename, detections, total_detections, created_at
-      FROM disease_detections
-      WHERE user_id = ${userId}
-      ORDER BY created_at DESC
-      LIMIT 50
-    `;
-    return res.status(200).json({ success: true, history: rows });
-  } catch (error) {
-    console.error('[Disease] History fetch error:', error);
-    return res.status(500).json({ success: false, message: error.message });
-  }
-});
+    const { lat, lng, coordinates } = req.body;
+    let targetLat = lat;
+    let targetLng = lng;
 
-// Delete a specific detection record
-app.delete('/api/disease-history/:id', async (req, res) => {
-  try {
-    const id = parseInt(req.params.id, 10);
-    if (isNaN(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid ID' });
+    if ((targetLat === undefined || targetLng === undefined) && Array.isArray(coordinates) && coordinates.length > 0) {
+      const centroid = fieldService.calculateCentroid(coordinates);
+      if (centroid) {
+        targetLat = centroid.lat;
+        targetLng = centroid.lng;
+      }
     }
-    await sql`DELETE FROM disease_detections WHERE id = ${id}`;
-    return res.status(200).json({ success: true, message: 'Record deleted' });
+
+    if (targetLat === undefined || targetLng === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: 'Valid lat/lng or coordinates array is required'
+      });
+    }
+
+    const geoResult = await fieldService.reverseGeocode(Number(targetLat), Number(targetLng));
+    return res.status(200).json({
+      success: true,
+      location: geoResult.locationName,
+      details: geoResult.details,
+      coordinates: { lat: Number(targetLat), lng: Number(targetLng) }
+    });
   } catch (error) {
-    console.error('[Disease] Delete error:', error);
-    return res.status(500).json({ success: false, message: error.message });
+    console.error('Error in reverse-geocode endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to reverse geocode location: ' + error.message
+    });
   }
 });
 
 // API endpoint to save field coordinates
-app.post('/api/fields', (req, res) => {
+app.post('/api/fields', async (req, res) => {
   try {
     console.log('Received field data request:', req.body);
     const fieldData = req.body;
     
     // Validate required fields
-    if (!fieldData.name || !fieldData.location || !fieldData.crop || !fieldData.coordinates || fieldData.coordinates.length < 3) {
+    if (!fieldData.name || !fieldData.crop || !fieldData.coordinates || fieldData.coordinates.length < 3) {
       console.log('Validation failed:', { 
         name: !!fieldData.name, 
-        location: !!fieldData.location, 
         crop: !!fieldData.crop,
         coordinates: fieldData.coordinates ? fieldData.coordinates.length : 0 
       });
       
       return res.status(400).json({ 
         success: false, 
-        message: 'Invalid field data. Name, location, crop, and at least 3 coordinates are required.' 
+        message: 'Invalid field data. Name, crop, and at least 3 coordinates are required.' 
       });
     }
     
-    // Create a filename based on field name with unique ID
-    const sanitizedName = fieldData.name.replace(/[^a-z0-9_\-]/gi, '_').toLowerCase();
-    const filename = `${sanitizedName}_${fieldData.id}.json`;
-    const filePath = path.join(fieldCoordsDir, filename);
+    if (!fieldData.id) {
+      fieldData.id = `${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    }
     
-    console.log('Saving field data to:', filePath);
-    
-    // Write the field data to a JSON file
-    fs.writeFileSync(filePath, JSON.stringify(fieldData, null, 2));
-    console.log('Field data saved successfully');
+    // Save via fieldService (handles precise reverse geocoding + DB & JSON file persistence)
+    const savedField = await fieldService.saveField(fieldData);
+    console.log('Field saved successfully with location:', savedField.location);
     
     return res.status(201).json({
       success: true,
       message: 'Field data saved successfully',
-      filename: filename
+      field: savedField
     });
     
   } catch (error) {
@@ -384,24 +378,13 @@ app.post('/api/fields', (req, res) => {
 });
 
 // API endpoint to get all saved fields
-app.get('/api/fields', (req, res) => {
+app.get('/api/fields', async (req, res) => {
   try {
-    const files = fs.readdirSync(fieldCoordsDir);
-    
-    // Read each JSON file and extract field data
-    const fields = files
-      .filter(file => file.endsWith('.json'))
-      .map(file => {
-        const filePath = path.join(fieldCoordsDir, file);
-        const fileContent = fs.readFileSync(filePath, 'utf8');
-        return JSON.parse(fileContent);
-      });
-    
+    const fields = await fieldService.getAllFields();
     return res.status(200).json({
       success: true,
       fields: fields
     });
-    
   } catch (error) {
     console.error('Error getting fields:', error);
     return res.status(500).json({ 
@@ -412,31 +395,22 @@ app.get('/api/fields', (req, res) => {
 });
 
 // API endpoint to get a specific field by ID
-app.get('/api/fields/:id', (req, res) => {
+app.get('/api/fields/:id', async (req, res) => {
   try {
     const fieldId = req.params.id;
-    const files = fs.readdirSync(fieldCoordsDir);
+    const field = await fieldService.getFieldById(fieldId);
     
-    // Find the file that contains the field ID
-    const fieldFile = files.find(file => file.includes(fieldId) && file.endsWith('.json'));
-    
-    if (!fieldFile) {
+    if (!field) {
       return res.status(404).json({
         success: false,
         message: 'Field not found'
       });
     }
     
-    // Read the field data from the file
-    const filePath = path.join(fieldCoordsDir, fieldFile);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    const fieldData = JSON.parse(fileContent);
-    
     return res.status(200).json({
       success: true,
-      field: fieldData
+      field: field
     });
-    
   } catch (error) {
     console.error('Error getting field:', error);
     return res.status(500).json({ 
@@ -447,30 +421,14 @@ app.get('/api/fields/:id', (req, res) => {
 });
 
 // Delete a field
-app.delete('/api/fields/:id', (req, res) => {
+app.delete('/api/fields/:id', async (req, res) => {
   try {
     const fieldId = req.params.id;
-    const files = fs.readdirSync(fieldCoordsDir);
-    
-    // Find the file that contains the field ID
-    const fieldFile = files.find(file => file.includes(fieldId) && file.endsWith('.json'));
-    
-    if (!fieldFile) {
-      return res.status(404).json({
-        success: false,
-        message: 'Field not found'
-      });
-    }
-    
-    // Delete the file
-    const filePath = path.join(fieldCoordsDir, fieldFile);
-    fs.unlinkSync(filePath);
-    
+    await fieldService.deleteField(fieldId);
     return res.status(200).json({
       success: true,
       message: 'Field deleted successfully'
     });
-    
   } catch (error) {
     console.error('Error deleting field:', error);
     return res.status(500).json({ 
@@ -481,10 +439,10 @@ app.delete('/api/fields/:id', (req, res) => {
 });
 
 // API endpoint to update manipal.json with coordinates from a selected field
-app.post('/api/update-manipal', (req, res) => {
+app.post('/api/update-manipal', async (req, res) => {
   try {
     const { fieldId } = req.body;
-    console.log("from manipal route",req.body);
+    console.log("from manipal route", req.body);
     if (!fieldId) {
       return res.status(400).json({
         success: false,
@@ -492,21 +450,15 @@ app.post('/api/update-manipal', (req, res) => {
       });
     }
     
-    // Find the field file
-    const files = fs.readdirSync(fieldCoordsDir);
-    const fieldFile = files.find(file => file.includes(fieldId) && file.endsWith('.json'));
+    // Find the field
+    const fieldData = await fieldService.getFieldById(fieldId);
     
-    if (!fieldFile) {
+    if (!fieldData) {
       return res.status(404).json({
         success: false,
         message: 'Field not found'
       });
     }
-    
-    // Read the field data from the file
-    const filePath = path.join(fieldCoordsDir, fieldFile);
-    const fileContent = fs.readFileSync(filePath, 'utf8');
-    const fieldData = JSON.parse(fileContent);
     
     if (!fieldData.coordinates || fieldData.coordinates.length < 3) {
       return res.status(400).json({
