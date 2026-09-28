@@ -19,10 +19,14 @@ import {
 
 // ── Supported crops with their display info ──────────────────────────────────
 const CROPS = [
-  { value: 'banana',   label: 'Banana' },
-  { value: 'turmeric', label: 'Turmeric' },
-  { value: 'corn',     label: 'Corn'   },
-  { value: 'wheat',    label: 'Wheat',  },
+  { value: 'banana',    label: 'Banana',    emoji: '🍌' },
+  { value: 'turmeric',  label: 'Turmeric',  emoji: '🌿' },
+  { value: 'corn',      label: 'Corn',      emoji: '🌽' },
+  { value: 'wheat',     label: 'Wheat',     emoji: '🌾' },
+  { value: 'cotton',    label: 'Cotton',    emoji: '☁️' },
+  { value: 'sugarcane', label: 'Sugarcane', emoji: '🎋' },
+  { value: 'tea',       label: 'Tea',       emoji: '🍵' },
+  { value: 'tomato',    label: 'Tomato',    emoji: '🍅' },
 ];
 
 const API_BASE = '/api';
@@ -438,6 +442,7 @@ const PlantDiseaseDetection = () => {
                     const topDet = dets.length > 0
                       ? dets.reduce((a, b) => ((a.confidence || 0) > (b.confidence || 0) ? a : b))
                       : null;
+                    const isHealthy = topDet ? topDet.class.toLowerCase().includes('healthy') : true;
                     const crop = CROPS.find((c) => c.value === record.plant_name);
 
                     return (
@@ -450,9 +455,9 @@ const PlantDiseaseDetection = () => {
                                 {record.plant_name}
                               </p>
                               <p className="text-xs text-gray-500 truncate">
-                                {topDet
+                                {topDet && !isHealthy
                                   ? `${topDet.class} · ${(topDet.confidence * 100).toFixed(0)}%`
-                                  : 'No disease found'}
+                                  : 'Healthy / No disease'}
                               </p>
                               <p className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1">
                                 <Clock size={10} />

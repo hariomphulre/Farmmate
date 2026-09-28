@@ -133,6 +133,56 @@ app.post('/api/upload-disease-image', upload.single('image'), (req, res) => {
     // Create result filename with plant name
     const resultFilename = `${sanitizedPlantName}.png`;
     const resultImagePath = path.join(diseaseResultsDir, resultFilename);
+    console.log(`[Disease] Image saved: ${finalFilename}, plant: ${plantName}`);
+
+    // Call ML service
+    let mlResult;
+    try {
+      const FormData = (await import('form-data')).default;
+      const formData = new FormData();
+      const fileBuffer = fs.readFileSync(finalPath);
+      formData.append('image', fileBuffer, { filename: finalFilename, contentType: 'image/png' });
+      formData.append('plant_name', plantName);
+
+      const axios = require('axios');
+      
+      const payloadBuffer = formData.getBuffer();
+      const headers = formData.getHeaders();
+      headers['Content-Length'] = payloadBuffer.length;
+
+      const axiosConfig = {
+        headers: headers,
+        timeout: 60000,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
+      };
+      
+      let mlResponse;
+      try {
+        mlResponse = await axios.post(`${ML_SERVICE_URL}/api/disease-detect`, payloadBuffer, axiosConfig);
+      } catch (err) {
+        if (err.code === 'ENOTFOUND' || err.code === 'ECONNREFUSED' || err.code === 'EAI_AGAIN') {
+          console.log('[Disease] ML_SERVICE_URL failed, falling back to localhost:8000');
+          mlResponse = await axios.post(`http://localhost:8000/api/disease-detect`, payloadBuffer, axiosConfig);
+        } else {
+          throw err;
+        }
+      }
+      mlResult = mlResponse.data;
+    } catch (mlErr) {
+      console.error('[Disease] ML service error:', mlErr.message);
+      return res.status(500).json({
+        success: false,
+        message: 'ML service is currently unavailable or failed to process the image: ' + mlErr.message
+      });
+    }
+
+    if (!mlResult.success) {
+      return res.status(500).json({
+        success: false,
+        message: mlResult.message || mlResult.error || 'ML model failed to analyze the image'
+      });
+    }
 
     // Simulate disease detection processing
     setTimeout(() => {
@@ -152,12 +202,89 @@ app.post('/api/upload-disease-image', upload.single('image'), (req, res) => {
       confidence: '87%'
     };
 
+    const isHealthy = topDetection ? topDetection.class.toLowerCase().includes('healthy') : true;
+
+    // Load disease info from JSON if available
+    let customDescription = null;
+    let customTreatment = null;
+    if (topDetection && !isHealthy) {
+      try {
+        const infoPath = path.join(__dirname, '../ml-service/crop_disease_info.json');
+        if (fs.existsSync(infoPath)) {
+          const diseaseData = JSON.parse(fs.readFileSync(infoPath, 'utf8'));
+          
+          // Try exact match or case-insensitive match
+          let plantData = diseaseData[plantName];
+          if (!plantData) {
+             const key = Object.keys(diseaseData).find(k => k.toLowerCase() === plantName.toLowerCase());
+             if (key) plantData = diseaseData[key];
+          }
+          
+          if (plantData) {
+            let diseaseKey = topDetection.class;
+            if (!plantData[diseaseKey]) {
+              diseaseKey = Object.keys(plantData).find(k => k.toLowerCase() === topDetection.class.toLowerCase());
+            }
+            if (diseaseKey && plantData[diseaseKey]) {
+              const info = plantData[diseaseKey];
+              
+              // Build description
+              let descParts = [];
+              const whatIsKey = Object.keys(info).find(k => k.startsWith('What is'));
+              if (whatIsKey && info[whatIsKey]) {
+                descParts.push(info[whatIsKey]);
+              }
+              if (info['Why & How this happen']) {
+                descParts.push('Cause: ' + info['Why & How this happen']);
+              }
+              if (descParts.length > 0) {
+                customDescription = descParts.join('\n\n');
+              }
+              
+              // Build treatment
+              let treatParts = [];
+              if (info['Steps to cure'] && Array.isArray(info['Steps to cure'])) {
+                treatParts.push('Steps to cure:\n' + info['Steps to cure'].join('\n'));
+              }
+              if (info['Recommended Pesticites/Fungicides/Bactericides/etc... '] && Array.isArray(info['Recommended Pesticites/Fungicides/Bactericides/etc... '])) {
+                treatParts.push('Recommended Treatments:\n' + info['Recommended Pesticites/Fungicides/Bactericides/etc... '].join('\n'));
+              }
+              if (treatParts.length > 0) {
+                customTreatment = treatParts.join('\n\n');
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.error('[Disease] Failed to load crop_disease_info.json:', e);
+      }
+    }
+
     return res.status(200).json({
       success: true,
       message: 'Image uploaded and analyzed successfully',
       diseaseInfo: mockDiseaseInfo,
       resultImagePath: `/detect_results/disease/${resultFilename}`,
       uploadedAs: finalFilename
+      message: 'Disease detection completed',
+      diseaseInfo: {
+        name: topDetection && !isHealthy ? topDetection.class : 'No disease detected',
+        description: customDescription 
+          ? customDescription 
+          : (topDetection && !isHealthy
+              ? `Detected ${topDetection.class} in ${plantName} leaf with ${(topDetection.confidence * 100).toFixed(1)}% confidence.`
+              : `No significant disease patterns were detected in the ${plantName} leaf image. The plant appears healthy.`),
+        treatment: customTreatment 
+          ? customTreatment 
+          : (topDetection && !isHealthy
+              ? `Disease "${topDetection.class}" detected. Consult an agricultural expert for specific treatment. General recommendations: 1) Isolate affected plants, 2) Remove infected leaves, 3) Apply appropriate fungicide/pesticide, 4) Improve air circulation.`
+              : 'No treatment required. Continue regular care and monitoring.'),
+        confidence: topDetection ? `${(topDetection.confidence * 100).toFixed(1)}%` : 'N/A',
+      },
+      detections: detections,
+      totalDetections: mlResult.total_detections || 0,
+      plant: plantName,
+      imageUrl: `/crop_imgs/disease/${finalFilename}`,
     });
 
   } catch (error) {
