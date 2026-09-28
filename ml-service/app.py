@@ -87,8 +87,10 @@ load_crop_artifacts()
 _yolo_cache: dict = {}
 
 PLANT_MODEL_MAP = {
-    "tea":    "tea1.pt",
+    "tea":    "tea_leaf.pt",
     "tomato": "tomato_leaf.pt",
+    "cotton": "cotton_leaf.pt",
+    "sugarcane": "sugarcane_leaf.pt",
 }
 
 def get_yolo_model(plant_name: str):
