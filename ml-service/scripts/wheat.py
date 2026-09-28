@@ -3,7 +3,7 @@ import base64
 import os
 
 API_KEY = os.environ.get("ROBOFLOW_API_KEY", "8J1d1XoYS8LbF5B2HDQD")
-API_URL = "https://serverless.roboflow.com"
+API_URL = "https://detect.roboflow.com"
 MODEL_ID = "wheat-disease-detection-zsn0p/1"
 
 def run_model(image_data):

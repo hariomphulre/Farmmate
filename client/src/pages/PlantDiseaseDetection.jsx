@@ -19,10 +19,10 @@ import {
 
 // ── Supported crops with their display info ──────────────────────────────────
 const CROPS = [
-  { value: 'banana',   label: 'Banana',   emoji: '🍌' },
-  { value: 'turmeric', label: 'Turmeric', emoji: '🌿' },
-  { value: 'corn',     label: 'Corn',     emoji: '🌽' },
-  { value: 'wheat',    label: 'Wheat',    emoji: '🌾' },
+  { value: 'banana',   label: 'Banana' },
+  { value: 'turmeric', label: 'Turmeric' },
+  { value: 'corn',     label: 'Corn'   },
+  { value: 'wheat',    label: 'Wheat',  },
 ];
 
 const API_BASE = '/api';
