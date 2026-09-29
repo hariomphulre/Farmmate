@@ -1,3 +1,15 @@
+# Stage 1: Builder
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+COPY package*.json ./
+# Install all dependencies (including dev) just in case there are build steps
+RUN npm ci --prefer-offline
+
+COPY . .
+# If there were a build step, it would go here (e.g., npm run build)
+
+# Stage 2: Production
 FROM node:22-alpine AS production
 
 # Install dumb-init for proper signal handling and PID 1 management
@@ -5,12 +17,12 @@ RUN apk add --no-cache dumb-init
 
 WORKDIR /app
 
-# Install production dependencies only
+# Copy package files and install ONLY production dependencies
 COPY package*.json ./
 RUN npm ci --omit=dev --prefer-offline && npm cache clean --force
 
-# Copy application source
-COPY . .
+# Copy application source from builder (if compiled, we would copy dist)
+COPY --from=builder /app ./
 
 # Create runtime directories that are NOT mounted as volumes
 RUN mkdir -p crop_imgs/disease detect_results/disease field_corrdinates Field_co-ordinates
