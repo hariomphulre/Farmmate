@@ -76,9 +76,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT != '' && secrets.VPS_PORT || 2222 }}
+          port: ${{ secrets.VPS_PORT || 2222 }}
           timeout: 30s
-          command_timeout: 10m
+          command_timeout: 30m
           source: "docker-compose.yml,nginx/,server/.env.example"
           target: "CodingWorkspace/Projects/Farmmate/"
 
@@ -88,9 +88,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT != '' && secrets.VPS_PORT || 2222 }}
+          port: ${{ secrets.VPS_PORT || 2222 }}
           timeout: 30s
-          command_timeout: 10m
+          command_timeout: 30m
           script: |
             set -e
             
@@ -108,10 +108,10 @@ jobs:
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             
             # Pull latest images
-            docker compose pull
+            docker compose pull --quiet
             
             # Bring up the containers, removing old orphans, wait for healthchecks
-            if docker compose up -d --remove-orphans --wait --wait-timeout 260; then
+            if docker compose up -d --remove-orphans --wait --wait-timeout 600; then
     
                 # Clean up dangling images
                 docker image prune -f 
