@@ -19,7 +19,8 @@ import {
   faEye,
   faEyeSlash,
   faUndo,
-  faLayerGroup
+  faLayerGroup,
+  faChevronDown
 } from '@fortawesome/free-solid-svg-icons';
 import { API_URLS } from '../../config';
 import { useAppContext } from '../../context/AppContext';
@@ -82,6 +83,7 @@ const FieldMapper = () => {
   const [isGeocoding, setIsGeocoding] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchingPlace, setSearchingPlace] = useState(false);
+  const [isFieldStateOpen, setIsFieldStateOpen] = useState(false);
 
   const { fields = [], refreshFields, setSelectedField, setSelectedLocation } = useAppContext() || {};
 
@@ -1162,36 +1164,78 @@ const FieldMapper = () => {
             </div>
 
             {/* Field State */}
-            <div className="form-group">
+            <div className="form-group relative">
               <label htmlFor="fieldStateSelect" className="flex items-center">
-                <FontAwesomeIcon icon={faSeedling} className="mr-2 text-green-600" />
                 Field State *
               </label>
-              <select
-                id="fieldStateSelect"
-                className="form-control"
-                value={fieldState}
-                onChange={(e) => {
-                  setFieldState(e.target.value);
-                  if (e.target.value !== 'Cultivated/Crop Field') {
-                    setSelectedCrop(''); // Clear crop if state is not cultivated
+              
+              <div 
+                className={`form-control flex items-center justify-between cursor-pointer ${loading ? 'opacity-50 pointer-events-none' : ''}`}
+                onClick={() => setIsFieldStateOpen(!isFieldStateOpen)}
+                tabIndex={0}
+                onBlur={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setIsFieldStateOpen(false);
                   }
                 }}
-                disabled={loading}
               >
-                <option value="">-- Select Current Field State --</option>
-                <option value="Bare Soil">Bare Soil</option>
-                <option value="Cultivated/Crop Field">Cultivated / Crop Field</option>
-                <option value="Grass/Weed Covered">Grass / Weed Covered</option>
-                <option value="Post-Harvest/Residue">Post-Harvest / Residue</option>
-                <option value="Fallow/Unused">Fallow / Unused</option>
-              </select>
+                <div className="flex items-center">
+                  {fieldState ? (
+                    (() => {
+                      const options = [
+                        { value: 'Bare Soil', label: 'Bare Soil', img: '/field_images/bare_soil.jpeg' },
+                        { value: 'Cultivated/Crop Field', label: 'Cultivated / Crop Field', img: '/field_images/cultivated.jpeg' },
+                        { value: 'Grass/Weed Covered', label: 'Grass / Weed Covered', img: '/field_images/weed.jpeg' },
+                        { value: 'Post-Harvest/Residue', label: 'Post-Harvest / Residue', img: '/field_images/post_harvest.jpeg' },
+                        { value: 'Fallow/Unused', label: 'Fallow / Unused', img: '/field_images/fallow.png' }
+                      ];
+                      const option = options.find(o => o.value === fieldState);
+                      return option ? (
+                        <>
+                          <img src={option.img} alt={option.label} className="w-8 h-8 rounded-lg mr-3 object-cover" />
+                          <span>{option.label}</span>
+                        </>
+                      ) : fieldState;
+                    })()
+                  ) : (
+                    <span className="text-gray-500">-- Select Current Field State --</span>
+                  )}
+                </div>
+                <FontAwesomeIcon icon={faChevronDown} className="text-gray-500 text-sm" />
+
+                {isFieldStateOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                    {[
+                      { value: 'Bare Soil', label: 'Bare Soil', img: '/field_images/bare_soil.jpeg' },
+                      { value: 'Cultivated/Crop Field', label: 'Cultivated / Crop Field', img: '/field_images/cultivated.jpeg' },
+                      { value: 'Grass/Weed Covered', label: 'Grass / Weed Covered', img: '/field_images/weed.jpeg' },
+                      { value: 'Post-Harvest/Residue', label: 'Post-Harvest / Residue', img: '/field_images/post_harvest.jpeg' },
+                      { value: 'Fallow/Unused', label: 'Fallow / Unused', img: '/field_images/fallow.png' }
+                    ].map((option) => (
+                      <div
+                        key={option.value}
+                        className="flex items-center px-4 py-2 hover:bg-green-50 cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFieldState(option.value);
+                          if (option.value !== 'Cultivated/Crop Field') {
+                            setSelectedCrop('');
+                          }
+                          setIsFieldStateOpen(false);
+                        }}
+                      >
+                        <img src={option.img} alt={option.label} className="w-10 h-10 rounded-lg mr-3 object-cover" />
+                        <span className="font-medium text-gray-700">{option.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Crop Selection - Only enabled when 'Cultivated/Crop Field' is selected */}
             <div className={`form-group ${fieldState !== 'Cultivated/Crop Field' ? 'opacity-50' : ''}`}>
               <label htmlFor="cropSelect" className="flex items-center">
-                <FontAwesomeIcon icon={faSeedling} className="mr-2 text-green-600" />
                 Selected Crop {fieldState === 'Cultivated/Crop Field' ? '*' : ''}
               </label>
               <select
