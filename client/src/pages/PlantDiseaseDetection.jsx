@@ -19,14 +19,14 @@ import {
 
 // ── Supported crops with their display info ──────────────────────────────────
 const CROPS = [
-  { value: 'banana',    label: 'Banana',    emoji: '🍌' },
-  { value: 'turmeric',  label: 'Turmeric',  emoji: '🌿' },
-  { value: 'corn',      label: 'Corn',      emoji: '🌽' },
-  { value: 'wheat',     label: 'Wheat',     emoji: '🌾' },
-  { value: 'cotton',    label: 'Cotton',    emoji: '☁️' },
-  { value: 'sugarcane', label: 'Sugarcane', emoji: '🎋' },
-  { value: 'tea',       label: 'Tea',       emoji: '🍵' },
-  { value: 'tomato',    label: 'Tomato',    emoji: '🍅' },
+  { value: 'banana',    label: 'Banana',    image: '/crop_images/banana.jpeg' },
+  { value: 'turmeric',  label: 'Turmeric',  image: '/crop_images/turmeric.jpeg' },
+  { value: 'corn',      label: 'Corn',      image: '/crop_images/corn.jpeg' },
+  { value: 'wheat',     label: 'Wheat',     image: '/crop_images/wheat.jpeg' },
+  { value: 'cotton',    label: 'Cotton',    image: '/crop_images/cotton.jpg' },
+  { value: 'sugarcane', label: 'Sugarcane', image: '/crop_images/sugarcane.jpeg' },
+  { value: 'tea',       label: 'Tea',       image: '/crop_images/tea.jpeg' },
+  { value: 'tomato',    label: 'Tomato',    image: '/crop_images/tomato.jpeg' },
 ];
 
 const API_BASE = '/api';
@@ -237,7 +237,12 @@ const PlantDiseaseDetection = () => {
                   } bg-white text-left transition-all`}
                 >
                   <span className={selectedCrop ? 'text-gray-900' : 'text-gray-400'}>
-                    {selectedCrop ? `${selectedCrop.emoji}  ${selectedCrop.label}` : 'Choose a crop type…'}
+                    {selectedCrop ? (
+                      <span className="flex items-center gap-2">
+                        <img src={selectedCrop.image} alt={selectedCrop.label} className="w-6 h-6 rounded-md object-cover border border-gray-200" />
+                        {selectedCrop.label}
+                      </span>
+                    ) : 'Choose a crop type…'}
                   </span>
                   <ChevronDown size={16} className={`text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
                 </button>
@@ -252,7 +257,7 @@ const PlantDiseaseDetection = () => {
                           plantName === crop.value ? 'bg-gray-50 font-medium' : ''
                         }`}
                       >
-                        <span className="text-lg">{crop.emoji}</span>
+                        <img src={crop.image} alt={crop.label} className="w-8 h-8 rounded-lg object-cover border border-gray-200" />
                         <span className="text-sm text-gray-800">{crop.label}</span>
                         {plantName === crop.value && <CheckCircle2 size={14} className="ml-auto text-emerald-500" />}
                       </button>
@@ -311,8 +316,7 @@ const PlantDiseaseDetection = () => {
                   </>
                 ) : (
                   <>
-                    <Sparkles size={18} />
-                    Run Detection
+                    Detect Disease
                   </>
                 )}
               </button>
@@ -449,7 +453,11 @@ const PlantDiseaseDetection = () => {
                       <div key={record.id} className="px-4 py-3 hover:bg-gray-50/50 transition-colors group">
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2.5 min-w-0">
-                            <span className="text-lg flex-shrink-0 mt-0.5">{crop?.emoji || '🌱'}</span>
+                            {crop ? (
+                              <img src={crop.image} alt={crop.label} className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <span className="text-lg flex-shrink-0 mt-0.5">🌱</span>
+                            )}
                             <div className="min-w-0">
                               <p className="text-sm font-medium text-gray-800 capitalize truncate">
                                 {record.plant_name}
@@ -499,27 +507,6 @@ const PlantDiseaseDetection = () => {
         </div>
       </div>
 
-      {/* How it works */}
-      <div className="max-w-7xl mx-auto mt-8">
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-          <h3 className="text-base font-semibold text-gray-800 mb-4">How It Works</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { icon: Upload, color: 'bg-gray-100 text-gray-600', title: '1. Upload Image', desc: 'Upload a clear photo of the affected plant leaf' },
-              { icon: Sparkles, color: 'bg-gray-100 text-gray-600', title: '2. AI Analysis', desc: 'Our Roboflow AI models analyze the leaf for diseases' },
-              { icon: Stethoscope, color: 'bg-gray-100 text-gray-600', title: '3. Get Results', desc: 'Receive detection results with treatment recommendations' },
-            ].map(({ icon: Icon, color, title, desc }) => (
-              <div key={title} className="text-center">
-                <div className={`grid h-12 w-12 place-items-center rounded-xl ${color} mx-auto mb-3`}>
-                  <Icon size={20} />
-                </div>
-                <h4 className="text-sm font-medium text-gray-800 mb-1">{title}</h4>
-                <p className="text-xs text-gray-500">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
