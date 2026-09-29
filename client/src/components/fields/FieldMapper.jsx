@@ -342,13 +342,7 @@ const FieldMapper = () => {
           initMap();
         }
       } catch (error) {
-        if (isMounted) {
-          setMessage({
-            show: true,
-            text: "Failed to load Google Maps. Please check your internet connection.",
-            type: 'error'
-          });
-        }
+        
       }
     };
 
@@ -1156,7 +1150,7 @@ const FieldMapper = () => {
                   id="fieldLocation" 
                   className="form-control"
                   style={{ paddingRight: '2.5rem' }}
-                  placeholder="Draw boundary on map to auto-identify location..."
+                  placeholder="Plot field to auto-identify location"
                   value={fieldLocation}
                   onChange={(e) => setFieldLocation(e.target.value)}
                   disabled={loading}
@@ -1322,7 +1316,7 @@ const FieldMapper = () => {
               disabled={loading}
             >
               <FontAwesomeIcon icon={loading ? faSpinner : faSave} spin={loading} className="mr-2" />
-              {loading ? 'Saving to Database...' : 'Save Field to Database'}
+              {loading ? 'Saving...' : 'Save'}
             </button>
             
             <button 
