@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
 
     ports:
-      - "127.0.0.1:${NGINX_PORT:-8081}:80"
+      - "${NGINX_PORT:-8081}:80"
 
     depends_on:
       server:
@@ -68,9 +68,9 @@ services:
 
     environment:
       NODE_ENV: production
-      PORT: 5000
+      PORT: ${SERVER_PORT:-5000}
       ML_SERVICE_URL: http://ml-service:8000
-      # ALLOWED_ORIGINS: "https://yourdomain.com"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://farmmate.hariomphulre.tech}
 
     # Optional direct host access for debugging.
     # Keep this on localhost so it is not publicly exposed.
