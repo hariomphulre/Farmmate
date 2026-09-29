@@ -6,21 +6,8 @@
  */
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  Home, Sprout, HandCoins, TrendingUp, Search, Bot, MapPin,
-  PlusCircle, CloudSun, Leaf, CloudRain, Flame, CloudDrizzle,
-  Layers, Droplet, CalendarClock, Settings, FileText, Users,
-  SearchX,
-} from 'lucide-react';
 import { getGroupedCommands, highlightMatch } from '../../data/commandRegistry';
 import './CommandPalette.css';
-
-// Map icon string names to actual components
-const ICON_MAP = {
-  Home, Sprout, HandCoins, TrendingUp, Search, Bot, MapPin,
-  PlusCircle, CloudSun, Leaf, CloudRain, Flame, CloudDrizzle,
-  Layers, Droplet, CalendarClock, Settings, FileText, Users,
-};
 
 const CommandPalette = ({ query, isOpen, onClose, onSelectCommand, searchInputRef }) => {
   const navigate = useNavigate();
@@ -126,22 +113,6 @@ const CommandPalette = ({ query, isOpen, onClose, onSelectCommand, searchInputRe
 
       {/* Palette dropdown */}
       <div className="cmd-palette" ref={paletteRef} role="listbox" aria-label="Command palette">
-        {/* Hint bar */}
-        <div className="cmd-palette-hint">
-          <span className="cmd-slash-icon">/</span>
-          <span>
-            {strippedQuery
-              ? <>Showing results for <strong>/{strippedQuery}</strong></>
-              : 'Type a command to jump to any feature'
-            }
-          </span>
-          <div className="cmd-hint-keys">
-            <kbd>↑↓</kbd>
-            <kbd>↵</kbd>
-            <kbd>esc</kbd>
-          </div>
-        </div>
-
         {/* Results */}
         {groups.length > 0 ? (
           groups.map(group => (
@@ -150,7 +121,6 @@ const CommandPalette = ({ query, isOpen, onClose, onSelectCommand, searchInputRe
               {group.commands.map(cmd => {
                 const currentFlatIdx = flatIdx++;
                 const isActive = currentFlatIdx === activeIndex;
-                const IconComponent = ICON_MAP[cmd.icon];
                 const nameParts = highlightMatch(cmd.name, query);
 
                 return (
@@ -163,9 +133,6 @@ const CommandPalette = ({ query, isOpen, onClose, onSelectCommand, searchInputRe
                     onClick={() => handleSelect(cmd)}
                     onMouseEnter={() => setActiveIndex(currentFlatIdx)}
                   >
-                    <div className="cmd-item-icon">
-                      {IconComponent && <IconComponent size={16} />}
-                    </div>
                     <div className="cmd-item-content">
                       <div className="cmd-item-name">
                         {nameParts.map((part, i) =>
@@ -174,11 +141,7 @@ const CommandPalette = ({ query, isOpen, onClose, onSelectCommand, searchInputRe
                             : <span key={i}>{part.text}</span>
                         )}
                       </div>
-                      <div className="cmd-item-desc">{cmd.description}</div>
                     </div>
-                    <span className="cmd-item-shortcut">
-                      /{cmd.keywords[0]}
-                    </span>
                   </div>
                 );
               })}
@@ -186,14 +149,11 @@ const CommandPalette = ({ query, isOpen, onClose, onSelectCommand, searchInputRe
           ))
         ) : (
           <div className="cmd-no-results">
-            <div className="cmd-no-results-icon">
-              <SearchX size={18} />
-            </div>
             <div className="cmd-no-results-title">
               No commands found for "/{strippedQuery}"
             </div>
             <div className="cmd-no-results-desc">
-              Try a different keyword like /weather, /crop, or /market
+              Try /weather, /crop, or /market
             </div>
           </div>
         )}
