@@ -73,6 +73,7 @@ const FieldMapper = () => {
   const [fieldName, setFieldName] = useState('');
   const [fieldLocation, setFieldLocation] = useState('');
   const [selectedCrop, setSelectedCrop] = useState('');
+  const [fieldState, setFieldState] = useState('');
   const [selectedSoilColor, setSelectedSoilColor] = useState(DATASET_SOIL_COLORS[0].color);
   const [coordinates, setCoordinates] = useState([]);
   const [fieldArea, setFieldArea] = useState({ acres: '0.00', hectares: '0.00' });
@@ -808,6 +809,7 @@ const FieldMapper = () => {
     setFieldArea({ acres: '0.00', hectares: '0.00' });
     setFieldName('');
     setFieldLocation('');
+    setFieldState('');
     setSelectedCrop('');
     
     setMessage({
@@ -839,10 +841,19 @@ const FieldMapper = () => {
       return;
     }
     
-    if (!selectedCrop) {
+    if (!fieldState) {
       setMessage({
         show: true,
-        text: "Please select a crop for this field.",
+        text: "Please select a field state.",
+        type: 'error'
+      });
+      return;
+    }
+
+    if (fieldState === 'Cultivated/Crop Field' && !selectedCrop) {
+      setMessage({
+        show: true,
+        text: "Please select a crop for this cultivated field.",
         type: 'error'
       });
       return;
@@ -867,7 +878,8 @@ const FieldMapper = () => {
         id: fieldId,
         name: fieldName.trim(),
         location: fieldLocation.trim(),
-        crop: selectedCrop,
+        field_state: fieldState,
+        crop: fieldState === 'Cultivated/Crop Field' ? selectedCrop : '',
         soil_color: activeSoil.color,
         soilColor: activeSoil.color,
         coordinates: coordinates,
@@ -1155,17 +1167,45 @@ const FieldMapper = () => {
               </div>
             </div>
 
-            {/* Crop Selection */}
+            {/* Field State */}
             <div className="form-group">
+              <label htmlFor="fieldStateSelect" className="flex items-center">
+                <FontAwesomeIcon icon={faSeedling} className="mr-2 text-green-600" />
+                Field State *
+              </label>
+              <select
+                id="fieldStateSelect"
+                className="form-control"
+                value={fieldState}
+                onChange={(e) => {
+                  setFieldState(e.target.value);
+                  if (e.target.value !== 'Cultivated/Crop Field') {
+                    setSelectedCrop(''); // Clear crop if state is not cultivated
+                  }
+                }}
+                disabled={loading}
+              >
+                <option value="">-- Select Current Field State --</option>
+                <option value="Bare Soil">Bare Soil</option>
+                <option value="Cultivated/Crop Field">Cultivated / Crop Field</option>
+                <option value="Grass/Weed Covered">Grass / Weed Covered</option>
+                <option value="Post-Harvest/Residue">Post-Harvest / Residue</option>
+                <option value="Fallow/Unused">Fallow / Unused</option>
+              </select>
+            </div>
+
+            {/* Crop Selection - Only enabled when 'Cultivated/Crop Field' is selected */}
+            <div className={`form-group ${fieldState !== 'Cultivated/Crop Field' ? 'opacity-50' : ''}`}>
               <label htmlFor="cropSelect" className="flex items-center">
-                Selected Crop *
+                <FontAwesomeIcon icon={faSeedling} className="mr-2 text-green-600" />
+                Selected Crop {fieldState === 'Cultivated/Crop Field' ? '*' : ''}
               </label>
               <select
                 id="cropSelect"
                 className="form-control"
                 value={selectedCrop}
                 onChange={(e) => setSelectedCrop(e.target.value)}
-                disabled={loading}
+                disabled={loading || fieldState !== 'Cultivated/Crop Field'}
               >
                 <option value="">-- Choose Crop to Grow --</option>
                 {cropOptions.map((crop) => (
