@@ -21,8 +21,6 @@ services:
     image: ghcr.io/hariomphulre/farmmate-client:latest
     restart: unless-stopped
 
-    # Host port 8081 → Container port 80
-    # Bound to localhost because the VPS's main Nginx will proxy to it.
     ports:
       - "127.0.0.1:${NGINX_PORT:-8081}:80"
 
