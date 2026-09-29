@@ -108,7 +108,7 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                   <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#111827] text-white flex-shrink-0">
                     <LayoutGrid size={16} />
                   </span>
-                  <span className="font-semibold text-[#111827] text-base tracking-tight truncate">Smart Agri</span>
+                  <span className="font-semibold text-[#111827] text-base tracking-tight truncate">Menu</span>
                 </div>
                 <button 
                   onClick={toggleSidebar} 
