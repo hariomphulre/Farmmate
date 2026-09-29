@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faMicrophone, 
+  faMicrophoneSlash,
   faMagnifyingGlass, 
   faBars, 
   faXmark,
@@ -15,12 +16,15 @@ import {
 import './Navbar.css';
 import { useAppContext } from '../../context/AppContext';
 import { API_URLS } from '../../config';
+import useSpeechRecognition from '../../hooks/useSpeechRecognition';
+import CommandPalette from './CommandPalette';
 
 const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const mobileMenuRef = useRef(null);
   const menuButtonRef = useRef(null);
+  const searchInputRef = useRef(null);
   
   // Safely use context with default values if context is undefined
   const contextValue = useAppContext() || {};
@@ -37,6 +41,88 @@ const Navbar = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNewFieldDialog, setShowNewFieldDialog] = useState(false);
   const [newFieldName, setNewFieldName] = useState('');
+  const [voiceError, setVoiceError] = useState(null);
+  const [showCommandPalette, setShowCommandPalette] = useState(false);
+
+  // Speech Recognition hook
+  const {
+    isListening,
+    transcript,
+    interimTranscript,
+    error: speechError,
+    isSupported: isSpeechSupported,
+    startListening,
+    stopListening,
+  } = useSpeechRecognition({ language: 'en-IN' });
+
+  // When speech recognition returns a final transcript, update search query
+  useEffect(() => {
+    if (transcript) {
+      setSearchQuery(transcript);
+    }
+  }, [transcript]);
+
+  // Show interim (partial) results in the search box as user speaks
+  useEffect(() => {
+    if (isListening && interimTranscript) {
+      setSearchQuery(interimTranscript);
+    }
+  }, [interimTranscript, isListening]);
+
+  // Show speech errors as temporary toast
+  useEffect(() => {
+    if (speechError) {
+      setVoiceError(speechError);
+      const timer = setTimeout(() => setVoiceError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [speechError]);
+
+  // Toggle voice search
+  const handleVoiceSearch = () => {
+    if (isListening) {
+      stopListening();
+    } else {
+      setSearchQuery('');
+      startListening();
+    }
+  };
+
+  // Command palette: detect '/' in search query
+  useEffect(() => {
+    if (searchQuery.startsWith('/')) {
+      setShowCommandPalette(true);
+    } else {
+      setShowCommandPalette(false);
+    }
+  }, [searchQuery]);
+
+  // Global '/' keyboard shortcut to focus search bar
+  useEffect(() => {
+    const handleGlobalSlash = (e) => {
+      // Don't trigger if user is typing in an input/textarea/select
+      const tag = e.target.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable) {
+        return;
+      }
+      if (e.key === '/') {
+        e.preventDefault();
+        if (searchInputRef.current) {
+          searchInputRef.current.focus();
+          setSearchQuery('/');
+          setShowCommandPalette(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalSlash);
+    return () => window.removeEventListener('keydown', handleGlobalSlash);
+  }, []);
+
+  // Close command palette
+  const closeCommandPalette = () => {
+    setShowCommandPalette(false);
+    setSearchQuery('');
+  };
   
   // State to track screen size
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -144,6 +230,8 @@ const Navbar = () => {
   
   const handleSearch = (e) => {
     e.preventDefault();
+    // If command palette is open, don't submit the form
+    if (showCommandPalette) return;
     // Implement search functionality here
     console.log("Searching for:", searchQuery);
   };
@@ -194,25 +282,36 @@ const Navbar = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4 lg:space-x-6 flex-grow mx-4 lg:mx-6">
               {/* Search Bar */}
-              <div className="flex-grow max-w-sm lg:max-w-md ml-auto">
-                <form style={{borderRadius: "2rem"}} onSubmit={handleSearch} className="relative flex items-center overflow-hidden bg-slate-50 border border-slate-200 shadow-sm h-9 md:h-10 focus-within:ring-2 focus-within:ring-[#052e16]/15 focus-within:border-[#052e16] transition-all duration-200">
+              <div className="flex-grow max-w-sm lg:max-w-md ml-auto relative">
+                <form style={{borderRadius: "2rem"}} onSubmit={handleSearch} className={`relative flex items-center overflow-hidden bg-slate-50 border shadow-sm h-9 md:h-10 transition-all duration-200 ${showCommandPalette ? 'border-[#052e16] ring-2 ring-[#052e16]/15' : 'border-slate-200 focus-within:ring-2 focus-within:ring-[#052e16]/15 focus-within:border-[#052e16]'}`}>
                   <input 
                     type="text" 
                     id="searchInput" 
+                    ref={searchInputRef}
                     style={{fontSize: "14px"}}
                     placeholder="Search (/) for tools, and more..." 
                     className="w-full pl-4 pr-2 md:px-4 py-1.5 md:py-2 outline-none text-slate-700 bg-slate-50 text-sm"
                     autoComplete="off"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => { if (searchQuery.startsWith('/')) setShowCommandPalette(true); }}
                   />
                   <div className="flex md:px-2 md:space-x-0 bg-slate-50">
                     <button 
                       type="button" 
-                      className="text-slate-400 hover:text-[#052e16] transition duration-200 pr-2 rounded-full"
-                      aria-label="Voice search"
+                      onClick={handleVoiceSearch}
+                      className={`transition duration-200 pr-2 rounded-full ${
+                        isListening 
+                          ? 'text-red-500 animate-pulse' 
+                          : isSpeechSupported 
+                            ? 'text-slate-400 hover:text-[#052e16]' 
+                            : 'text-slate-300 cursor-not-allowed'
+                      }`}
+                      aria-label={isListening ? 'Stop voice search' : 'Start voice search'}
+                      title={!isSpeechSupported ? 'Speech recognition not supported in this browser' : isListening ? 'Click to stop listening' : 'Click to search by voice'}
+                      disabled={!isSpeechSupported}
                     >
-                      <FontAwesomeIcon icon={faMicrophone} className="text-xs md:text-sm" />
+                      <FontAwesomeIcon icon={isListening ? faMicrophoneSlash : faMicrophone} className="text-xs md:text-sm" />
                     </button>
                     <button 
                       type="submit" 
@@ -223,6 +322,14 @@ const Navbar = () => {
                     </button>
                   </div>
                 </form>
+
+                {/* Command Palette Dropdown */}
+                <CommandPalette
+                  query={searchQuery}
+                  isOpen={showCommandPalette}
+                  onClose={closeCommandPalette}
+                  searchInputRef={searchInputRef}
+                />
               </div>
               
               {/* Create Field Button */}
@@ -284,20 +391,32 @@ const Navbar = () => {
             }`}
           >
               {/* Mobile Search */}
-              <form onSubmit={handleSearch} className="mb-4 px-4">
-                <div className="flex rounded-md overflow-hidden shadow-sm border border-slate-200">
-                  <input
-                    type="text"
-                    className="text-slate-800 flex-1 px-4 py-2.5 outline-none border-none focus:ring-0 text-sm bg-slate-50"
-                    placeholder="Search for tools, analytics..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                  <button type="submit" className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 transition duration-200 active:bg-slate-300">
-                    <FontAwesomeIcon icon={faMagnifyingGlass} />
-                  </button>
-                </div>
-              </form>
+              <div className="mb-4 px-4 relative">
+                <form onSubmit={handleSearch}>
+                  <div className={`flex rounded-md overflow-hidden shadow-sm border ${showCommandPalette ? 'border-[#052e16] ring-2 ring-[#052e16]/15' : 'border-slate-200'}`}>
+                    <input
+                      type="text"
+                      className="text-slate-800 flex-1 px-4 py-2.5 outline-none border-none focus:ring-0 text-sm bg-slate-50"
+                      placeholder="Type / for commands..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onFocus={() => { if (searchQuery.startsWith('/')) setShowCommandPalette(true); }}
+                      autoComplete="off"
+                    />
+                    <button type="submit" className="bg-slate-100 hover:bg-slate-200 text-slate-600 px-4 transition duration-200 active:bg-slate-300">
+                      <FontAwesomeIcon icon={faMagnifyingGlass} />
+                    </button>
+                  </div>
+                </form>
+
+                {/* Mobile Command Palette */}
+                <CommandPalette
+                  query={searchQuery}
+                  isOpen={showCommandPalette}
+                  onClose={closeCommandPalette}
+                  searchInputRef={searchInputRef}
+                />
+              </div>
               
               {/* Create Field Button - Mobile */}
               <div className="px-4 mb-4">
@@ -386,6 +505,31 @@ const Navbar = () => {
               </div>
           </div>
       </nav>
+
+      {/* Voice Error Toast */}
+      {voiceError && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg shadow-lg max-w-md text-sm flex items-center gap-2 animate-fade-in">
+          <FontAwesomeIcon icon={faMicrophoneSlash} className="text-red-500 flex-shrink-0" />
+          <span>{voiceError}</span>
+          <button onClick={() => setVoiceError(null)} className="ml-2 text-red-400 hover:text-red-600 flex-shrink-0">
+            <FontAwesomeIcon icon={faXmark} />
+          </button>
+        </div>
+      )}
+
+      {/* Listening Indicator Overlay */}
+      {isListening && (
+        <div className="fixed top-16 left-1/2 -translate-x-1/2 z-[100] bg-white border border-green-200 text-green-700 px-4 py-3 rounded-lg shadow-lg max-w-sm text-sm flex items-center gap-3 animate-fade-in">
+          <div className="relative flex-shrink-0">
+            <FontAwesomeIcon icon={faMicrophone} className="text-red-500 text-lg" />
+            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+          </div>
+          <div>
+            <p className="font-medium text-green-800">Listening...</p>
+            <p className="text-xs text-green-600">Speak now – click mic again to stop</p>
+          </div>
+        </div>
+      )}
         
       {/* New Field Dialog */}
       {showNewFieldDialog && (
