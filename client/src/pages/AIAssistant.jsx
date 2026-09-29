@@ -3,10 +3,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faPaperPlane, faSpinner, faRobot, faLeaf, faArrowLeft,
   faSeedling, faWheatAwn, faCloudSunRain, faChartLine,
-  faSun, faCloudRain, faDroplet, faIndianRupeeSign
+  faSun, faCloudRain, faDroplet, faIndianRupeeSign,
+  faMicrophone, faMicrophoneSlash
 } from '@fortawesome/free-solid-svg-icons';
 import { useAppContext } from '../context/AppContext';
 import { fetchFieldData } from '../services/dataService';
+import useSpeechRecognition from '../hooks/useSpeechRecognition';
 
 // Add custom CSS for typing indicator and responsive design
 import './AIAssistant.css';
@@ -38,7 +40,52 @@ const AIAssistant = () => {
     "Recommend crops for this season",
     "Current market prices for wheat"
   ]);
+  const [voiceError, setVoiceError] = useState(null);
   const messagesEndRef = useRef(null);
+
+  // Speech Recognition for AI Assistant chat
+  const {
+    isListening: isVoiceListening,
+    transcript: voiceTranscript,
+    interimTranscript: voiceInterim,
+    error: voiceSpeechError,
+    isSupported: isVoiceSupported,
+    startListening: startVoice,
+    stopListening: stopVoice,
+  } = useSpeechRecognition({ language: 'en-IN', maxDuration: 60000 });
+
+  // When speech returns a final transcript, put it in the input
+  useEffect(() => {
+    if (voiceTranscript) {
+      setMessage(voiceTranscript);
+    }
+  }, [voiceTranscript]);
+
+  // Show interim results in input as user speaks
+  useEffect(() => {
+    if (isVoiceListening && voiceInterim) {
+      setMessage(voiceInterim);
+    }
+  }, [voiceInterim, isVoiceListening]);
+
+  // Show voice errors
+  useEffect(() => {
+    if (voiceSpeechError) {
+      setVoiceError(voiceSpeechError);
+      const timer = setTimeout(() => setVoiceError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [voiceSpeechError]);
+
+  // Toggle voice input
+  const handleVoiceToggle = () => {
+    if (isVoiceListening) {
+      stopVoice();
+    } else {
+      setMessage('');
+      startVoice();
+    }
+  };
 
   // Chat suggestion categories
   const chatCategories = [
@@ -511,15 +558,59 @@ const AIAssistant = () => {
       
       {/* Input area */}
       <div className="p-3 md:p-4 lg:p-5 pb-18 bg-white border-t border-gray-200 shadow-inner sticky bottom-0 z-10">
+        {/* Voice Error Toast */}
+        {voiceError && (
+          <div className="max-w-3xl mx-auto mb-2 bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+            <FontAwesomeIcon icon={faMicrophoneSlash} className="text-red-500 flex-shrink-0" />
+            <span className="flex-1">{voiceError}</span>
+            <button onClick={() => setVoiceError(null)} className="text-red-400 hover:text-red-600 flex-shrink-0 text-xs">
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Listening indicator */}
+        {isVoiceListening && (
+          <div className="max-w-3xl mx-auto mb-2 bg-green-50 border border-green-200 text-green-700 px-3 py-2 rounded-lg text-xs flex items-center gap-2">
+            <div className="relative flex-shrink-0">
+              <FontAwesomeIcon icon={faMicrophone} className="text-red-500" />
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-ping"></span>
+            </div>
+            <span className="font-medium">Listening... Speak your message</span>
+          </div>
+        )}
+
         <form onSubmit={handleSendMessage} className="max-w-3xl mx-auto">
           <div className="flex items-center gap-1 md:gap-2">
+            {/* Microphone Button */}
+            <button
+              type="button"
+              onClick={handleVoiceToggle}
+              disabled={!isVoiceSupported || isLoading}
+              aria-label={isVoiceListening ? 'Stop voice input' : 'Start voice input'}
+              title={!isVoiceSupported ? 'Speech recognition not supported' : isVoiceListening ? 'Stop listening' : 'Speak your message'}
+              className={`rounded-lg md:rounded-xl p-2.5 md:p-3 min-w-[42px] min-h-[42px] flex items-center justify-center transition-all border ${
+                isVoiceListening
+                  ? 'bg-red-50 border-red-300 text-red-500 voice-pulse-ring'
+                  : isVoiceSupported
+                    ? 'bg-gray-50 border-gray-200 text-gray-500 hover:bg-green-50 hover:border-green-300 hover:text-green-600'
+                    : 'bg-gray-100 border-gray-200 text-gray-300 cursor-not-allowed'
+              }`}
+            >
+              <FontAwesomeIcon icon={isVoiceListening ? faMicrophoneSlash : faMicrophone} className="text-sm md:text-base" />
+            </button>
+
             <div className="flex-1 relative">
               <input
                 type="text"
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
-                placeholder="Ask about farming, crops, weather..."
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg md:rounded-xl text-sm py-2.5 md:py-3 px-3 md:px-4 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                placeholder={isVoiceListening ? 'Listening... speak now' : 'Ask about farming, crops, weather...'}
+                className={`w-full bg-gray-50 border rounded-lg md:rounded-xl text-sm py-2.5 md:py-3 px-3 md:px-4 focus:outline-none focus:ring-2 focus:border-transparent ${
+                  isVoiceListening
+                    ? 'border-green-300 focus:ring-green-500 bg-green-50/30'
+                    : 'border-gray-200 focus:ring-green-500'
+                }`}
                 disabled={isLoading}
                 autoComplete="off"
               />
@@ -533,10 +624,6 @@ const AIAssistant = () => {
               <FontAwesomeIcon icon={faPaperPlane} className="text-sm md:text-base" />
             </button>
           </div>
-          {/* <div className="flex items-center justify-center mt-2 md:mt-3 gap-1">
-            <FontAwesomeIcon icon={faLeaf} className="text-green-500 text-[10px] md:text-xs" />
-            <span className="text-[10px] md:text-xs text-gray-500">Powered by SmartAgri | Farming Intelligence</span>
-          </div> */}
         </form>
       </div>
     </div>
