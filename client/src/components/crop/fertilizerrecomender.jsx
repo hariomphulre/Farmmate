@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Apple, Grape, Carrot, Cherry, Leaf, Wheat, Sprout } from "lucide-react";
-import serverOutput from "../../../../ml-service/crop_prediction/crop_data/output.json";
 
-// UI component to render fertilizer recommendations from output.json
+// UI component to render fertilizer recommendations from backend
 export default function FertilizerRecommender() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -16,7 +15,12 @@ export default function FertilizerRecommender() {
       setLoading(true);
       setError("");
       try {
-        if (isMounted) setData(serverOutput);
+        const response = await fetch('/api/crop/output');
+        if (!response.ok) {
+          throw new Error('Failed to fetch recommendations from server');
+        }
+        const jsonData = await response.json();
+        if (isMounted) setData(jsonData);
       } catch (err) {
         if (isMounted) setError(err?.message || "Failed to load recommendations");
       } finally {
@@ -54,7 +58,7 @@ export default function FertilizerRecommender() {
       <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
         <p className="text-red-700 font-medium">{error}</p>
         <p className="text-red-600 text-sm mt-2">
-          Tip: Ensure `output.json` is copied to `System/client/public/crop_data/output.json`.
+          Tip: Ensure the backend server and ML service are running and successfully generated the output.
         </p>
       </div>
     );
