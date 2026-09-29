@@ -150,19 +150,26 @@ const FieldMapper = () => {
       setIsGeocoding(true);
       const centroid = getCentroid(points);
       
-      const res = await fetch(API_URLS.REVERSE_GEOCODE, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          lat: centroid.lat, 
-          lng: centroid.lng, 
-          coordinates: points 
-        })
+      // Use OpenStreetMap Nominatim with zoom=18 (street/building level) for maximum precision
+      const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${centroid.lat}&lon=${centroid.lng}&zoom=18&addressdetails=1`, {
+        headers: {
+          'User-Agent': 'SmartAgri-ExFarmer/1.0',
+          'Accept-Language': 'en'
+        }
       });
       
       const json = await res.json();
-      if (res.ok && json && json.success && json.location) {
-        setFieldLocation(json.location);
+      if (res.ok && json && json.display_name) {
+        // Use the full precise display name provided by Nominatim
+        // It usually includes street, locality, district, state, and pin code
+        // We'll strip the country (usually the last comma-separated item) for better readability
+        let preciseLocation = json.display_name;
+        const parts = preciseLocation.split(', ');
+        if (parts.length > 1) {
+          parts.pop(); // Remove country
+          preciseLocation = parts.join(', ');
+        }
+        setFieldLocation(preciseLocation);
       } else {
         setFieldLocation(`${centroid.lat.toFixed(5)}, ${centroid.lng.toFixed(5)}`);
       }
@@ -1100,7 +1107,7 @@ const FieldMapper = () => {
         <div className="field-details">
           <h3>
             <FontAwesomeIcon icon={faSeedling} className="mr-2 text-green-600" />
-            Field & Soil Specifications
+            Field Info
           </h3>
           
           <div className="field-form">
@@ -1146,15 +1153,11 @@ const FieldMapper = () => {
                   <FontAwesomeIcon icon={faLocationDot} />
                 </span>
               </div>
-              <div className="text-xs text-gray-500 mt-1">
-                Reverse-geocoded from coordinates (village/town, district, state) and saved to database.
-              </div>
             </div>
 
             {/* Crop Selection */}
             <div className="form-group">
               <label htmlFor="cropSelect" className="flex items-center">
-                <FontAwesomeIcon icon={faSeedling} className="mr-2 text-green-600" />
                 Selected Crop *
               </label>
               <select
@@ -1177,8 +1180,7 @@ const FieldMapper = () => {
             <div className="soil-color-section">
               <div className="soil-color-header">
                 <label className="text-sm font-semibold text-gray-800 flex items-center">
-                  <FontAwesomeIcon icon={faPalette} className="mr-2 text-amber-700" />
-                  Soil Color (Dataset Standard) *
+                  Soil Color *
                 </label>
                 
                 {/* Active Selection Badge */}
@@ -1195,10 +1197,6 @@ const FieldMapper = () => {
                     {activeSoil.soilType}
                   </span>
                 </div>
-              </div>
-
-              <div className="text-xs text-gray-500 mb-2">
-                Choose the soil color from the 14 official classes in the crop recommendation dataset:
               </div>
 
               {/* 14 Dataset Soil Color Grid */}
