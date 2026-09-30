@@ -29,7 +29,7 @@ services:
       - farmmate-net
 
     ports:
-      - "127.0.0.1:8081:80"
+      - "127.0.0.1:8082:80"
 
     volumes:
       # Serve the Nginx config from the repo
