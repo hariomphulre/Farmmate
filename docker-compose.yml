@@ -29,7 +29,7 @@ services:
       - farmmate-net
 
     ports:
-      - "8081:80"
+      - "127.0.0.1:8081:80"
 
     volumes:
       # Serve the Nginx config from the repo
@@ -68,7 +68,7 @@ services:
       NODE_ENV: production
       PORT: ${SERVER_PORT:-5000}
       ML_SERVICE_URL: http://ml-service:8000
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://farmmate.hariomphulre.tech:8081,http://www.farmmate.hariomphulre.tech:8081}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://farmmate.hariomphulre.tech,https://www.farmmate.hariomphulre.tech,http://farmmate.hariomphulre.tech,http://www.farmmate.hariomphulre.tech}
 
     # depends_on:
     #   ml-service:

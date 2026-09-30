@@ -1,8 +1,0 @@
-{
-  email {$CADDY_EMAIL}
-}
-
-farmmate.hariomphulre.tech, www.farmmate.hariomphulre.tech {
-  encode zstd gzip
-  reverse_proxy nginx:80
-}
