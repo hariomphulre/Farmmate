@@ -52,12 +52,13 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-server:latest
 
       # --- 3. Build ML Service ---
-      - name: Build and push ML Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./ml-service
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-ml-service:latest
+      # Disabled for now: only deploy client and server to the VPS.
+      # - name: Build and push ML Service
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./ml-service
+      #     push: true
+      #     tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-ml-service:latest
 
   deploy-to-vps:
     needs: build-and-push

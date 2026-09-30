@@ -77,9 +77,9 @@ services:
     ports:
       - "127.0.0.1:${SERVER_PORT:-5000}:5000"
 
-    depends_on:
-      ml-service:
-        condition: service_healthy
+    # depends_on:
+    #   ml-service:
+    #     condition: service_healthy
 
     networks:
       - farmmate-net
@@ -106,52 +106,53 @@ services:
 
 
   # ── 3. ML Service — FastAPI + YOLO + scikit-learn ──────────────────────────
-  ml-service:
-    build:
-      context: ./ml-service
-      dockerfile: Dockerfile
-      target: production
-    container_name: farmmate-ml
-    image: ghcr.io/hariomphulre/farmmate-ml-service:latest
-    restart: unless-stopped
-
-    environment:
-      APP_BASE_DIR: /app
-      CROP_DATA_PATH: /app/crop_prediction/crop_data
-      CROP_MODEL_PATH: /app/crop_prediction/crop_recommendation.pkl
-      MODELS_DIR: /app/models
-      YOLO_MIN_CONF: "0.5"
-      YOLO_RESOLUTION: "480x480"
-
-    networks:
-      - farmmate-net
-
-    volumes:
-      # Share uploaded images so YOLO can read them if needed
-      - server-uploads:/app/crop_imgs:ro
-      - server-results:/app/detect_results
-
-      # Persist output.json between restarts
-      - ml-crop-data:/app/crop_prediction/crop_data
-
-    healthcheck:
-      test:
-        [
-          "CMD",
-          "python",
-          "-c",
-          "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
-        ]
-      interval: 30s
-      timeout: 15s
-      start_period: 30s
-      retries: 3
-
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2G
+  # Disabled for now: only deploy client and server on the VPS.
+  # ml-service:
+  #   build:
+  #     context: ./ml-service
+  #     dockerfile: Dockerfile
+  #     target: production
+  #   container_name: farmmate-ml
+  #   image: ghcr.io/hariomphulre/farmmate-ml-service:latest
+  #   restart: unless-stopped
+  #
+  #   environment:
+  #     APP_BASE_DIR: /app
+  #     CROP_DATA_PATH: /app/crop_prediction/crop_data
+  #     CROP_MODEL_PATH: /app/crop_prediction/crop_recommendation.pkl
+  #     MODELS_DIR: /app/models
+  #     YOLO_MIN_CONF: "0.5"
+  #     YOLO_RESOLUTION: "480x480"
+  #
+  #   networks:
+  #     - farmmate-net
+  #
+  #   volumes:
+  #     # Share uploaded images so YOLO can read them if needed
+  #     - server-uploads:/app/crop_imgs:ro
+  #     - server-results:/app/detect_results
+  #
+  #     # Persist output.json between restarts
+  #     - ml-crop-data:/app/crop_prediction/crop_data
+  #
+  #   healthcheck:
+  #     test:
+  #       [
+  #         "CMD",
+  #         "python",
+  #         "-c",
+  #         "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+  #       ]
+  #     interval: 30s
+  #     timeout: 15s
+  #     start_period: 30s
+  #     retries: 3
+  #
+  #   deploy:
+  #     resources:
+  #       limits:
+  #         cpus: "2.0"
+  #         memory: 2G
 
 
   # ── 4. GEE Worker — Google Earth Engine batch jobs ─────────────────────────

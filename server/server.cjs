@@ -64,8 +64,9 @@ const { sql } = require('./NeonSetup');
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://ml-service:8000';
 
 // Configure multer for image uploads with plant name-based storage
-const diseaseUploadDir = path.join(__dirname, 'crop_imgs', 'disease');
-const diseaseResultsDir = path.join(__dirname, 'detect_results', 'disease');
+const baseDir = process.env.VERCEL ? '/tmp' : __dirname;
+const diseaseUploadDir = path.join(baseDir, 'crop_imgs', 'disease');
+const diseaseResultsDir = path.join(baseDir, 'detect_results', 'disease');
 
 // Ensure folders exist
 if (!fs.existsSync(diseaseUploadDir)) fs.mkdirSync(diseaseUploadDir, { recursive: true });
@@ -119,7 +120,7 @@ app.get('/api/crop/output', (req, res) => {
 });
 
 // Create directory for field coordinates if it doesn't exist
-const fieldCoordsDir = path.join(__dirname, 'Field_co-ordinates');
+const fieldCoordsDir = path.join(baseDir, 'Field_co-ordinates');
 if (!fs.existsSync(fieldCoordsDir)) {
   fs.mkdirSync(fieldCoordsDir, { recursive: true });
 }
@@ -847,6 +848,11 @@ const traderRoutes = require('./TraderRoutes/Trader.js');
 
 app.use("/api/trader", traderRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
+}
+
+// Export the Express API for Vercel serverless function
+module.exports = app;
