@@ -28,6 +28,9 @@ services:
     networks:
       - farmmate-net
 
+    ports:
+      - "8081:80"
+
     volumes:
       # Serve the Nginx config from the repo
       # (easy to update without rebuild)
@@ -47,33 +50,7 @@ services:
           memory: 128M
 
 
-  # ── 2. Caddy — HTTPS termination for the public domain ────────────────────
-  caddy:
-    image: caddy:2-alpine
-    container_name: farmmate-caddy
-    restart: unless-stopped
-
-    depends_on:
-      nginx:
-        condition: service_healthy
-
-    ports:
-      - "81:80"
-      - "443:443"
-
-    environment:
-      CADDY_EMAIL: ${CADDY_EMAIL:-admin@farmmate.hariomphulre.tech}
-
-    volumes:
-      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
-      - caddy-data:/data
-      - caddy-config:/config
-
-    networks:
-      - farmmate-net
-
-
-  # ── 3. Server — Node/Express REST API ──────────────────────────────────────
+  # ── 2. Server — Node/Express REST API ──────────────────────────────────────
   server:
     build:
       context: ./server
@@ -91,12 +68,7 @@ services:
       NODE_ENV: production
       PORT: ${SERVER_PORT:-5000}
       ML_SERVICE_URL: http://ml-service:8000
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://farmmate.hariomphulre.tech}
-
-    # Optional direct host access for debugging.
-    # Keep this on localhost so it is not publicly exposed.
-    ports:
-      - "127.0.0.1:${SERVER_PORT:-5000}:5000"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://farmmate.hariomphulre.tech:8081,http://www.farmmate.hariomphulre.tech:8081}
 
     # depends_on:
     #   ml-service:
@@ -126,7 +98,7 @@ services:
           memory: 512M
 
 
-  # ── 4. ML Service — FastAPI + YOLO + scikit-learn ──────────────────────────
+  # ── 3. ML Service — FastAPI + YOLO + scikit-learn ──────────────────────────
   # Disabled for now: only deploy client and server on the VPS.
   # ml-service:
   #   build:
@@ -176,7 +148,7 @@ services:
   #         memory: 2G
 
 
-  # ── 5. GEE Worker — Google Earth Engine batch jobs ─────────────────────────
+  # ── 4. GEE Worker — Google Earth Engine batch jobs ─────────────────────────
   # This is a one-shot job container, not a long-running service.
   #
   # Run manually:
@@ -219,8 +191,6 @@ volumes:
   server-fields:
   server-field-coords:
   ml-crop-data:
-  caddy-data:
-  caddy-config:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
