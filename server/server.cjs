@@ -848,11 +848,9 @@ const traderRoutes = require('./TraderRoutes/Trader.js');
 
 app.use("/api/trader", traderRoutes);
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // Export the Express API for Vercel serverless function
 module.exports = app;
