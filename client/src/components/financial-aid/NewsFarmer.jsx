@@ -170,7 +170,7 @@ export default function NewsFarmer({ coordinates }) {
         }
 
         const res = await fetch(
-          `http://localhost:5000/api/agri-news?state=${encodeURIComponent(
+          `/api/agri-news?state=${encodeURIComponent(
             detectedState
           )}&type=agriculture`
         );

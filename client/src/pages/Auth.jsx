@@ -118,8 +118,8 @@ const Auth = () => {
   }, [timer]);
 
   // Google OAuth and reCAPTCHA configuration
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'your-google-client-id';
-  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '6LeHGdItAAAAAMkfo9nFUTdsQ-vEQeuBR9fQ-fJW';
+  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
+  const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
   const backgroundVideoRef = useRef(null);
   const BACKGROUND_VIDEO_SRC = "/newvideo.mp4";
@@ -148,7 +148,7 @@ const Auth = () => {
     };
 
     const initializeGoogleAuth = () => {
-      if (window.google && GOOGLE_CLIENT_ID !== 'your-google-client-id') {
+      if (window.google && GOOGLE_CLIENT_ID) {
         try {
           window.google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
@@ -213,6 +213,10 @@ const Auth = () => {
 
   useEffect(() => {
     if (recaptchaLoaded && window.grecaptcha && recaptchaRef.current) {
+      if (!RECAPTCHA_SITE_KEY) {
+        setErrors(prev => ({ ...prev, recaptcha: 'reCAPTCHA site key is not configured.' }));
+        return;
+      }
       if (!recaptchaRef.current.hasChildNodes()) {
         try {
           window.grecaptcha.render(recaptchaRef.current, {

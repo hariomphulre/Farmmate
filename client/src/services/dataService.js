@@ -86,7 +86,7 @@ export async function getWeatherByCoordinates(lat, lng, startDate, endDate) {
     }
 
     const response = await fetch(
-      `http://localhost:5000/api/weather-for-farmer?lat=${lat}&lng=${lng}&start=${startDate}&end=${endDate}`
+      `/api/weather-for-farmer?lat=${lat}&lng=${lng}&start=${startDate}&end=${endDate}`
     );    
 
     if (!response.ok) {

@@ -9,8 +9,8 @@
  * - Support resources
  */
 
-// Mock API base URL - replace with actual backend URL
-const API_BASE_URL = 'http://localhost:5000/api/financial-aid';
+// Same-origin API base URL works in both Vite dev (via proxy) and production.
+const API_BASE_URL = '/api/financial-aid';
 
 /**
  * Government Schemes Service

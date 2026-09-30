@@ -47,7 +47,12 @@ class GoogleMapsLoader {
         return;
       }
 
-      const apiKey = "AIzaSyA3vUl0jnyrAi_awYheUAYjFNDKCUaDpeU";
+      const apiKey = import.meta.env?.VITE_GOOGLE_MAPS_API_KEY;
+      if (!apiKey) {
+        this.isLoading = false;
+        reject(new Error('VITE_GOOGLE_MAPS_API_KEY is not set'));
+        return;
+      }
       const script = document.createElement('script');
       const allLibs = Array.from(new Set([...libraries, 'drawing', 'geometry', 'places']));
       const libraryString = `&libraries=${allLibs.join(',')}`;

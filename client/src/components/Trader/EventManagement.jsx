@@ -21,7 +21,7 @@ const EventManagement = () => {
         setSubmitStatus(null);
         
         try {
-            const res = await fetch("http://localhost:5000/api/trader/event-schedule", {
+            const res = await fetch("/api/trader/event-schedule", {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"

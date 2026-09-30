@@ -11,7 +11,7 @@ name: farmmate
 
 services:
 
-  # ── 1. Nginx — reverse proxy + React static files ──────────────────────────
+  # ── 1. App Nginx — React static files + API proxy ─────────────────────────
   nginx:
     build:
       context: ./client
@@ -20,9 +20,6 @@ services:
     container_name: farmmate-nginx
     image: ghcr.io/hariomphulre/farmmate-client:latest
     restart: unless-stopped
-
-    ports:
-      - "${NGINX_PORT:-8081}:80"
 
     depends_on:
       server:
@@ -50,7 +47,33 @@ services:
           memory: 128M
 
 
-  # ── 2. Server — Node/Express REST API ──────────────────────────────────────
+  # ── 2. Caddy — HTTPS termination for the public domain ────────────────────
+  caddy:
+    image: caddy:2-alpine
+    container_name: farmmate-caddy
+    restart: unless-stopped
+
+    depends_on:
+      nginx:
+        condition: service_healthy
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    environment:
+      CADDY_EMAIL: ${CADDY_EMAIL:-admin@farmmate.hariomphulre.tech}
+
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+    networks:
+      - farmmate-net
+
+
+  # ── 3. Server — Node/Express REST API ──────────────────────────────────────
   server:
     build:
       context: ./server
@@ -62,9 +85,7 @@ services:
 
     env_file:
       - path: ./server/.env.production
-        required: false
-      - path: ./server/.env.example
-        required: false
+        required: true
 
     environment:
       NODE_ENV: production
@@ -105,7 +126,7 @@ services:
           memory: 512M
 
 
-  # ── 3. ML Service — FastAPI + YOLO + scikit-learn ──────────────────────────
+  # ── 4. ML Service — FastAPI + YOLO + scikit-learn ──────────────────────────
   # Disabled for now: only deploy client and server on the VPS.
   # ml-service:
   #   build:
@@ -155,7 +176,7 @@ services:
   #         memory: 2G
 
 
-  # ── 4. GEE Worker — Google Earth Engine batch jobs ─────────────────────────
+  # ── 5. GEE Worker — Google Earth Engine batch jobs ─────────────────────────
   # This is a one-shot job container, not a long-running service.
   #
   # Run manually:
@@ -198,6 +219,8 @@ volumes:
   server-fields:
   server-field-coords:
   ml-crop-data:
+  caddy-data:
+  caddy-config:
 
 
 # ─────────────────────────────────────────────────────────────────────────────

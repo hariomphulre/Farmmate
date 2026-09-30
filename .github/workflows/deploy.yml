@@ -39,9 +39,15 @@ jobs:
           context: ./client
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-client:latest
-          # Add build-args here if your React app needs them during build
-          # build-args: |
-          #   VITE_API_URL=https://farmmate.hariomphulre.tech/api
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+            VITE_RECAPTCHA_SITE_KEY=${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+            VITE_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+            VITE_GROQ_API_KEY=${{ secrets.VITE_GROQ_API_KEY }}
+            VITE_GROQ_API_URL=${{ secrets.VITE_GROQ_API_URL }}
+            VITE_DATA_GOV_API_KEY=${{ secrets.VITE_DATA_GOV_API_KEY }}
 
       # --- 2. Build Server ---
       - name: Build and push Server
@@ -50,6 +56,8 @@ jobs:
           context: ./server
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-server:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
       # --- 3. Build ML Service ---
       # Disabled for now: only deploy client and server to the VPS.
@@ -80,7 +88,7 @@ jobs:
           port: ${{ secrets.VPS_PORT || 2222 }}
           timeout: 30s
           command_timeout: 30m
-          source: "docker-compose.yml,nginx/,server/.env.example"
+          source: "docker-compose.yml,nginx/,caddy/"
           target: "CodingWorkspace/Projects/Farmmate/"
 
       - name: Pull Images and Restart Containers on VPS
@@ -98,11 +106,10 @@ jobs:
             # Ensure target directories exist for env files
             mkdir -p CodingWorkspace/Projects/Farmmate/server
             cd CodingWorkspace/Projects/Farmmate
-            
-            # If production env doesn't exist, create a template from example
-            if [ ! -f server/.env.production ] && [ -f server/.env.example ]; then
-              cp server/.env.example server/.env.production
-              echo "⚠️ Created server/.env.production from example. Please fill in your API keys!"
+
+            if [ ! -f server/.env.production ]; then
+              echo "❌ Missing server/.env.production on the VPS. Create it once with real production secrets before deploying."
+              exit 1
             fi
 
             # Login to GitHub Container Registry
@@ -113,9 +120,6 @@ jobs:
             
             # Bring up the containers, removing old orphans, wait for healthchecks
             if docker compose up -d --remove-orphans --wait --wait-timeout 600; then
-    
-                # Clean up dangling images
-                docker image prune -f 
                 
                 echo "✅ Deployment Successful! Current live containers:"
                 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"

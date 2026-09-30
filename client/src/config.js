@@ -5,7 +5,7 @@ const isDevelopment = import.meta.env ? import.meta.env.DEV : (process.env.NODE_
 // Use different base URLs for development and production
 const API_BASE_URL = isDevelopment 
   ? 'http://localhost:5000'
-  : '/api'; // In production, use relative URLs
+  : ''; // In production, use relative URLs from the same origin
 
 const CLIENT_URL = isDevelopment
   ? 'http://localhost:5173'

@@ -21,8 +21,12 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm ci --omit=dev --prefer-offline && npm cache clean --force
 
-# Copy application source from builder (if compiled, we would copy dist)
-COPY --from=builder /app ./
+# Copy only runtime source files, not the builder's node_modules tree
+COPY --from=builder /app/server.cjs ./server.cjs
+COPY --from=builder /app/AuthRoutes.js ./AuthRoutes.js
+COPY --from=builder /app/NeonSetup.js ./NeonSetup.js
+COPY --from=builder /app/fieldService.js ./fieldService.js
+COPY --from=builder /app/TraderRoutes ./TraderRoutes
 
 # Create runtime directories that are NOT mounted as volumes
 RUN mkdir -p crop_imgs/disease detect_results/disease field_corrdinates Field_co-ordinates
