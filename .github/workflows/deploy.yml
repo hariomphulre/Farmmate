@@ -125,6 +125,10 @@ jobs:
             # Login to GitHub Container Registry
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             
+            # Prune dangling images BEFORE pull to free up disk space
+            echo "🧹 Pruning old unused Docker images and containers to free up space..."
+            docker system prune -af || true
+            
             # Pull latest images
             docker compose pull --quiet
             
