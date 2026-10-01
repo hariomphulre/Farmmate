@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { FcGoogle } from "react-icons/fc";
 import { Lock, Mail, Eye, EyeOff, Check, User } from "lucide-react";
 import config from '../config';
+import GoogleSignInButton from '../components/GoogleSignInButton';
+import logo from './logo.png';
 
 const API_BASE_URL = config.API_BASE_URL;
 const BRAND_GREEN = "#052e16";
@@ -118,7 +120,6 @@ const Auth = () => {
   }, [timer]);
 
   // Google OAuth and reCAPTCHA configuration
-  const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
   const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY || '';
 
   const backgroundVideoRef = useRef(null);
@@ -134,34 +135,6 @@ const Auth = () => {
     setEmailCheckError("");
   };
 
-  // Load Google OAuth script
-  useEffect(() => {
-    const loadGoogleScript = () => {
-      if (window.google) return;
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = initializeGoogleAuth;
-      script.onerror = () => setErrors(prev => ({ ...prev, google: 'Failed to load Google OAuth.' }));
-      document.head.appendChild(script);
-    };
-
-    const initializeGoogleAuth = () => {
-      if (window.google && GOOGLE_CLIENT_ID) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: handleGoogleResponse,
-            auto_select: false,
-          });
-        } catch (error) {
-          setErrors(prev => ({ ...prev, google: 'Failed to initialize Google OAuth.' }));
-        }
-      }
-    };
-    loadGoogleScript();
-  }, [GOOGLE_CLIENT_ID, usertype]); 
 
   // Keep the login background video playing
   useEffect(() => {
@@ -262,12 +235,7 @@ const Auth = () => {
   };
 
   // Google OAuth Response
-  const handleGoogleResponse = async (response) => {
-    if (!usertype) {
-        setErrors({ general: 'Please select a User Type before signing in with Google.' });
-        return;
-    }
-    
+  const handleGoogleSuccess = async (token) => {
     try {
       setLoading(true);
       setErrors({});
@@ -275,7 +243,7 @@ const Auth = () => {
       const res = await fetch(`${API_BASE_URL}/api/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential: response.credential, user_type: usertype })
+        body: JSON.stringify({ credential: token, user_type: usertype })
       });
       const data = await res.json();
       
@@ -299,21 +267,8 @@ const Auth = () => {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    if (!usertype) {
-      setErrors({ general: 'Please select a User Type first.' });
-      return;
-    }
-    if (!recaptchaVerified) {
-      setErrors({ general: 'Please complete the reCAPTCHA verification first.' });
-      return;
-    }
-
-    if (window.google && window.google.accounts) {
-      window.google.accounts.id.prompt();
-    } else {
-      setErrors({ general: 'Google OAuth is loading. Please wait.' });
-    }
+  const handleGoogleError = (errorMsg) => {
+    setErrors({ general: errorMsg });
   };
 
   // Flow: SIGN IN
@@ -511,7 +466,7 @@ const Auth = () => {
       {/* ── Navbar ───────────────────────────────────────────────────────── */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm px-4 sm:px-8 py-1.5 flex justify-between items-center border-b border-slate-100">
         <div className="flex items-center gap-3">
-          <img src="../../logo.png" alt="Farmmate Logo" className="w-9 h-9 object-contain" />
+          <img src={logo} alt="Farmmate Logo" className="w-9 h-9 object-contain" />
           <div className="hidden sm:block">
             <h1 className="text-lg font-bold text-[#052e16] leading-tight">Farmmate</h1>
             <h2 className="text-[10px] font-medium text-slate-600 tracking-wide">Smart & Climate Resilient Agriculture</h2>
@@ -803,15 +758,13 @@ const Auth = () => {
                     <div className="h-px flex-1 bg-slate-200" />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleGoogleSignIn}
+                  <GoogleSignInButton 
+                    usertype={usertype}
+                    recaptchaVerified={recaptchaVerified}
+                    onSuccess={handleGoogleSuccess}
+                    onError={handleGoogleError}
                     disabled={loading || !!emailCheckError}
-                    className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-slate-200 bg-white py-3 text-[15px] font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <FcGoogle className="text-xl" />
-                    Continue with Google
-                  </button>
+                  />
                 </>
               )}
             </form>

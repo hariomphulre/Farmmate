@@ -18,6 +18,7 @@ import { useAppContext } from '../../context/AppContext';
 import { API_URLS } from '../../config';
 import useSpeechRecognition from '../../hooks/useSpeechRecognition';
 import CommandPalette from './CommandPalette';
+import logo from '../../pages/logo.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -259,7 +260,7 @@ const Navbar = () => {
     <>
       <nav id="top-bar" className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm px-4 sm:px-8 py-1.5 flex justify-between items-center border-b border-slate-100">
           <Link to="/" className="flex items-center gap-3">
-            <img src="../../../logo.png" alt="Farmmate Logo" className="w-9 h-9 object-contain" />
+            <img src={logo} alt="Farmmate Logo" className="w-9 h-9 object-contain" />
             <div className="hidden sm:block">
               <h1 className="text-lg font-bold text-[#052e16] leading-tight">Farmmate</h1>
               <h2 className="text-[10px] font-medium text-slate-600 tracking-wide">Smart & Climate Resilient Agriculture</h2>

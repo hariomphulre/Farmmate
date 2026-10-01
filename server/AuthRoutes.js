@@ -3,12 +3,20 @@ const router = express.Router();
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { OAuth2Client } = require('google-auth-library');
+const { initializeApp, getApps } = require('firebase-admin/app');
+const { getAuth } = require('firebase-admin/auth');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: path.join(__dirname, '.env') });
+
+// Initialize Firebase Admin (uses default credentials if not specified, or just projectId)
+if (!getApps().length) {
+    initializeApp({
+        projectId: process.env.FIREBASE_PROJECT_ID || 'climate-resilient-agriculture'
+    });
+}
 
 // ── Database Pool (uses pg driver — works reliably in Node.js) ──────────────
 const pool = new Pool({
@@ -18,7 +26,6 @@ const pool = new Pool({
     idleTimeoutMillis: 30000,
 });
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID || '');
 const JWT_SECRET = process.env.JWT_SECRET || 'farmmate_jwt_secret_2026';
 
 // ── Nodemailer (optional — falls back to console logging if not configured) ──
@@ -276,12 +283,8 @@ router.post('/google', async (req, res) => {
             return res.status(400).json({ message: 'Missing Google token or user type.' });
         }
 
-        const ticket = await googleClient.verifyIdToken({
-            idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID || undefined,
-        });
-        const payload = ticket.getPayload();
-        const { email, name, picture } = payload;
+        const decodedToken = await getAuth().verifyIdToken(credential);
+        const { email, name, picture } = decodedToken;
 
         let rows = await query('SELECT * FROM auth_users WHERE email = $1', [email]);
 
