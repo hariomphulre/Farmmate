@@ -258,7 +258,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav id="top-bar" className="fixed top-0 left-0 right-0 z-50 bg-white shadow-sm px-4 sm:px-8 py-1.5 flex justify-between items-center border-b border-slate-100">
+      <nav id="top-bar" className="fixed top-0 left-0 right-0 z-[1050] bg-white shadow-sm px-4 sm:px-8 py-1.5 flex justify-between items-center border-b border-slate-100">
           <Link to="/" className="flex items-center gap-3">
             <img src={logo} alt="Farmmate Logo" className="w-9 h-9 object-contain" />
             <div className="hidden sm:block">
@@ -283,7 +283,7 @@ const Navbar = () => {
             {/* Desktop Navigation */}
             <div className="hidden md:flex items-center space-x-4 lg:space-x-6 flex-grow mx-4 lg:mx-6">
               {/* Search Bar */}
-              <div className="flex-grow max-w-sm lg:max-w-md ml-auto relative">
+              <div className="flex-grow max-w-sm lg:max-w-md ml-auto relative z-[100]">
                 <form style={{borderRadius: "2rem"}} onSubmit={handleSearch} className={`relative flex items-center overflow-hidden bg-slate-50 border shadow-sm h-9 md:h-10 transition-all duration-200 ${showCommandPalette ? 'border-[#052e16] ring-2 ring-[#052e16]/15' : 'border-slate-200 focus-within:ring-2 focus-within:ring-[#052e16]/15 focus-within:border-[#052e16]'}`}>
                   <input 
                     type="text" 
@@ -387,12 +387,12 @@ const Navbar = () => {
           {/* Mobile Navigation Menu */}
           <div 
             ref={mobileMenuRef} 
-            className={`md:hidden mt-1.5 py-4 border-t border-slate-200 bg-white rounded-b-lg shadow-lg fixed top-[52px] sm:top-[60px] left-0 right-0 max-h-[calc(100vh-52px)] sm:max-h-[calc(100vh-60px)] overflow-y-auto z-50 transition-all duration-300 transform ${
+            className={`md:hidden mt-1.5 py-4 border-t border-slate-200 bg-white rounded-b-lg shadow-lg fixed top-[52px] sm:top-[60px] left-0 right-0 max-h-[calc(100vh-52px)] sm:max-h-[calc(100vh-60px)] overflow-y-auto z-[1050] transition-all duration-300 transform ${
               mobileMenuOpen ? 'opacity-100 translate-y-0 mobile-menu-enter' : 'opacity-0 -translate-y-5 pointer-events-none'
             }`}
           >
               {/* Mobile Search */}
-              <div className="mb-4 px-4 relative">
+              <div className="mb-4 px-4 relative z-[100]">
                 <form onSubmit={handleSearch}>
                   <div className={`flex rounded-md overflow-hidden shadow-sm border ${showCommandPalette ? 'border-[#052e16] ring-2 ring-[#052e16]/15' : 'border-slate-200'}`}>
                     <input

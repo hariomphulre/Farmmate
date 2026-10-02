@@ -24,6 +24,7 @@ import {
   LayoutGrid,
   Leaf,
   MoreHorizontal,
+  PanelRight,
   Pencil,
   Plus,
   Search,
@@ -31,14 +32,15 @@ import {
   SlidersHorizontal,
   Sparkles,
   User,
+  X,
 } from 'lucide-react';
 import {
   AREA_464,
   AREA_465,
-  ESRI_SATELLITE,
+  GOOGLE_HYBRID,
+  GOOGLE_STREETS,
   MAP_CENTER,
   MAP_ZOOM,
-  OSM_STREETS,
   ZONES,
 } from '../data/zoneMap';
 import { boundsFromPolygon, createNdviDataUrl } from '../utils/ndviCanvas';
@@ -123,6 +125,49 @@ const Dashboard = () => {
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showParams, setShowParams] = useState(false);
+  const [isPanelOpen, setIsPanelOpen] = useState(
+    typeof window !== 'undefined' ? window.innerWidth >= 1000 : true
+  );
+
+  const [navHeight, setNavHeight] = useState(53);
+
+  useEffect(() => {
+    const updateNavHeight = () => {
+      const nav = document.getElementById('top-bar') || document.querySelector('nav');
+      if (nav) {
+        setNavHeight(nav.offsetHeight);
+      }
+    };
+    updateNavHeight();
+    window.addEventListener('resize', updateNavHeight);
+    const nav = document.getElementById('top-bar') || document.querySelector('nav');
+    let ro;
+    if (nav && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(updateNavHeight);
+      ro.observe(nav);
+    }
+    return () => {
+      window.removeEventListener('resize', updateNavHeight);
+      if (ro) ro.disconnect();
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 1000) {
+        setIsPanelOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      mapObj.current?.invalidateSize();
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [isPanelOpen]);
 
 
   const filteredZones = ZONES.filter((zone) =>
@@ -148,18 +193,21 @@ const Dashboard = () => {
       zoom: MAP_ZOOM,
       zoomControl: false,
       attributionControl: true,
+      maxZoom: 20,
     });
     mapObj.current = map;
     map.on("zoomend", () => setZoom(map.getZoom()));
 
-    satLayer.current = L.tileLayer(ESRI_SATELLITE, {
-      attribution: 'Tiles © Esri',
-      maxZoom: 19,
+    satLayer.current = L.tileLayer(GOOGLE_HYBRID, {
+      attribution: 'Map data © Google',
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     }).addTo(map);
 
-    streetLayer.current = L.tileLayer(OSM_STREETS, {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19,
+    streetLayer.current = L.tileLayer(GOOGLE_STREETS, {
+      attribution: 'Map data © Google',
+      maxZoom: 20,
+      subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     });
 
     L.polygon(AREA_464, {
@@ -201,8 +249,6 @@ const Dashboard = () => {
         .addTo(map);
     });
 
-    map.on('zoomend', () => setZoom(map.getZoom()));
-
     let mini;
     if (miniRef.current) {
       const miniContainer = document.createElement('div');
@@ -219,8 +265,12 @@ const Dashboard = () => {
         doubleClickZoom: false,
         boxZoom: false,
         keyboard: false,
+        maxZoom: 20,
       });
-      L.tileLayer(ESRI_SATELLITE, { maxZoom: 19 }).addTo(mini);
+      L.tileLayer(GOOGLE_HYBRID, {
+        maxZoom: 20,
+        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+      }).addTo(mini);
       const rect = L.rectangle(map.getBounds(), {
         color: '#fff',
         weight: 2,
@@ -280,13 +330,19 @@ const Dashboard = () => {
       mapObj.current.removeLayer(streetLayer.current);
       satLayer.current.addTo(mapObj.current);
       setBaseLayer('satellite');
-    }
+    }3
   };
 
   const activeZoneData = ZONES.find((zone) => zone.id === activeZone) || ZONES[2];
 
   return (
-    <div className="zm-page -mx-3 -mb-3 sm:-mx-4 sm:-mb-4 md:-mx-6 md:-mb-6 h-[calc(100vh-72px)] bg-[#dfe3e8] p-2 md:p-3">
+    <div
+      className="zm-page -mx-3 -mb-3 sm:-mx-4 sm:-mb-4 md:-mx-6 md:-mb-6 bg-[#ffffff]"
+      style={{
+        marginTop: `${-(60 - navHeight)}px`,
+        height: `calc(100vh - ${navHeight}px)`
+      }}
+    >
       <div className="zm-shell">
 
 
@@ -294,6 +350,15 @@ const Dashboard = () => {
           <div ref={mapRef} className="absolute inset-0" />
 
           <div className="map-tools">
+            <button
+              type="button"
+              className={`map-tool ${isPanelOpen ? 'active' : ''}`}
+              aria-label="Result Automation"
+              title={isPanelOpen ? 'Close Result Automation' : 'Open Result Automation'}
+              onClick={() => setIsPanelOpen((v) => !v)}
+            >
+              <LayoutGrid size={16} />
+            </button>
             <button
               type="button"
               className={`map-tool ${showAlert ? 'active' : ''}`}
@@ -321,14 +386,14 @@ const Dashboard = () => {
           </div>
 
           <div className="zoom-rail">
-            <button type="button" onClick={() => setZoomLevel(Math.min(19, zoom + 1))} aria-label="Zoom in">
+            <button type="button" onClick={() => setZoomLevel(Math.min(20, zoom + 1))} aria-label="Zoom in">
               <Plus size={12} />
             </button>
             <div className="zoom-track">
               <input
                 type="range"
                 min="12"
-                max="19"
+                max="20"
                 step="1"
                 value={zoom}
                 onChange={(e) => setZoomLevel(e.target.value)}
@@ -336,7 +401,7 @@ const Dashboard = () => {
                 aria-label="Map zoom"
                 style={{ writingMode: 'vertical-lr', direction: 'rtl' }}
               />
-              <span className="zoom-thumb" style={{ top: `${((19 - zoom) / 7) * 100}%` }} />
+              <span className="zoom-thumb" style={{ top: `${((20 - zoom) / 8) * 100}%` }} />
             </div>
           </div>
 
@@ -394,7 +459,7 @@ const Dashboard = () => {
           )}
         </section>
 
-        <aside className="zm-panel">
+        <aside className={`zm-panel ${isPanelOpen ? 'open' : 'closed'}`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="grid h-8 w-8 place-items-center rounded-lg bg-gray-900 text-white">
@@ -405,14 +470,25 @@ const Dashboard = () => {
                 <p className="text-[11px] text-gray-400">Agricultural Area 465</p>
               </div>
             </div>
-            <button
-              type="button"
-              className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-gray-100"
-              aria-label="Search"
-              onClick={() => setShowSearch((v) => !v)}
-            >
-              <Search size={16} />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-gray-100 transition-colors"
+                aria-label="Search"
+                onClick={() => setShowSearch((v) => !v)}
+              >
+                <Search size={16} />
+              </button>
+              <button
+                type="button"
+                className="grid h-8 w-8 place-items-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
+                aria-label="Close Panel"
+                title="Close Result Automation"
+                onClick={() => setIsPanelOpen(false)}
+              >
+                <X size={16} />
+              </button>
+            </div>
           </div>
 
           {showSearch && (
@@ -545,6 +621,15 @@ const Dashboard = () => {
             </div>
           )}
         </aside>
+
+        {/* Mobile backdrop when Result Automation panel is open */}
+        {isPanelOpen && (
+          <div
+            className="fixed inset-0 bg-black/40 z-[950] md:hidden backdrop-blur-[1px] transition-opacity"
+            onClick={() => setIsPanelOpen(false)}
+            aria-hidden="true"
+          />
+        )}
       </div>
     </div>
   );

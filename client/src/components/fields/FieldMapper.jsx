@@ -1192,7 +1192,12 @@ const FieldMapper = () => {
                       const option = options.find(o => o.value === fieldState);
                       return option ? (
                         <>
-                          <img src={option.img} alt={option.label} className="w-8 h-8 rounded-lg mr-3 object-cover" />
+                          <img
+                            src={option.img}
+                            alt={option.label}
+                            className="w-8 h-8 rounded-lg mr-3 object-cover"
+                            onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                          />
                           <span>{option.label}</span>
                         </>
                       ) : fieldState;
@@ -1224,7 +1229,12 @@ const FieldMapper = () => {
                           setIsFieldStateOpen(false);
                         }}
                       >
-                        <img src={option.img} alt={option.label} className="w-10 h-10 rounded-lg mr-3 object-cover" />
+                        <img
+                          src={option.img}
+                          alt={option.label}
+                          className="w-10 h-10 rounded-lg mr-3 object-cover"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
                         <span className="font-medium text-gray-700">{option.label}</span>
                       </div>
                     ))}

@@ -26,16 +26,15 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
-  LayoutGrid,
 } from 'lucide-react';
 
 const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState({
-    analytics: true,
+    climate: true,
+    irrigation: true,
     pests: false,
     crops: false,
-    irrigation: false,
     fields: false
   });
   
@@ -48,6 +47,18 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    const climatePaths = ['/climate', '/vegetation', '/water', '/fire', '/hazards', '/rainfall', '/soil'];
+    const irrigationPaths = ['/water-management', '/irrigation-schedule'];
+
+    if (climatePaths.some(p => location.pathname === p)) {
+      setExpandedMenus(prev => ({ ...prev, climate: true }));
+    }
+    if (irrigationPaths.some(p => location.pathname === p)) {
+      setExpandedMenus(prev => ({ ...prev, irrigation: true }));
+    }
+  }, [location.pathname]);
 
   const toggleMenu = (menu) => {
     if (!isMobile && isCollapsed) {
@@ -96,28 +107,31 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
     >
       <div className="h-full flex flex-col justify-between overflow-y-auto pb-20 md:pb-0 overscroll-contain scroll-smooth">
         <div>
-          {/* ── Logo + collapse toggle ── */}
-          <div className="flex items-center justify-between py-4 px-4 sticky top-0 bg-white z-10">
+          {/* ── Header + collapse toggle ── */}
+          <div className="flex items-center justify-between py-3.5 px-4 sticky top-0 bg-white z-10">
             {isCollapsed ? (
-              <button onClick={toggleSidebar} className="mx-auto grid h-10 w-10 place-items-center rounded-xl bg-[#111827] text-white" aria-label="Expand sidebar">
-                <LayoutGrid size={16} />
+              <button
+                onClick={toggleSidebar}
+                className="mx-auto grid h-9 w-9 place-items-center rounded-xl text-[#4b5563] hover:bg-[#e5e7eb] hover:text-[#111827] transition-colors"
+                aria-label="Expand sidebar"
+                title="Expand sidebar"
+              >
+                <ChevronRight size={18} />
               </button>
             ) : (
-              <>
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#111827] text-white flex-shrink-0">
-                    <LayoutGrid size={16} />
-                  </span>
-                  <span className="font-semibold text-[#111827] text-base tracking-tight truncate">Menu</span>
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={toggleSidebar}
+                    className="grid h-8 w-8 place-items-center rounded-lg text-[#6b7280] hover:bg-[#e5e7eb] hover:text-[#111827] transition-colors"
+                    aria-label="Collapse sidebar"
+                    title="Collapse sidebar"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <span className="font-semibold text-[#111827] text-base tracking-tight truncate">Main</span>
                 </div>
-                <button 
-                  onClick={toggleSidebar} 
-                  className="grid h-8 w-8 place-items-center rounded-full text-[#9aa3af] hover:bg-[#e5e7eb] hover:text-[#4b5563] transition-colors"
-                  aria-label="Collapse sidebar"
-                >
-                  <ChevronLeft size={16} />
-                </button>
-              </>
+              </div>
             )}
           </div>
 
@@ -131,12 +145,6 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
           {/* ── Main nav cluster (pill container) ── */}
           <nav className="px-3 mt-2">
             <div className={`bg-[#eef0f3] ${isCollapsed ? 'rounded-full py-2 px-1.5' : 'rounded-2xl py-3 px-2'} flex flex-col items-center gap-0.5`}>
-
-              {!isCollapsed && (
-                <div className="w-full px-2 mb-1">
-                  <h3 className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-wider">Main</h3>
-                </div>
-              )}
 
               <Link to="/dashboard" className={pill(isActive('/dashboard'))}>
                 <Home size={16} className={ic(isActive('/dashboard'))} />
@@ -174,32 +182,29 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
               </Link>
             </div>
 
-            {/* ── Analytics ── */}
+            {/* ── Climate Analysis Section ── */}
             <div className="mt-3">
-              {!isCollapsed && (
-                <div className="px-2 mb-1">
-                  <h3 className="text-[10px] font-semibold text-[#9ca3af] uppercase tracking-wider">Analytics</h3>
-                </div>
-              )}
-
-              {/* Climate Analysis */}
               <button
                 type="button"
-                className={expander(expandedMenus.analytics)}
-                onClick={() => toggleMenu('analytics')}
-                onKeyDown={(e) => handleKeyDown(e, 'analytics')}
-                aria-expanded={expandedMenus.analytics}
+                className={expander(expandedMenus.climate)}
+                onClick={() => toggleMenu('climate')}
+                onKeyDown={(e) => handleKeyDown(e, 'climate')}
+                aria-expanded={expandedMenus.climate}
+                title="Climate Analysis"
               >
                 <CloudSun size={16} />
                 {!isCollapsed && (
                   <>
                     <span className="ml-3 mr-auto text-sm font-medium">Climate Analysis</span>
-                    <ChevronDown size={14} className={`transition-transform duration-200 ${expandedMenus.analytics ? '' : '-rotate-90'}`} />
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${expandedMenus.climate ? '' : '-rotate-90'}`}
+                    />
                   </>
                 )}
               </button>
 
-              {expandedMenus.analytics && !isCollapsed && (
+              {expandedMenus.climate && !isCollapsed && (
                 <ul className="mt-1 pl-7 space-y-0.5">
                   <li>
                     <Link to="/climate" className={sub(isActive('/climate'))}>
@@ -245,18 +250,26 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                   </li>
                 </ul>
               )}
+            </div>
 
-              {/* Irrigation */}
+            {/* ── Irrigation Section ── */}
+            <div className="mt-2">
               <button
                 type="button"
-                className={`${expander(expandedMenus.irrigation)} ${isCollapsed ? 'mt-1' : 'mt-0.5'}`}
+                className={`${expander(expandedMenus.irrigation)} ${isCollapsed ? 'mt-1' : ''}`}
                 onClick={() => toggleMenu('irrigation')}
+                onKeyDown={(e) => handleKeyDown(e, 'irrigation')}
+                aria-expanded={expandedMenus.irrigation}
+                title="Irrigation"
               >
                 <Droplets size={16} />
                 {!isCollapsed && (
                   <>
                     <span className="ml-3 mr-auto text-sm font-medium">Irrigation</span>
-                    <ChevronDown size={14} className={`transition-transform duration-200 ${expandedMenus.irrigation ? '' : '-rotate-90'}`} />
+                    <ChevronDown
+                      size={14}
+                      className={`transition-transform duration-200 ${expandedMenus.irrigation ? '' : '-rotate-90'}`}
+                    />
                   </>
                 )}
               </button>

@@ -87,6 +87,11 @@ export const ZONES = [
   },
 ];
 
+export const GOOGLE_HYBRID =
+  'https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
+export const GOOGLE_STREETS =
+  'https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
 export const ESRI_SATELLITE =
   'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 export const OSM_STREETS = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+

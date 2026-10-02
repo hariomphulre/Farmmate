@@ -76,6 +76,10 @@ export default function NewfarmSlideshow({ articles, loading, error, state }) {
                   src={article.image_url || "/default_news.jpg"}
                   alt={article.title}
                   className="object-cover w-full h-full"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "/default_news.jpg";
+                  }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                 <span className="absolute top-2 right-2 px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded-full font-medium">

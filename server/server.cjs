@@ -100,8 +100,8 @@ const upload = multer({
 });
 
 // Serve static files for detection results
-app.use('/detect_results', express.static(path.join(__dirname, 'detect_results')));
-app.use('/crop_imgs', express.static(path.join(__dirname, 'crop_imgs')));
+app.use('/detect_results', express.static(path.join(baseDir, 'detect_results')));
+app.use('/crop_imgs', express.static(path.join(baseDir, 'crop_imgs')));
 
 // Serve crop recommendation output.json via API
 app.get('/api/crop/output', (req, res) => {

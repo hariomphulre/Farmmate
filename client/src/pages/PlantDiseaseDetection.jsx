@@ -239,7 +239,12 @@ const PlantDiseaseDetection = () => {
                   <span className={selectedCrop ? 'text-gray-900' : 'text-gray-400'}>
                     {selectedCrop ? (
                       <span className="flex items-center gap-2">
-                        <img src={selectedCrop.image} alt={selectedCrop.label} className="w-6 h-6 rounded-md object-cover border border-gray-200" />
+                        <img
+                          src={selectedCrop.image}
+                          alt={selectedCrop.label}
+                          className="w-6 h-6 rounded-md object-cover border border-gray-200"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
                         {selectedCrop.label}
                       </span>
                     ) : 'Choose a crop type…'}
@@ -257,7 +262,12 @@ const PlantDiseaseDetection = () => {
                           plantName === crop.value ? 'bg-gray-50 font-medium' : ''
                         }`}
                       >
-                        <img src={crop.image} alt={crop.label} className="w-8 h-8 rounded-lg object-cover border border-gray-200" />
+                        <img
+                          src={crop.image}
+                          alt={crop.label}
+                          className="w-8 h-8 rounded-lg object-cover border border-gray-200"
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
                         <span className="text-sm text-gray-800">{crop.label}</span>
                         {plantName === crop.value && <CheckCircle2 size={14} className="ml-auto text-emerald-500" />}
                       </button>
@@ -454,7 +464,12 @@ const PlantDiseaseDetection = () => {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex items-start gap-2.5 min-w-0">
                             {crop ? (
-                              <img src={crop.image} alt={crop.label} className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0 mt-0.5" />
+                              <img
+                                src={crop.image}
+                                alt={crop.label}
+                                className="w-8 h-8 rounded-lg object-cover border border-gray-200 flex-shrink-0 mt-0.5"
+                                onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                              />
                             ) : (
                               <span className="text-lg flex-shrink-0 mt-0.5">🌱</span>
                             )}
