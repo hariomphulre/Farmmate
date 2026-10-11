@@ -454,6 +454,79 @@ app.get('/api/fields/:id', (req, res) => {
   }
 });
 
+// API endpoint to update a field by ID
+app.put('/api/fields/:id', (req, res) => {
+  try {
+    const fieldId = req.params.id;
+    const updatedData = req.body;
+    const files = fs.readdirSync(fieldCoordsDir);
+    
+    // Find the file that contains the field ID
+    const fieldFile = files.find(file => file.includes(fieldId) && file.endsWith('.json'));
+    
+    if (!fieldFile) {
+      return res.status(404).json({
+        success: false,
+        message: 'Field not found'
+      });
+    }
+    
+    const filePath = path.join(fieldCoordsDir, fieldFile);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+    const existingField = JSON.parse(fileContent);
+    
+    // Merge updated data while preserving id and creation date
+    const mergedField = {
+      ...existingField,
+      ...updatedData,
+      id: existingField.id || fieldId,
+      createdAt: existingField.createdAt || new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    if (updatedData.soil_color && !updatedData.soilColor) {
+      mergedField.soilColor = updatedData.soil_color;
+    }
+    
+    fs.writeFileSync(filePath, JSON.stringify(mergedField, null, 2));
+    
+    // Sync with manipal.json if coordinates changed or active
+    try {
+      const manipalPath = path.join(baseDir, 'manipal.json');
+      if (fs.existsSync(manipalPath)) {
+        const manipalRaw = fs.readFileSync(manipalPath, 'utf8');
+        const manipalData = JSON.parse(manipalRaw);
+        if (manipalData.id === fieldId || manipalData.name === existingField.name) {
+          if (Array.isArray(mergedField.coordinates) && mergedField.coordinates.length >= 3) {
+            const manipalCoords = {};
+            mergedField.coordinates.forEach((coord, index) => {
+              manipalCoords[index] = [coord.lat, coord.lng];
+            });
+            manipalData.coordinates = manipalCoords;
+          }
+          if (mergedField.name) manipalData.name = mergedField.name;
+          if (mergedField.crop) manipalData.crop = mergedField.crop;
+          fs.writeFileSync(manipalPath, JSON.stringify(manipalData, null, 2));
+        }
+      }
+    } catch (mErr) {
+      console.warn('Could not sync with manipal.json:', mErr.message);
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Field updated successfully',
+      field: mergedField
+    });
+  } catch (error) {
+    console.error('Error updating field:', error);
+    return res.status(500).json({ 
+      success: false, 
+      message: `Server error while updating field: ${error.message}`
+    });
+  }
+});
+
 // Delete a field
 app.delete('/api/fields/:id', (req, res) => {
   try {

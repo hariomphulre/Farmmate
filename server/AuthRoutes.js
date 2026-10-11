@@ -384,4 +384,33 @@ router.post('/reset-password', async (req, res) => {
     }
 });
 
+// ══════════════════════════════════════════════════════════════════════════════
+// 8. VERIFY TOKEN SESSION
+// ══════════════════════════════════════════════════════════════════════════════
+router.get('/verify', async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ valid: false, message: 'No authorization token provided.' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decoded = jwt.verify(token, JWT_SECRET);
+
+        const rows = await query(
+            'SELECT id, email, name, user_type FROM auth_users WHERE id = $1',
+            [decoded.id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(401).json({ valid: false, message: 'User not found.' });
+        }
+
+        res.json({ valid: true, user: rows[0] });
+    } catch (err) {
+        return res.status(401).json({ valid: false, message: 'Invalid or expired token.' });
+    }
+});
+
 module.exports = router;
+

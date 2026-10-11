@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -13,9 +13,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 import {
-  AlertTriangle,
   ArrowUpRight,
-  BarChart3,
   CalendarDays,
   FileText,
   Home,
@@ -23,6 +21,7 @@ import {
   Layers,
   LayoutGrid,
   Leaf,
+  LocateFixed,
   MoreHorizontal,
   PanelRight,
   Pencil,
@@ -34,6 +33,7 @@ import {
   User,
   X,
 } from 'lucide-react';
+import { useAppContext } from '../context/AppContext';
 import {
   AREA_464,
   AREA_465,
@@ -108,18 +108,41 @@ function RadarChart() {
 
 
 
+function normalizeCoordinates(coords) {
+  if (!Array.isArray(coords)) return [];
+  return coords
+    .map((c) => {
+      if (Array.isArray(c) && c.length >= 2) {
+        return [Number(c[0]), Number(c[1])];
+      }
+      if (c && typeof c === 'object') {
+        const lat = Number(c.lat ?? c.latitude);
+        const lng = Number(c.lng ?? c.longitude);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return [lat, lng];
+        }
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
+
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { selectedField, fields } = useAppContext();
+  const activeField =
+    fields?.find((f) => String(f.id) === String(selectedField)) ||
+    (fields?.length > 0 ? fields[0] : null);
+
   const mapRef = useRef(null);
-  const miniRef = useRef(null);
   const mapObj = useRef(null);
   const shellRef = useRef(null);
-  const ndviLayer = useRef(null);
+  const fieldAoiLayerRef = useRef(null);
+  const userLocationLayerRef = useRef(null);
   const satLayer = useRef(null);
   const streetLayer = useRef(null);
 
   const [tab, setTab] = useState('zone');
-  const [showAlert, setShowAlert] = useState(true);
   const [showNdvi, setShowNdvi] = useState(true);
   const [baseLayer, setBaseLayer] = useState('satellite');
   const [zoom, setZoom] = useState(MAP_ZOOM);
@@ -127,6 +150,8 @@ const Dashboard = () => {
   const [query, setQuery] = useState('');
   const [showSearch, setShowSearch] = useState(false);
   const [showParams, setShowParams] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
   const [isPanelOpen, setIsPanelOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 1000 : true
   );
@@ -243,9 +268,88 @@ const Dashboard = () => {
 
   const flyToZone = (zone) => {
     setActiveZone(zone.id);
-    setShowAlert(true);
     mapObj.current?.flyTo(zone.center, 16, { duration: 0.7 });
   };
+
+  const renderUserLocation = useCallback((lat, lng, accuracy = 30) => {
+    if (!userLocationLayerRef.current) return;
+    userLocationLayerRef.current.clearLayers();
+
+    const accuracyCircle = L.circle([lat, lng], {
+      radius: Math.max(accuracy, 25),
+      color: '#3b82f6',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.16,
+      weight: 1.5,
+    });
+
+    const marker = L.circleMarker([lat, lng], {
+      radius: 8,
+      color: '#ffffff',
+      weight: 3,
+      fillColor: '#2563eb',
+      fillOpacity: 1,
+    });
+
+    marker.bindTooltip('Your Location', {
+      permanent: false,
+      direction: 'top',
+      className: 'field-label',
+    });
+
+    accuracyCircle.addTo(userLocationLayerRef.current);
+    marker.addTo(userLocationLayerRef.current);
+  }, []);
+
+  const handleLocateMe = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser.');
+      return;
+    }
+
+    setLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setLocating(false);
+        const { latitude, longitude, accuracy } = pos.coords;
+        setUserLocation({ lat: latitude, lng: longitude, accuracy });
+        renderUserLocation(latitude, longitude, accuracy);
+        if (mapObj.current) {
+          mapObj.current.flyTo([latitude, longitude], Math.max(mapObj.current.getZoom(), 16), {
+            duration: 1.2,
+          });
+        }
+      },
+      (err) => {
+        setLocating(false);
+        console.warn('Geolocation error:', err.message);
+        if (err.code === 1) {
+          alert('Location access was denied. Please allow location permissions in your browser.');
+        } else {
+          alert('Could not determine your location. Please check your network or GPS connection.');
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 }
+    );
+  };
+
+  useEffect(() => {
+    if (navigator?.permissions?.query) {
+      navigator.permissions.query({ name: 'geolocation' }).then((result) => {
+        if (result.state === 'granted') {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const { latitude, longitude, accuracy } = pos.coords;
+              setUserLocation({ lat: latitude, lng: longitude, accuracy });
+              renderUserLocation(latitude, longitude, accuracy);
+            },
+            () => {},
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+          );
+        }
+      }).catch(() => {});
+    }
+  }, [renderUserLocation]);
 
   useEffect(() => {
     if (!mapRef.current) return;
@@ -277,83 +381,8 @@ const Dashboard = () => {
       subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
     });
 
-    L.polygon(AREA_464, {
-      color: '#ffffff',
-      weight: 2,
-      fill: false,
-    }).addTo(map);
-
-    L.polygon(AREA_465, {
-      color: '#ffffff',
-      weight: 3,
-      fillColor: '#ffffff',
-      fillOpacity: 0.04,
-    }).addTo(map);
-
-    const ndviUrl = createNdviDataUrl(AREA_465);
-    ndviLayer.current = L.imageOverlay(ndviUrl, boundsFromPolygon(AREA_465), {
-      opacity: 0.88,
-      interactive: false,
-    }).addTo(map);
-
-    L.tooltip({ permanent: true, direction: 'center', className: 'field-label' })
-      .setLatLng([30.8964, 75.8432])
-      .setContent('Agricultural Area 464')
-      .addTo(map);
-
-    L.tooltip({ permanent: true, direction: 'center', className: 'field-label' })
-      .setLatLng([30.8934, 75.8658])
-      .setContent('Agricultural Area 465')
-      .addTo(map);
-
-    ZONES.forEach((zone) => {
-      L.polygon(zone.polygon, {
-        color: zone.color,
-        weight: 1,
-        fillOpacity: 0.08,
-      })
-        .on('click', () => flyToZone(zone))
-        .addTo(map);
-    });
-
-    let mini;
-    if (miniRef.current) {
-      const miniContainer = document.createElement('div');
-      miniContainer.style.width = '100%';
-      miniContainer.style.height = '100%';
-      miniRef.current.appendChild(miniContainer);
-      mini = L.map(miniContainer, {
-        center: MAP_CENTER,
-        zoom: MAP_ZOOM - 3,
-        zoomControl: false,
-        attributionControl: false,
-        dragging: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false,
-        boxZoom: false,
-        keyboard: false,
-        maxZoom: 20,
-      });
-      L.tileLayer(GOOGLE_HYBRID, {
-        maxZoom: 20,
-        subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
-      }).addTo(mini);
-      const rect = L.rectangle(map.getBounds(), {
-        color: '#fff',
-        weight: 2,
-        fillOpacity: 0.08,
-      }).addTo(mini);
-
-      const syncMini = () => {
-        rect.setBounds(map.getBounds());
-        mini.setView(map.getCenter(), Math.max(map.getZoom() - 3, 11), { animate: false });
-      };
-      map.on('move', syncMini);
-      map.on('zoom', syncMini);
-      miniRef.current.addEventListener('click', () => {
-        map.setView(MAP_CENTER, MAP_ZOOM);
-      });
-    }
+    fieldAoiLayerRef.current = L.layerGroup().addTo(map);
+    userLocationLayerRef.current = L.layerGroup().addTo(map);
 
     const resize = () => map.invalidateSize();
     const ro = new ResizeObserver(resize);
@@ -362,24 +391,78 @@ const Dashboard = () => {
 
     return () => {
       ro.disconnect();
-      if (mini) {
-        mini.remove();
-        if (miniRef.current) miniRef.current.innerHTML = '';
-      }
       map.remove();
       if (mapRef.current) mapRef.current.innerHTML = '';
       mapObj.current = null;
+      fieldAoiLayerRef.current = null;
+      userLocationLayerRef.current = null;
     };
   }, []);
 
   useEffect(() => {
-    if (!ndviLayer.current) return;
-    if (showNdvi) {
-      ndviLayer.current.addTo(mapObj.current);
-    } else {
-      mapObj.current?.removeLayer(ndviLayer.current);
+    if (!mapObj.current || !fieldAoiLayerRef.current) return;
+
+    fieldAoiLayerRef.current.clearLayers();
+
+    let targetPolygon = null;
+    let targetName = '';
+
+    if (activeField?.coordinates && Array.isArray(activeField.coordinates) && activeField.coordinates.length >= 3) {
+      targetPolygon = normalizeCoordinates(activeField.coordinates);
+      targetName = activeField.name || 'Selected Field';
+    } else if (!fields || fields.length === 0) {
+      targetPolygon = AREA_465;
+      targetName = 'Agricultural Area 465';
     }
-  }, [showNdvi]);
+
+    if (targetPolygon && targetPolygon.length >= 3) {
+      const aoiPoly = L.polygon(targetPolygon, {
+        color: '#10b981',
+        weight: 3,
+        fillColor: '#10b981',
+        fillOpacity: 0.12,
+      }).addTo(fieldAoiLayerRef.current);
+
+      L.polygon(targetPolygon, {
+        color: '#ffffff',
+        weight: 1.5,
+        dashArray: '5, 5',
+        fill: false,
+        interactive: false,
+      }).addTo(fieldAoiLayerRef.current);
+
+      aoiPoly.bindTooltip(targetName, {
+        permanent: true,
+        direction: 'center',
+        className: 'field-label',
+      });
+
+      if (showNdvi) {
+        try {
+          const ndviUrl = createNdviDataUrl(targetPolygon);
+          L.imageOverlay(ndviUrl, boundsFromPolygon(targetPolygon), {
+            opacity: 0.88,
+            interactive: false,
+          }).addTo(fieldAoiLayerRef.current);
+        } catch (err) {
+          console.error('Failed to generate NDVI overlay:', err);
+        }
+      }
+
+      try {
+        const bounds = aoiPoly.getBounds();
+        if (bounds.isValid()) {
+          mapObj.current.fitBounds(bounds, {
+            padding: [50, 50],
+            maxZoom: 18,
+            animate: true,
+          });
+        }
+      } catch (err) {
+        console.warn('Could not fit bounds for AOI:', err);
+      }
+    }
+  }, [selectedField, fields, showNdvi, activeField]);
 
   const setZoomLevel = (value) => {
     const next = Number(value);
@@ -399,8 +482,6 @@ const Dashboard = () => {
       setBaseLayer('satellite');
     }
   };
-
-  const activeZoneData = ZONES.find((zone) => zone.id === activeZone) || ZONES[2];
 
   return (
     <div
@@ -428,11 +509,12 @@ const Dashboard = () => {
             </button>
             <button
               type="button"
-              className={`map-tool ${showAlert ? 'active' : ''}`}
-              aria-label="Analytics"
-              onClick={() => setShowAlert((v) => !v)}
+              className={`map-tool ${userLocation ? 'active' : ''}`}
+              aria-label="Locate me"
+              title="Locate me"
+              onClick={handleLocateMe}
             >
-              <BarChart3 size={16} />
+              <LocateFixed size={18} className={locating ? 'text-blue-400' : ''} />
             </button>
             <button
               type="button"
@@ -471,59 +553,6 @@ const Dashboard = () => {
               <span className="zoom-thumb" style={{ top: `${((20 - zoom) / 8) * 100}%` }} />
             </div>
           </div>
-
-          <div className="minimap" ref={miniRef} />
-
-          {showAlert && (
-            <div className="alert-card">
-              <div className="mb-1 flex items-start gap-2">
-                <span className="mt-0.5 text-amber-500">
-                  <AlertTriangle size={16} />
-                </span>
-                <div>
-                  <h3 className="text-[15px] font-semibold text-gray-900">Crop Health Alert</h3>
-                  <p className="text-xs text-gray-400">Agricultural Area 465 · {activeZoneData.name}</p>
-                </div>
-              </div>
-              <p className="mt-2 flex items-center gap-2 text-xs text-gray-400">
-                <CalendarDays size={13} />
-                Identified: 02 - 05 December 2025
-              </p>
-              <div className="mt-3 flex items-center justify-between rounded-lg border border-gray-100 px-3 py-2">
-                <span className="flex items-center gap-2 text-sm text-gray-700">
-                  <span className="grid h-6 w-6 place-items-center rounded-md bg-sky-50 text-sky-600">≡</span>
-                  Possible Water Deficit
-                </span>
-                <span className="grid h-5 w-5 place-items-center rounded-full border border-gray-200 text-[10px] text-gray-400">
-                  i
-                </span>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-xs text-gray-500">
-                <span>
-                  Parameters <span className="ml-1 font-medium text-gray-800">1.4 - 1.8 T/ac</span>
-                </span>
-                <span className="flex items-center gap-1 font-medium text-rose-500">
-                  ▦ NDVI: {activeZoneData.ndvi.toFixed(2)}
-                </span>
-              </div>
-              <div className="mt-4 flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowAlert(false)}
-                  className="rounded-lg bg-gray-100 px-4 py-1.5 text-sm font-medium text-gray-600"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowAlert(false)}
-                  className="rounded-lg bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          )}
         </section>
 
         {isPanelOpen && windowWidth >= 1000 && (
@@ -553,7 +582,7 @@ const Dashboard = () => {
             <div className="flex items-center gap-2">
               <div>
                 <p className="text-sm font-semibold leading-tight">Result Automation</p>
-                <p className="text-[11px] text-gray-400">Agricultural Area 465</p>
+                <p className="text-[11px] text-gray-400">{activeField?.name || 'Agricultural Area 465'}</p>
               </div>
             </div>
             <div className="flex items-center gap-1">

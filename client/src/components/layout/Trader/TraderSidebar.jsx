@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { MdHistory } from "react-icons/md";
 import { IoIosNotifications } from "react-icons/io";
-import { faHandshake, faChevronLeft, faChevronRight, faCalendar, faIndianRupeeSign } from '@fortawesome/free-solid-svg-icons';
+import { faHandshake, faChevronLeft, faChevronRight, faCalendar, faIndianRupeeSign, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 
 const TraderSidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
     const location = useLocation();
@@ -157,7 +157,18 @@ const TraderSidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
                                     {!isCollapsed && <span className="ml-3 whitespace-nowrap">Trader</span>}
                                 </Link>
                             </li>
+                            <li>
+                                <Link
+                                    to="/logout"
+                                    title="Logout"
+                                    className={`flex items-center px-3 py-2.5 rounded-lg ${isCollapsed ? 'justify-center' : ''} text-gray-700 hover:bg-red-50 hover:text-red-600 group transition-all duration-200`}
+                                >
+                                    <FontAwesomeIcon icon={faSignOutAlt} className="w-5 h-5 text-gray-500 group-hover:text-red-600" />
+                                    {!isCollapsed && <span className="ml-3 whitespace-nowrap">Logout</span>}
+                                </Link>
+                            </li>
                         </ul>
+
                     </div>
                 </div>
             </div>

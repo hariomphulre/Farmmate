@@ -229,6 +229,27 @@ export const fetchFieldData = async (fieldId) => {
   }
 };
 
+// Function to update a field by ID
+export const updateField = async (fieldId, fieldData) => {
+  try {
+    const response = await fetch(`${API_URLS.FIELDS}/${fieldId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fieldData)
+    });
+    
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || `Failed to update field: ${response.status}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating field:', error);
+    throw error;
+  }
+};
+
 // Function to update manipal.json with coordinates from a selected field
 export const updateManipalCoordinates = async (fieldId) => {
   try {

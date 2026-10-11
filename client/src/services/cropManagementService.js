@@ -9,8 +9,11 @@
  * and API endpoints needed for the crop management feature.
  */
 
+import { getAuthToken } from '../utils/authUtils';
+
 // API Base URL - Replace with actual backend URL
 const API_BASE_URL = 'http://localhost:3001/api'; // Example URL
+
 
 /**
  * CROP LIFECYCLE TRACKING APIs
@@ -46,7 +49,7 @@ export const getCropLifecycle = async () => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}` // Add auth token
+        'Authorization': `Bearer ${getAuthToken()}` // Add auth token
       }
     });
     
@@ -83,7 +86,7 @@ export const addCropToLifecycle = async (cropData) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       },
       body: JSON.stringify(cropData)
     });
@@ -119,7 +122,7 @@ export const updateCropStage = async (cropId, updateData) => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       },
       body: JSON.stringify(updateData)
     });
@@ -145,7 +148,7 @@ export const deleteCropFromLifecycle = async (cropId) => {
     const response = await fetch(`${API_BASE_URL}/crops/lifecycle/${cropId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       }
     });
     
@@ -198,7 +201,7 @@ export const getInventory = async (filters = {}) => {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       }
     });
     
@@ -237,7 +240,7 @@ export const addInventoryItem = async (inventoryData) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       },
       body: JSON.stringify(inventoryData)
     });
@@ -265,7 +268,7 @@ export const updateInventoryItem = async (itemId, updateData) => {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       },
       body: JSON.stringify(updateData)
     });
@@ -291,7 +294,7 @@ export const deleteInventoryItem = async (itemId) => {
     const response = await fetch(`${API_BASE_URL}/inventory/${itemId}`, {
       method: 'DELETE',
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+        'Authorization': `Bearer ${getAuthToken()}`
       }
     });
     

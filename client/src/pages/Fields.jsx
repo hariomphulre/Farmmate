@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMap, faEdit, faTrash, faSearch, faExclamationTriangle, faSpinner, faTimes, faSeedling } from '@fortawesome/free-solid-svg-icons';
+import { faMap, faEdit, faTrash, faSearch, faExclamationTriangle, faSpinner, faTimes, faSeedling, faEye } from '@fortawesome/free-solid-svg-icons';
 import { API_URLS } from '../config';
+import { useAppContext } from '../context/AppContext';
 import '../components/fields/Fields.css';
 
 const Fields = () => {
+  const { refreshFields } = useAppContext() || {};
   const [fields, setFields] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -60,6 +62,9 @@ const Fields = () => {
 
       // Remove the deleted field from the state
       setFields(fields.filter(field => field.id !== fieldId));
+      if (refreshFields) {
+        await refreshFields();
+      }
       
       // Clear delete confirmation
       setDeleteConfirm(null);
@@ -248,24 +253,23 @@ const Fields = () => {
                         {field.coordinates ? `${calculateFieldArea(field.coordinates).toFixed(2)} ha` : 'N/A'}
                       </td>
                       <td className="px-6 py-4 border-b border-gray-200 text-right">
-                        <div className="flex justify-end space-x-2">
-                          <div className='pr-8 flex gap-4'>
+                        <div className="flex items-center justify-end gap-2">
                           <Link
                             to={`/field-detail/${field.id}`}
-                            className="text-indigo-600 hover:text-indigo-900"
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 rounded border border-emerald-200 transition-colors"
                             title="View field details"
                           >
-                            View
+                            <FontAwesomeIcon icon={faEye} />
+                            <span>View</span>
                           </Link>
                           <Link
-                            to={`/field-detail/${field.id}`}
-                            className="text-blue-600 hover:text-blue-900"
-                            title="Edit field"
+                            to={`/edit-field/${field.id}`}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 rounded border border-blue-200 transition-colors"
+                            title="Edit field details"
                           >
-                            
                             <FontAwesomeIcon icon={faEdit} />
+                            <span>Edit</span>
                           </Link>
-                          </div>
                           {deleteConfirm === field.id ? (
                             <div className="flex items-center ml-1">
                               <button

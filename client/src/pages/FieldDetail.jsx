@@ -1,19 +1,68 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMap, faArrowLeft, faEdit, faTrash, faSpinner, faExclamationTriangle, faSeedling } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faArrowLeft, 
+  faEdit, 
+  faTrash, 
+  faSpinner, 
+  faExclamationTriangle, 
+  faSeedling,
+  faLocationDot,
+  faCalendarDays,
+  faLayerGroup
+} from '@fortawesome/free-solid-svg-icons';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { API_URLS } from '../config';
-import googleMapsLoader from '../utils/googleMapsLoader';
+import { useAppContext } from '../context/AppContext';
+import { getSoilHex } from '../components/fields/FieldMapper';
 import '../components/fields/Fields.css';
+
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  iconRetinaUrl: markerIcon2x,
+  shadowUrl: markerShadow,
+});
+
+const GOOGLE_HYBRID = 'https://mt{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}';
+
+function normalizeCoordinates(coords) {
+  if (!Array.isArray(coords)) return [];
+  return coords
+    .map((c) => {
+      if (Array.isArray(c) && c.length >= 2) {
+        return [Number(c[0]), Number(c[1])];
+      }
+      if (c && typeof c === 'object') {
+        const lat = Number(c.lat ?? c.latitude);
+        const lng = Number(c.lng ?? c.longitude);
+        if (!isNaN(lat) && !isNaN(lng)) {
+          return [lat, lng];
+        }
+      }
+      return null;
+    })
+    .filter(Boolean);
+}
 
 const FieldDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { refreshFields } = useAppContext() || {};
+
   const [field, setField] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
   const mapRef = useRef(null);
-  const [map, setMap] = useState(null);
-  const [polygon, setPolygon] = useState(null);
+  const mapInstanceRef = useRef(null);
+  const polygonLayerRef = useRef(null);
 
   useEffect(() => {
     fetchFieldDetails();
@@ -36,142 +85,196 @@ const FieldDetail = () => {
       } else {
         setError('Field not found or invalid server response');
       }
-    } catch (error) {
-      console.error('Error fetching field details:', error);
-      setError(`Failed to load field details: ${error.message}`);
+    } catch (err) {
+      console.error('Error fetching field details:', err);
+      setError(`Failed to load field details: ${err.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Initialize the Google Maps when field data is available
+  // Initialize and update Leaflet map when field is loaded
   useEffect(() => {
-    if (!field || !field.coordinates || field.coordinates.length < 3) return;
+    if (!field || !mapRef.current) return;
 
-    const loadMaps = async () => {
+    // Create Leaflet map if not created yet
+    if (!mapInstanceRef.current) {
+      const map = L.map(mapRef.current, {
+        center: [20.5937, 78.9629],
+        zoom: 5,
+        zoomControl: true,
+        maxZoom: 20,
+      });
+
+      L.tileLayer(GOOGLE_HYBRID, {
+        attribution: 'Map data © Google',
+        maxZoom: 20,
+        subdomains: ['0', '1', '2', '3'],
+      }).addTo(map);
+
+      mapInstanceRef.current = map;
+      polygonLayerRef.current = L.layerGroup().addTo(map);
+    }
+
+    const map = mapInstanceRef.current;
+    const layerGroup = polygonLayerRef.current;
+    layerGroup.clearLayers();
+
+    const normalizedCoords = normalizeCoordinates(field.coordinates);
+
+    if (normalizedCoords.length >= 3) {
+      const soilHex = getSoilHex(field.soil_color || field.soilColor);
+
+      const poly = L.polygon(normalizedCoords, {
+        color: '#16a34a',
+        weight: 3,
+        fillColor: soilHex,
+        fillOpacity: 0.35,
+      }).addTo(layerGroup);
+
+      // Inner dashed accent
+      L.polygon(normalizedCoords, {
+        color: '#ffffff',
+        weight: 1.5,
+        dashArray: '5, 5',
+        fill: false,
+        interactive: false,
+      }).addTo(layerGroup);
+
+      poly.bindTooltip(field.name || 'Field Boundary', {
+        permanent: true,
+        direction: 'center',
+        className: 'bg-white px-2 py-1 text-xs font-semibold rounded shadow-sm text-gray-800 border border-gray-200',
+      });
+
       try {
-        await googleMapsLoader.loadGoogleMaps(['geometry']);
-        initMap();
-      } catch (error) {
-        setError("Failed to load Google Maps. Please check your internet connection.");
+        const bounds = poly.getBounds();
+        if (bounds.isValid()) {
+          map.fitBounds(bounds, { padding: [50, 50], maxZoom: 18 });
+        }
+      } catch (err) {
+        console.warn('Could not fit bounds on field polygon:', err);
       }
-    };
+    } else if (normalizedCoords.length > 0) {
+      // If single point or invalid polygon
+      const [lat, lng] = normalizedCoords[0];
+      L.marker([lat, lng]).addTo(layerGroup).bindPopup(field.name);
+      map.setView([lat, lng], 15);
+    }
 
-    loadMaps();
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 200);
+
+    return () => {
+      // Leave map instance cleanup to component unmount
+    };
   }, [field]);
 
-  const initMap = () => {
-    if (!mapRef.current || !field || !field.coordinates || field.coordinates.length < 3) return;
-    
-    // Calculate the center of the polygon
-    const bounds = new window.google.maps.LatLngBounds();
-    field.coordinates.forEach(coord => {
-      bounds.extend(new window.google.maps.LatLng(coord.lat, coord.lng));
-    });
-    
-    const mapInstance = new window.google.maps.Map(mapRef.current, {
-      center: bounds.getCenter(),
-      zoom: 15,
-      mapTypeId: 'hybrid',
-      mapTypeControl: true,
-      streetViewControl: false,
-      fullscreenControl: true
-    });
-    
-    // Create the polygon from field coordinates
-    const polygonPath = field.coordinates.map(coord => ({
-      lat: coord.lat,
-      lng: coord.lng
-    }));
-    
-    const fieldPolygon = new window.google.maps.Polygon({
-      paths: polygonPath,
-      strokeColor: '#2563eb',
-      strokeOpacity: 0.8,
-      strokeWeight: 2,
-      fillColor: '#2563eb',
-      fillOpacity: 0.35,
-      editable: false
-    });
-    
-    fieldPolygon.setMap(mapInstance);
-    mapInstance.fitBounds(bounds);
-    
-    setMap(mapInstance);
-    setPolygon(fieldPolygon);
+  // Clean up map on unmount
+  useEffect(() => {
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleDeleteField = async () => {
+    if (!window.confirm(`Are you sure you want to delete "${field.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeleting(true);
+    try {
+      const res = await fetch(`${API_URLS.FIELDS}/${field.id}`, {
+        method: 'DELETE',
+      });
+
+      if (!res.ok) {
+        throw new Error(`Failed to delete field: ${res.statusText}`);
+      }
+
+      if (refreshFields) {
+        await refreshFields();
+      }
+
+      navigate('/field-list');
+    } catch (err) {
+      alert(`Error deleting field: ${err.message}`);
+      setDeleting(false);
+    }
   };
 
   // Calculate field area in hectares
   const calculateFieldArea = (coordinates) => {
-    if (!coordinates || coordinates.length < 3) return 0;
+    const coords = normalizeCoordinates(coordinates);
+    if (!coords || coords.length < 3) return 0;
 
-    // Implementation of the Shoelace formula to calculate polygon area
     let area = 0;
-    for (let i = 0; i < coordinates.length; i++) {
-      const j = (i + 1) % coordinates.length;
-      area += coordinates[i].lat * coordinates[j].lng;
-      area -= coordinates[j].lat * coordinates[i].lng;
+    for (let i = 0; i < coords.length; i++) {
+      const j = (i + 1) % coords.length;
+      area += coords[i][0] * coords[j][1];
+      area -= coords[j][0] * coords[i][1];
     }
 
     area = Math.abs(area) / 2;
-    
-    // Convert square degrees to hectares (very approximate, varies by latitude)
-    const degreeToMeter = 111319.9; // At equator, varies by latitude
+    const degreeToMeter = 111319.9;
     const squareMetersToHectares = 0.0001;
-    
     return area * Math.pow(degreeToMeter, 2) * squareMetersToHectares;
   };
 
   return (
-    <div className="field-detail-page bg-white rounded-lg shadow-md">
+    <div className="field-detail-page bg-white rounded-lg shadow-md max-w-7xl mx-auto my-4">
       {loading ? (
-        <div className="text-center py-12">
+        <div className="text-center py-16">
           <FontAwesomeIcon icon={faSpinner} spin className="text-4xl text-green-600 mb-4" />
-          <p>Loading field details...</p>
+          <p className="text-gray-600">Loading field details...</p>
         </div>
       ) : error ? (
-        <div className="bg-red-50 text-red-700 p-6 rounded-lg flex items-center">
-          <FontAwesomeIcon icon={faExclamationTriangle} className="text-3xl mr-4" />
+        <div className="bg-red-50 text-red-700 p-8 rounded-lg flex items-start gap-4 m-6 border border-red-200">
+          <FontAwesomeIcon icon={faExclamationTriangle} className="text-3xl text-red-500 mt-1" />
           <div>
-            <h2 className="font-bold mb-1">Error</h2>
-            <p>{error}</p>
-            <Link to="/field-list" className="text-red-700 font-medium mt-2 inline-block hover:underline">
-              &larr; Back to fields list
+            <h2 className="font-bold text-lg mb-1">Field Not Found</h2>
+            <p className="text-sm text-red-600 mb-4">{error}</p>
+            <Link to="/field-list" className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors">
+              <FontAwesomeIcon icon={faArrowLeft} /> Back to My Fields
             </Link>
           </div>
         </div>
       ) : field ? (
         <>
           <div className="field-header p-6 border-b border-gray-200">
-            <div className="flex justify-between items-center">
+            <div className="flex flex-wrap justify-between items-center gap-4">
               <div className="flex items-center">
-                <Link to="/field-list" className="mr-4 text-gray-500 hover:text-gray-700">
+                <Link to="/field-list" className="mr-4 text-gray-500 hover:text-gray-700 text-lg transition-colors" title="Back to fields">
                   <FontAwesomeIcon icon={faArrowLeft} />
                 </Link>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-800">{field.name}</h1>
-                  <p className="text-gray-600">{field.location}</p>
+                  <h1 className="text-2xl font-bold text-gray-900">{field.name}</h1>
+                  <p className="text-gray-500 text-sm flex items-center gap-1 mt-0.5">
+                    <FontAwesomeIcon icon={faLocationDot} className="text-gray-400" />
+                    {field.location}
+                  </p>
                 </div>
               </div>
-              <div className="flex space-x-3">
+              <div className="flex items-center gap-2">
                 <Link 
                   to={`/edit-field/${field.id}`}
-                  className="btn bg-blue-600 hover:bg-blue-700 text-white py-1.5 px-3 rounded flex items-center"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm"
                 >
-                  <FontAwesomeIcon icon={faEdit} className="mr-1" />
-                  Edit
+                  <FontAwesomeIcon icon={faEdit} />
+                  <span>Edit Field</span>
                 </Link>
                 <button 
-                  className="btn bg-red-600 hover:bg-red-700 text-white py-1.5 px-3 rounded flex items-center"
-                  onClick={() => {
-                    if (confirm('Are you sure you want to delete this field?')) {
-                      // Implement delete functionality here
-                      window.location.href = '/field-list';
-                    }
-                  }}
+                  type="button"
+                  disabled={deleting}
+                  onClick={handleDeleteField}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm disabled:opacity-50"
                 >
-                  <FontAwesomeIcon icon={faTrash} className="mr-1" />
-                  Delete
+                  <FontAwesomeIcon icon={deleting ? faSpinner : faTrash} spin={deleting} />
+                  <span>{deleting ? 'Deleting...' : 'Delete'}</span>
                 </button>
               </div>
             </div>
@@ -179,63 +282,88 @@ const FieldDetail = () => {
           
           <div className="field-body grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
             <div className="field-info lg:col-span-1 space-y-6">
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h2 className="font-semibold text-lg text-gray-800 mb-3">Field Information</h2>
-                <div className="space-y-3">
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
+                <h2 className="font-semibold text-base text-gray-800 mb-4 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faLayerGroup} className="text-emerald-600" />
+                  Field Information
+                </h2>
+                <div className="space-y-3.5 text-sm">
                   <div>
-                    <h3 className="text-sm text-gray-500">Field Name</h3>
-                    <p className="font-medium">{field.name}</p>
+                    <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Field Name</span>
+                    <span className="font-semibold text-gray-900">{field.name}</span>
                   </div>
                   <div>
-                    <h3 className="text-sm text-gray-500">Location</h3>
-                    <p className="font-medium">{field.location}</p>
+                    <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Location</span>
+                    <span className="font-medium text-gray-800">{field.location}</span>
                   </div>
                   <div>
-                    <h3 className="text-sm text-gray-500">Created Date</h3>
-                    <p className="font-medium">{new Date(field.createdAt).toLocaleDateString()}</p>
+                    <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Primary Crop</span>
+                    <span className="inline-flex items-center gap-1.5 mt-0.5 px-2.5 py-1 bg-emerald-50 text-emerald-800 rounded-md font-semibold text-xs border border-emerald-200">
+                      <FontAwesomeIcon icon={faSeedling} className="text-emerald-600" />
+                      {field.crop || 'Not specified'}
+                    </span>
                   </div>
                   <div>
-                    <h3 className="text-sm text-gray-500">Field Size</h3>
-                    <p className="font-medium">{calculateFieldArea(field.coordinates).toFixed(2)} hectares</p>
+                    <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Field State</span>
+                    <span className="font-medium text-gray-800">{field.field_state || 'Standard Farm Field'}</span>
                   </div>
                   <div>
-                    <h3 className="text-sm text-gray-500">Crop</h3>
-                    <p className="font-medium">{field.crop || 'Not specified'}</p>
+                    <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Field Area</span>
+                    <span className="font-semibold text-gray-900 text-base">
+                      {calculateFieldArea(field.coordinates).toFixed(2)} ha
+                      <span className="text-xs font-normal text-gray-500 ml-1.5">
+                        ({(calculateFieldArea(field.coordinates) * 2.47105).toFixed(2)} acres)
+                      </span>
+                    </span>
                   </div>
                   {field.soil_color && (
                     <div>
-                      <h3 className="text-sm text-gray-500">Soil Color & Type</h3>
-                      <div className="flex items-center mt-1 gap-2">
+                      <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Soil Color & Type</span>
+                      <div className="flex items-center mt-1.5 gap-2">
                         <span 
                           className="w-4 h-4 rounded-full border border-gray-300 shadow-xs flex-shrink-0" 
-                          style={{ 
-                            backgroundColor: field.soil_color.match(/#[0-9a-fA-F]{3,6}/)?.[0] || '#4A3728' 
-                          }}
-                        ></span>
-                        <p className="font-medium text-gray-800">{field.soil_color}</p>
+                          style={{ backgroundColor: getSoilHex(field.soil_color) }}
+                        />
+                        <span className="font-medium text-gray-800">{field.soil_color}</span>
                       </div>
+                    </div>
+                  )}
+                  {field.createdAt && (
+                    <div>
+                      <span className="text-xs text-gray-400 uppercase tracking-wider block font-medium">Created On</span>
+                      <span className="text-gray-600 flex items-center gap-1.5 mt-0.5">
+                        <FontAwesomeIcon icon={faCalendarDays} className="text-gray-400 text-xs" />
+                        {new Date(field.createdAt).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
                     </div>
                   )}
                 </div>
               </div>
               
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <h2 className="font-semibold text-lg text-gray-800 mb-3">Coordinates</h2>
-                <div className="overflow-y-auto max-h-56">
-                  <table className="w-full text-sm">
-                    <thead className="border-b">
+              <div className="bg-gray-50 p-5 rounded-xl border border-gray-100">
+                <h2 className="font-semibold text-base text-gray-800 mb-3 flex items-center gap-2">
+                  <FontAwesomeIcon icon={faLocationDot} className="text-blue-600" />
+                  Boundary Coordinates ({normalizeCoordinates(field.coordinates).length} points)
+                </h2>
+                <div className="overflow-y-auto max-h-56 rounded-lg border border-gray-200 bg-white">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-100 border-b border-gray-200 text-gray-600">
                       <tr>
-                        <th className="text-left py-2">Point</th>
-                        <th className="text-left py-2">Latitude</th>
-                        <th className="text-left py-2">Longitude</th>
+                        <th className="text-left py-2 px-3 font-semibold">#</th>
+                        <th className="text-left py-2 px-3 font-semibold">Latitude</th>
+                        <th className="text-left py-2 px-3 font-semibold">Longitude</th>
                       </tr>
                     </thead>
-                    <tbody>
-                      {field.coordinates.map((point, index) => (
-                        <tr key={index} className="border-b border-gray-100">
-                          <td className="py-2">{index + 1}</td>
-                          <td className="py-2">{point.lat.toFixed(6)}</td>
-                          <td className="py-2">{point.lng.toFixed(6)}</td>
+                    <tbody className="divide-y divide-gray-100">
+                      {normalizeCoordinates(field.coordinates).map(([lat, lng], index) => (
+                        <tr key={index} className="hover:bg-gray-50">
+                          <td className="py-2 px-3 font-medium text-gray-400">{index + 1}</td>
+                          <td className="py-2 px-3 text-gray-700 font-mono">{lat.toFixed(6)}</td>
+                          <td className="py-2 px-3 text-gray-700 font-mono">{lng.toFixed(6)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -244,27 +372,21 @@ const FieldDetail = () => {
               </div>
             </div>
             
-            <div className="field-map lg:col-span-2">
+            <div className="field-map lg:col-span-2 flex flex-col">
               <div 
                 ref={mapRef} 
-                className="w-full h-96 lg:h-full min-h-[500px] rounded-lg shadow-inner"
-              ></div>
+                className="w-full h-96 lg:h-full min-h-[500px] rounded-xl overflow-hidden border border-gray-200 shadow-inner z-0"
+              />
             </div>
           </div>
           
-          <div className="field-footer p-6 border-t border-gray-200 bg-gray-50">
-            <div className="flex justify-between items-center">
-              <div>
-                <Link to="/field-list" className="text-green-600 hover:text-green-700 font-medium">
-                  &larr; Back to All Fields
-                </Link>
-              </div>
-              <div>
-                <Link to="/" className="text-blue-600 hover:text-blue-700 font-medium">
-                  View in Dashboard
-                </Link>
-              </div>
-            </div>
+          <div className="field-footer p-6 border-t border-gray-200 bg-gray-50 flex justify-between items-center rounded-b-lg">
+            <Link to="/field-list" className="text-sm font-medium text-emerald-700 hover:text-emerald-800 flex items-center gap-1.5 transition-colors">
+              <FontAwesomeIcon icon={faArrowLeft} /> Back to All Fields
+            </Link>
+            <Link to="/dashboard" className="text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors">
+              View on Dashboard &rarr;
+            </Link>
           </div>
         </>
       ) : null}

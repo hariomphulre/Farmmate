@@ -98,15 +98,53 @@ export const formatAuthError = (error) => {
 };
 
 /**
- * Stores authentication token securely
+ * Stores authentication token securely across standard keys
  * @param {string} token - JWT token
- * @param {boolean} remember - Whether to persist token
+ * @param {boolean} remember - Whether to persist token in localStorage
  */
-export const storeAuthToken = (token, remember = false) => {
+export const storeAuthToken = (token, remember = true) => {
+  if (!token) return;
   if (remember) {
     localStorage.setItem('authToken', token);
+    localStorage.setItem('token', token);
+    sessionStorage.removeItem('authToken');
+    sessionStorage.removeItem('token');
   } else {
     sessionStorage.setItem('authToken', token);
+    sessionStorage.setItem('token', token);
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('token');
+  }
+};
+
+/**
+ * Stores user object securely across standard storage
+ * @param {object} user - User object
+ * @param {boolean} remember - Whether to persist user in localStorage
+ */
+export const storeUser = (user, remember = true) => {
+  if (!user) return;
+  const userJson = JSON.stringify(user);
+  if (remember) {
+    localStorage.setItem('user', userJson);
+    sessionStorage.removeItem('user');
+  } else {
+    sessionStorage.setItem('user', userJson);
+    localStorage.removeItem('user');
+  }
+};
+
+/**
+ * Retrieves stored user object
+ * @returns {object|null} - Parsed user object or null
+ */
+export const getStoredUser = () => {
+  const raw = localStorage.getItem('user') || sessionStorage.getItem('user') || localStorage.getItem('userData');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
   }
 };
 
@@ -115,49 +153,71 @@ export const storeAuthToken = (token, remember = false) => {
  * @returns {string|null} - Stored token or null
  */
 export const getAuthToken = () => {
-  return localStorage.getItem('authToken') || sessionStorage.getItem('authToken');
+  return localStorage.getItem('authToken') || 
+         sessionStorage.getItem('authToken') ||
+         localStorage.getItem('token') ||
+         sessionStorage.getItem('token');
 };
 
 /**
- * Removes stored authentication token
+ * Removes all stored authentication data
  */
 export const removeAuthToken = () => {
   localStorage.removeItem('authToken');
   sessionStorage.removeItem('authToken');
+  localStorage.removeItem('token');
+  sessionStorage.removeItem('token');
+  localStorage.removeItem('user');
+  sessionStorage.removeItem('user');
+  localStorage.removeItem('userData');
+  sessionStorage.removeItem('userData');
 };
 
 /**
- * Checks if user is authenticated
+ * Decodes JWT token payload safely handling base64url and UTF-8
+ * @param {string} token - JWT token
+ * @returns {object|null} - Decoded payload or null
+ */
+export const decodeToken = (token) => {
+  try {
+    if (!token || typeof token !== 'string') return null;
+    const parts = token.split('.');
+    if (parts.length !== 3) return null;
+    
+    const base64Url = parts[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Checks if user is authenticated (token exists and not expired)
  * @returns {boolean} - True if authenticated
  */
 export const isAuthenticated = () => {
   const token = getAuthToken();
   if (!token) return false;
 
-  try {
-    // Basic JWT token validation (decode without verification for client-side check)
-    const payload = JSON.parse(atob(token.split('.')[1]));
+  const payload = decodeToken(token);
+  if (!payload) return false;
+
+  // If token has exp timestamp, check expiration against current time
+  if (payload.exp) {
     const now = Date.now() / 1000;
-    
-    // Check if token is not expired
     return payload.exp > now;
-  } catch (error) {
-    return false;
   }
+
+  return true;
 };
 
-/**
- * Decodes JWT token payload
- * @param {string} token - JWT token
- * @returns {object|null} - Decoded payload or null
- */
-export const decodeToken = (token) => {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch (error) {
-    return null;
-  }
-};
 
 /**
  * Creates a secure random string for state parameter

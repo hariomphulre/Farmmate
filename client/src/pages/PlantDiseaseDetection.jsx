@@ -15,7 +15,11 @@ import {
   ShieldCheck,
   Clock,
   X,
+  Camera,
+  RotateCw,
+  RefreshCw,
 } from 'lucide-react';
+
 
 // ── Supported crops with their display info ──────────────────────────────────
 const CROPS = [
@@ -70,9 +74,152 @@ const PlantDiseaseDetection = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen]   = useState(false);
   const fileInputRef = useRef(null);
+  const cameraInputRef = useRef(null);
   const dropdownRef  = useRef(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
+
+  // ── Camera state ─────────────────────────────────────────────────────────
+  const [isCameraOpen, setIsCameraOpen]     = useState(false);
+  const [cameraLoading, setCameraLoading]   = useState(false);
+  const [cameraError, setCameraError]       = useState(null);
+  const [facingMode, setFacingMode]         = useState('environment'); // 'environment' (back) | 'user' (front)
+  const [capturedImage, setCapturedImage]   = useState(null);
 
   const userId = getUserId();
+
+  // ── Stop camera helper ───────────────────────────────────────────────────
+  const stopCameraStream = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
+  }, []);
+
+  // ── Camera stream lifecycle ──────────────────────────────────────────────
+  useEffect(() => {
+    if (!isCameraOpen) return;
+    let isActive = true;
+
+    const startLiveCamera = async () => {
+      setCameraLoading(true);
+      setCameraError(null);
+      setCapturedImage(null);
+      stopCameraStream();
+
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('Live camera is not supported on this browser.');
+        }
+
+        let stream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+              facingMode: { ideal: facingMode },
+              width: { ideal: 1280 },
+              height: { ideal: 720 },
+            },
+            audio: false,
+          });
+        } catch {
+          // Fallback to default camera if requested mode fails
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false,
+          });
+        }
+
+        if (!isActive) {
+          stream.getTracks().forEach((t) => t.stop());
+          return;
+        }
+
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          await videoRef.current.play().catch(() => {});
+        }
+      } catch (err) {
+        if (!isActive) return;
+        let msg = 'Could not access camera.';
+        if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+          msg = 'Camera permission was denied. Please allow camera permissions in your browser or use native camera below.';
+        } else if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+          msg = 'No camera device found on this system.';
+        } else if (err.message) {
+          msg = err.message;
+        }
+        setCameraError(msg);
+      } finally {
+        if (isActive) setCameraLoading(false);
+      }
+    };
+
+    startLiveCamera();
+
+    return () => {
+      isActive = false;
+      stopCameraStream();
+    };
+  }, [isCameraOpen, facingMode, stopCameraStream]);
+
+  const closeCamera = () => {
+    stopCameraStream();
+    setIsCameraOpen(false);
+    setCapturedImage(null);
+    setCameraError(null);
+  };
+
+  const toggleFacingMode = () => {
+    setFacingMode((prev) => (prev === 'environment' ? 'user' : 'environment'));
+  };
+
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+
+    if (facingMode === 'user') {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+    setCapturedImage(dataUrl);
+    video.pause();
+  };
+
+  const retakePhoto = () => {
+    setCapturedImage(null);
+    if (videoRef.current && streamRef.current) {
+      videoRef.current.play().catch(() => {});
+    }
+  };
+
+  const confirmPhoto = () => {
+    if (!capturedImage) return;
+    fetch(capturedImage)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const file = new File([blob], `leaf_photo_${Date.now()}.jpg`, { type: 'image/jpeg' });
+        processFile(file);
+        closeCamera();
+      })
+      .catch((err) => {
+        console.error('Failed to process captured image:', err);
+        setError('Failed to process captured image.');
+        closeCamera();
+      });
+  };
+
 
   // ── Fetch history ────────────────────────────────────────────────────────
   const fetchHistory = useCallback(async () => {
@@ -184,8 +331,11 @@ const PlantDiseaseDetection = () => {
     setDetections([]);
     setError(null);
     setPlantName('');
+    setCapturedImage(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+    if (cameraInputRef.current) cameraInputRef.current.value = '';
   };
+
 
   const selectedCrop = CROPS.find((c) => c.value === plantName);
 
@@ -276,6 +426,12 @@ const PlantDiseaseDetection = () => {
                 )}
               </div>
 
+              {/* Drop zone label & action buttons */}
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">Upload Leaf Image</label>
+                
+              </div>
+
               {/* Drop zone */}
               <div
                 className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
@@ -289,29 +445,68 @@ const PlantDiseaseDetection = () => {
               >
                 {previewUrl ? (
                   <div className="space-y-3">
-                    <img src={previewUrl} alt="Selected leaf" className="max-h-52 mx-auto rounded-lg shadow-sm" />
+                    <img src={previewUrl} alt="Selected leaf" className="max-h-56 mx-auto rounded-lg shadow-sm object-contain" />
                     <div className="text-sm text-gray-600 flex items-center justify-center gap-1.5">
                       <CheckCircle2 size={14} className="text-emerald-500" />
-                      {selectedFile?.name}
+                      <span className="font-medium text-gray-800">{selectedFile?.name || 'Leaf photo ready'}</span>
+                    </div>
+                    <div className="flex items-center justify-center gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="text-xs text-gray-600 hover:text-gray-900 bg-white border border-gray-200 px-3 py-1.5 rounded-lg shadow-2xs transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        <Upload size={13} /> Change File
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsCameraOpen(true)}
+                        className="text-xs text-emerald-800 hover:text-emerald-950 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        <Camera size={13} /> Retake with Camera
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="grid h-14 w-14 place-items-center rounded-2xl bg-gray-100 mx-auto">
-                      <ImageIcon size={24} className="text-gray-400" />
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gray-100 text-gray-400">
+                        <ImageIcon size={22} />
+                      </div>
+                      <div className="text-gray-300 font-light">or</div>
+                      <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gray-100 text-gray-400">
+                        <Camera size={22} />
+                      </div>
                     </div>
                     <div>
-                      <p className="text-gray-600">
-                        Drag and drop your leaf image, or{' '}
-                        <span className="text-[#052e16] font-medium cursor-pointer">browse</span>
+                      <p className="text-gray-700 font-medium text-sm">
+                        Drag and drop your leaf photo, or choose an option:
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, JPEG · Max 10 MB</p>
+                      <div className="flex items-center justify-center gap-2.5 mt-3">
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
+                          className="px-3.5 py-1.5 text-xs font-semibold rounded-xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-800 shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Upload size={13} className="text-gray-500" /> Browse Image
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); setIsCameraOpen(true); }}
+                          className="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-[#052e16] hover:bg-[#06401e] text-white shadow-xs transition-all flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Camera size={13} /> Take Photo
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-400 mt-2.5">PNG, JPG, JPEG · Max 10 MB · Supports phone & desktop cameras</p>
                     </div>
                   </div>
                 )}
               </div>
 
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+              <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileSelect} className="hidden" />
+
 
               {/* Action button */}
               <button
@@ -522,8 +717,173 @@ const PlantDiseaseDetection = () => {
         </div>
       </div>
 
+      {/* ── CAMERA MODAL ──────────────────────────────────────────────── */}
+      {isCameraOpen && (
+
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 animate-in fade-in duration-200">
+          <div className="relative bg-slate-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-800 flex flex-col">
+            
+            {/* Modal Header */}
+            <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-800 bg-slate-900">
+              <div className="flex items-center gap-2.5">
+                <div className="grid h-8 w-8 place-items-center rounded-lg bg-emerald-500/20 text-emerald-400">
+                  <Camera size={18} />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-white leading-tight">Take Leaf Photo</h3>
+                  <p className="text-[11px] text-slate-400">Position leaf in good lighting</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={closeCamera}
+                className="text-slate-400 hover:text-white p-1.5 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
+                aria-label="Close camera"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Viewfinder View */}
+            <div className="relative w-full aspect-[4/3] bg-black flex items-center justify-center overflow-hidden">
+              {/* Spinner */}
+              {cameraLoading && (
+                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/70 gap-2">
+                  <Loader2 size={32} className="animate-spin text-emerald-400" />
+                  <p className="text-xs text-slate-300">Starting camera...</p>
+                </div>
+              )}
+
+              {/* Error Screen */}
+              {cameraError ? (
+                <div className="p-6 text-center max-w-sm">
+                  <div className="grid h-12 w-12 place-items-center rounded-full bg-red-500/20 text-red-400 mx-auto mb-3">
+                    <AlertTriangle size={24} />
+                  </div>
+                  <p className="text-xs text-red-200 font-medium mb-4">{cameraError}</p>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        closeCamera();
+                        cameraInputRef.current?.click();
+                      }}
+                      className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <Camera size={15} /> Use Device Camera Directly
+                    </button>
+                    <button
+                      type="button"
+                      onClick={toggleFacingMode}
+                      className="w-full py-1.5 px-3 text-[11px] text-slate-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      Try switching camera
+                    </button>
+                  </div>
+                </div>
+              ) : capturedImage ? (
+                /* Captured Frame Preview */
+                <div className="relative w-full h-full flex items-center justify-center bg-black">
+                  <img src={capturedImage} alt="Captured preview" className="w-full h-full object-contain" />
+                  <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-medium text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
+                    <CheckCircle2 size={13} /> Photo Captured
+                  </div>
+                </div>
+              ) : (
+                /* Live Stream Feed */
+                <>
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Visual Guide Box */}
+                  <div className="pointer-events-none absolute inset-6 sm:inset-8 border-2 border-dashed border-emerald-400/50 rounded-2xl flex flex-col items-center justify-between p-2">
+                    <span className="text-[10px] font-medium text-white/90 bg-black/60 px-2 py-0.5 rounded-full backdrop-blur-xs">
+                      Focus on diseased leaf area
+                    </span>
+                    <div className="w-4 h-4 border-b-2 border-r-2 border-emerald-400/80 rounded-br-sm self-end" />
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Bottom Controls */}
+            <div className="p-4 bg-slate-900 border-t border-slate-800 flex items-center justify-between">
+              {!cameraError && !capturedImage ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={toggleFacingMode}
+                    className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                    title="Flip camera"
+                  >
+                    <RotateCw size={13} />
+                    Flip
+                  </button>
+
+                  {/* Circular Shutter Button */}
+                  <button
+                    type="button"
+                    onClick={capturePhoto}
+                    disabled={cameraLoading}
+                    className="relative p-1 rounded-full border-4 border-white/80 hover:border-emerald-400 transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
+                    aria-label="Capture photo"
+                  >
+                    <div className="w-12 h-12 rounded-full bg-white hover:bg-emerald-400 transition-colors" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      closeCamera();
+                      cameraInputRef.current?.click();
+                    }}
+                    className="px-3 py-2 text-xs text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                    title="Open native camera app"
+                  >
+                    Native App
+                  </button>
+                </>
+              ) : capturedImage ? (
+                <div className="w-full flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={retakePhoto}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <RotateCw size={14} /> Retake
+                  </button>
+                  <button
+                    type="button"
+                    onClick={confirmPhoto}
+                    className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-lg shadow-emerald-950 cursor-pointer"
+                  >
+                    <CheckCircle2 size={14} /> Use This Photo
+                  </button>
+                </div>
+              ) : (
+                <div className="w-full flex justify-end">
+                  <button
+                    type="button"
+                    onClick={closeCamera}
+                    className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition-colors cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
+              )}
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
+
 };
 
 export default PlantDiseaseDetection;

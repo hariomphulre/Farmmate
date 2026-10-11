@@ -1,5 +1,7 @@
 import { createContext, useState, useContext, useEffect } from 'react';
 import { fetchFields, updateManipalCoordinates } from '../services/dataService';
+import { isAuthenticated } from '../utils/authUtils';
+
 
 // Create the context with default values
 const AppContext = createContext({
@@ -43,6 +45,11 @@ export const AppProvider = ({ children }) => {
 
   // Fetch fields from backend on component mount
   useEffect(() => {
+    if (!isAuthenticated()) {
+      setLoading(false);
+      return;
+    }
+
     const loadFields = async () => {
       try {
         setLoading(true);
@@ -66,6 +73,7 @@ export const AppProvider = ({ children }) => {
     
     loadFields();
   }, []);
+
   
   // Function to add a new field (will be replaced with API call in production)
   const addField = (field) => {

@@ -1,9 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FcGoogle } from "react-icons/fc";
 import { Lock, Mail, Eye, EyeOff, Check, User } from "lucide-react";
 import config from '../config';
 import GoogleSignInButton from '../components/GoogleSignInButton';
+import { useAuth } from '../context/AuthContext';
 import logo from './logo.png';
+
 
 const API_BASE_URL = config.API_BASE_URL;
 const BRAND_GREEN = "#052e16";
@@ -88,6 +91,10 @@ const OTPInput = ({ otp, setOtp }) => {
 };
 
 const Auth = () => {
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [view, setView] = useState('signin'); // 'signin', 'signup', 'forgot'
   
   const [loading, setLoading] = useState(false);
@@ -104,6 +111,15 @@ const Auth = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(true);
+
+  const navigateAfterAuth = (userObj) => {
+    const attemptedPath = location.state?.from?.pathname;
+    const userRole = (userObj?.user_type || userObj?.role || usertype || '').toLowerCase();
+    const defaultDashboard = userRole === 'trader' ? '/trader/dashboard' : '/dashboard';
+    const target = (attemptedPath && attemptedPath !== '/') ? attemptedPath : defaultDashboard;
+    navigate(target, { replace: true });
+  };
+
 
   const [otpSent, setOtpSent] = useState(false);
   const [timer, setTimer] = useState(0);
@@ -250,15 +266,14 @@ const Auth = () => {
       if (!res.ok) {
         setErrors({ general: data.message || 'Google authentication failed.' });
       } else {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        login(data.token, data.user, true);
         
         if (window.grecaptcha && recaptchaRef.current) {
           window.grecaptcha.reset();
         }
         
         alert(`Google authentication successful! Welcome ${data.user.name}!`);
-        window.location.href = data.user.user_type === "Farmer" ? '/dashboard' : '/trader';
+        navigateAfterAuth(data.user);
       }
     } catch (error) {
       setErrors({ general: 'Server error during Google authentication.' });
@@ -296,9 +311,8 @@ const Auth = () => {
       if (!res.ok) {
         setErrors({ general: data.message || 'Login failed' });
       } else {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-        window.location.href = data.user.user_type === "Farmer" ? '/dashboard' : '/trader';
+        login(data.token, data.user, rememberDevice);
+        navigateAfterAuth(data.user);
       }
     } catch (err) {
       setErrors({ general: 'Server error. Please try again.' });
@@ -364,10 +378,9 @@ const Auth = () => {
       if (!res.ok) {
         setErrors({ general: data.message || 'Verification failed' });
       } else {
-        localStorage.setItem('authToken', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        login(data.token, data.user, true);
         alert("Sign up successful!");
-        window.location.href = data.user.user_type === "Farmer" ? '/dashboard' : '/trader';
+        navigateAfterAuth(data.user);
       }
     } catch (err) {
       setErrors({ general: 'Server error. Please try again.' });
@@ -375,6 +388,7 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
 
   // Flow: FORGOT PASSWORD (Init -> Verify)
   const handleForgotInit = async (e) => {
