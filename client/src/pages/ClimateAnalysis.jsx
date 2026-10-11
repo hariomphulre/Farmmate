@@ -4,7 +4,6 @@ import {
   faCloudSunRain, 
   faDroplet, 
   faLeaf, 
-  faFire, 
   faCloudRain, 
   faTriangleExclamation,
   faInfoCircle,
@@ -22,7 +21,6 @@ import WeatherAnalysis from '../components/climate/WeatherAnalysis';
 import VegetationAnalysis from '../components/climate/VegetationAnalysis';
 import WaterIrrigationAnalysis from '../components/climate/WaterIrrigationAnalysis';
 import SoilLandAnalysis from '../components/climate/SoilLandAnalysis';
-import FireAnalysis from '../components/climate/FireAnalysis';
 
 // Import Chart.js components
 import { Line } from 'react-chartjs-2';
@@ -65,7 +63,7 @@ const ClimateAnalysis = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    if (tab && ['weather', 'vegetation', 'water', 'soil', 'fire', 'rainfall'].includes(tab)) {
+    if (tab && ['weather', 'vegetation', 'water', 'soil', 'rainfall'].includes(tab)) {
       setActiveTab(tab);
     }
   }, [location.search]);
@@ -152,18 +150,6 @@ const ClimateAnalysis = () => {
             <FontAwesomeIcon icon={faCloudRain} className="mr-2" />
             Rainfall & Monsoon
           </button>
-          
-          <button
-            onClick={() => setActiveTab('fire')}
-            className={`whitespace-nowrap py-3 px-1 border-b-2 font-medium text-sm ${
-              activeTab === 'fire'
-                ? 'border-red-500 text-red-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <FontAwesomeIcon icon={faFire} className="mr-2" />
-            Fire & Hazards
-          </button>
         </nav>
       </div>
 
@@ -189,10 +175,6 @@ const ClimateAnalysis = () => {
         
         {activeTab === 'water' && (
           <WaterIrrigationAnalysis dateRange={dateRange} />
-        )}
-        
-        {activeTab === 'fire' && (
-          <FireAnalysis dateRange={dateRange} />
         )}
         
         {activeTab === 'rainfall' && (

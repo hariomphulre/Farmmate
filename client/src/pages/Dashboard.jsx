@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
+import { LuSquareSplitHorizontal } from "react-icons/lu";
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconUrl: markerIcon,
@@ -45,6 +45,7 @@ import {
 } from '../data/zoneMap';
 import { boundsFromPolygon, createNdviDataUrl } from '../utils/ndviCanvas';
 import './Dashboard.css';
+import { MdDashboard, MdSpaceDashboard } from 'react-icons/md';
 
 const thisMonth = [0.74, 0.88, 0.84, 0.52, 0.46, 0.58];
 const lastMonth = [0.6, 0.54, 0.48, 0.56, 0.72, 0.7];
@@ -112,6 +113,7 @@ const Dashboard = () => {
   const mapRef = useRef(null);
   const miniRef = useRef(null);
   const mapObj = useRef(null);
+  const shellRef = useRef(null);
   const ndviLayer = useRef(null);
   const satLayer = useRef(null);
   const streetLayer = useRef(null);
@@ -127,6 +129,13 @@ const Dashboard = () => {
   const [showParams, setShowParams] = useState(false);
   const [isPanelOpen, setIsPanelOpen] = useState(
     typeof window !== 'undefined' ? window.innerWidth >= 1000 : true
+  );
+
+  const [panelWidth, setPanelWidth] = useState(480);
+  const [isDragging, setIsDragging] = useState(false);
+  const isDraggingRef = useRef(false);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1200
   );
 
   const [navHeight, setNavHeight] = useState(53);
@@ -154,8 +163,13 @@ const Dashboard = () => {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 1000) {
+      const w = window.innerWidth;
+      setWindowWidth(w);
+      if (w < 1000) {
         setIsPanelOpen(false);
+      } else {
+        const maxW = Math.max(340, w - 280);
+        setPanelWidth((prev) => Math.min(prev, maxW));
       }
     };
     window.addEventListener('resize', handleResize);
@@ -168,6 +182,59 @@ const Dashboard = () => {
     }, 320);
     return () => clearTimeout(timer);
   }, [isPanelOpen]);
+
+  useEffect(() => {
+    return () => {
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, []);
+
+  const handlePointerDown = (e) => {
+    if (e.button !== 0 && e.pointerType === 'mouse') return;
+    e.preventDefault();
+    setIsDragging(true);
+    isDraggingRef.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+
+    const onPointerMove = (moveEvent) => {
+      if (!isDraggingRef.current) return;
+      const shell = shellRef.current;
+      if (!shell) return;
+      const shellRect = shell.getBoundingClientRect();
+      const newWidth = shellRect.right - moveEvent.clientX;
+      const minW = 340;
+      const maxW = Math.max(minW, shellRect.width - 280);
+      const clampedWidth = Math.min(Math.max(newWidth, minW), maxW);
+      setPanelWidth(Math.round(clampedWidth));
+      mapObj.current?.invalidateSize();
+    };
+
+    const onPointerUp = () => {
+      setIsDragging(false);
+      isDraggingRef.current = false;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
+      setTimeout(() => {
+        mapObj.current?.invalidateSize();
+      }, 50);
+    };
+
+    window.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
+  };
+
+  const handleDoubleClick = () => {
+    setPanelWidth(480);
+    setTimeout(() => {
+      mapObj.current?.invalidateSize();
+    }, 50);
+  };
 
 
   const filteredZones = ZONES.filter((zone) =>
@@ -330,7 +397,7 @@ const Dashboard = () => {
       mapObj.current.removeLayer(streetLayer.current);
       satLayer.current.addTo(mapObj.current);
       setBaseLayer('satellite');
-    }3
+    }
   };
 
   const activeZoneData = ZONES.find((zone) => zone.id === activeZone) || ZONES[2];
@@ -343,7 +410,7 @@ const Dashboard = () => {
         height: `calc(100vh - ${navHeight}px)`
       }}
     >
-      <div className="zm-shell">
+      <div className="zm-shell" ref={shellRef}>
 
 
         <section className="zm-map">
@@ -357,7 +424,7 @@ const Dashboard = () => {
               title={isPanelOpen ? 'Close Result Automation' : 'Open Result Automation'}
               onClick={() => setIsPanelOpen((v) => !v)}
             >
-              <LayoutGrid size={16} />
+              <LuSquareSplitHorizontal size={16} />
             </button>
             <button
               type="button"
@@ -459,12 +526,31 @@ const Dashboard = () => {
           )}
         </section>
 
-        <aside className={`zm-panel ${isPanelOpen ? 'open' : 'closed'}`}>
+        {isPanelOpen && windowWidth >= 1000 && (
+          <div
+            className={`zm-resizer ${isDragging ? 'dragging' : ''}`}
+            onPointerDown={handlePointerDown}
+            onDoubleClick={handleDoubleClick}
+            title="Drag to resize panel, double-click to reset"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize Result Automation panel"
+          >
+            <div className="zm-resizer-line" />
+            <div className="zm-resizer-handle">
+              <span className="zm-grip-dot" />
+              <span className="zm-grip-dot" />
+              <span className="zm-grip-dot" />
+            </div>
+          </div>
+        )}
+
+        <aside
+          className={`zm-panel ${isPanelOpen ? 'open' : 'closed'} ${isDragging ? 'dragging' : ''}`}
+          style={isPanelOpen && windowWidth >= 1000 ? { width: `${panelWidth}px` } : undefined}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-lg bg-gray-900 text-white">
-                <LayoutGrid size={14} />
-              </div>
               <div>
                 <p className="text-sm font-semibold leading-tight">Result Automation</p>
                 <p className="text-[11px] text-gray-400">Agricultural Area 465</p>

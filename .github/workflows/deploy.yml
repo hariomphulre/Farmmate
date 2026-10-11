@@ -99,7 +99,7 @@ jobs:
           port: ${{ secrets.VPS_PORT || 2222 }}
           timeout: 30s
           command_timeout: 30m
-          source: "docker-compose.yml,nginx/"
+          source: "docker-compose.yml,nginx/,redis/"
           target: "CodingWorkspace/Projects/Farmmate/"
 
       - name: Pull Images and Restart Containers on VPS

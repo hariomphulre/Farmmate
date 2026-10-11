@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 # Copy all GEE scripts
 COPY jobs.py vegetation_data.py soil_data.py weather_data.py \
-     water_data.py rainfall_data.py fire_data.py ./
+     water_data.py rainfall_data.py ./
 
 # Non-root user
 RUN useradd -m -u 1001 geeuser && chown -R geeuser:geeuser /app

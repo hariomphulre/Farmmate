@@ -1,6 +1,7 @@
 const { sql } = require("../NeonSetup.js");
 const express = require("express");
 const axios = require("axios");
+const cacheService = require("../cacheService");
 const router = express.Router();
 
 router.post("/event-schedule", async (req, res) => {
@@ -19,6 +20,9 @@ router.post("/event-schedule", async (req, res) => {
     `;
     console.log("Event insert result:", result);
 
+    // Invalidate events cache upon new schedule
+    await cacheService.del("events:all");
+
     res.status(200).json({ message: "Event Scheduled Successfully", data: result });
   } catch (error) {
     console.error("Error scheduling events:", error);
@@ -26,11 +30,18 @@ router.post("/event-schedule", async (req, res) => {
   }
 });
 
-// Fetch all events
+// Fetch all events (cached for 5 minutes)
 router.get("/get-events", async (req, res) => {
   try {
+    const cacheKey = "events:all";
+    const cachedEvents = await cacheService.get(cacheKey);
+    if (cachedEvents) {
+      return res.status(200).json({ message: "Events fetched successfully", data: cachedEvents, fromCache: true });
+    }
+
     const result = await sql`SELECT * FROM events ORDER BY event_start_date ASC`;
-    console.log("Fetched events:", result);
+    await cacheService.set(cacheKey, result, 300); // 5 mins TTL
+
     res.status(200).json({ message: "Events fetched successfully", data: result });
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -40,8 +51,6 @@ router.get("/get-events", async (req, res) => {
 
 router.get("/farmer/news", async (req, res) => {
   try {
-    console.log("GET /farmer/news query:", req.query);
-
     const apiKey = process.env.NEWSDATA_API_KEY || req.query.apiKey;
     if (!apiKey) {
       console.error("Missing NewsData.io API key");
@@ -50,21 +59,24 @@ router.get("/farmer/news", async (req, res) => {
 
     const { page = 1, q } = req.query;
     const defaultQuery = "maharashtra agriculture OR maharashtra farmer OR महाराष्ट्र शेतकरी OR महाराष्ट्र कृषी";
+    const queryTerm = q && q.trim() !== "" ? q : defaultQuery;
+
+    const cacheKey = `news:trader:${page}:${encodeURIComponent(queryTerm)}`;
+    const cachedNews = await cacheService.get(cacheKey);
+    if (cachedNews) {
+      return res.status(200).json({ ...cachedNews, fromCache: true });
+    }
 
     const params = {
       apikey: apiKey,
-      q: q && q.trim() !== "" ? q : defaultQuery,
+      q: queryTerm,
       country: "IN",
       language: "hi,en,mr",
       page,
     };
 
-    console.log("NewsData.io params:", params);
-
     const url = "https://newsdata.io/api/1/news";
     const response = await axios.get(url, { params });
-
-    console.log("NewsData.io API response status:", response.status);
 
     const data = response.data || {};
     if (data.status && data.status !== "success") {
@@ -74,7 +86,6 @@ router.get("/farmer/news", async (req, res) => {
     }
 
     const results = Array.isArray(data.results) ? data.results : [];
-    console.log("NewsData.io results count:", results.length);
 
     // Normalize news articles
     const articles = results.map((item) => ({
@@ -86,12 +97,17 @@ router.get("/farmer/news", async (req, res) => {
       imageUrl: item.image_url || item.image || null,
     }));
 
-    res.status(200).json({
+    const responsePayload = {
       articles,
       total: data.totalResults || data.total_results || articles.length,
       nextPage: data.nextPage || data.next_page || null,
       page: Number(page),
-    });
+    };
+
+    // Cache for 30 minutes
+    await cacheService.set(cacheKey, responsePayload, 1800);
+
+    res.status(200).json(responsePayload);
   } catch (error) {
     console.error("Error fetching news:", error.response || error.message);
     const status = error.response?.status || 500;

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
+const cacheService = require('./cacheService');
 
 const fieldCoordsDir = path.join(__dirname, 'Field_co-ordinates');
 if (!fs.existsSync(fieldCoordsDir)) {
@@ -75,11 +76,21 @@ function calculateCentroid(points) {
   return { lat: latSum / count, lng: lngSum / count };
 }
 
-// Precise reverse geocoding from coordinates
+// Precise reverse geocoding from coordinates (cached with Redis for 7 days)
 async function reverseGeocode(lat, lng) {
   if (typeof lat !== 'number' || typeof lng !== 'number' || isNaN(lat) || isNaN(lng)) {
     return { locationName: '', details: {} };
   }
+
+  const cacheKey = `geo:${lat.toFixed(4)}:${lng.toFixed(4)}`;
+  try {
+    const cached = await cacheService.get(cacheKey);
+    if (cached) return cached;
+  } catch (e) {
+    // ignore cache failure
+  }
+
+  let result = null;
 
   // 1. Nominatim (OpenStreetMap) with zoom=18 for village/hamlet/subdistrict precision
   try {
@@ -103,14 +114,13 @@ async function reverseGeocode(lat, lng) {
       const parts = [locality, district || subdistrict, state].filter(Boolean);
       const uniqueParts = [...new Set(parts)];
       if (uniqueParts.length > 0) {
-        return {
+        result = {
           locationName: uniqueParts.join(', '),
           details: { ...addr, displayName: data.display_name }
         };
-      }
-      if (data.display_name) {
+      } else if (data.display_name) {
         const shortName = data.display_name.split(',').slice(0, 3).map(s => s.trim()).join(', ');
-        return {
+        result = {
           locationName: shortName,
           details: addr
         };
@@ -121,30 +131,39 @@ async function reverseGeocode(lat, lng) {
   }
 
   // 2. Fallback to BigDataCloud
-  try {
-    const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
-    const bdcRes = await fetch(bdcUrl, { signal: AbortSignal.timeout(5000) });
-    if (bdcRes.ok) {
-      const bdcData = await bdcRes.json();
-      const parts = [
-        bdcData.locality || bdcData.city,
-        bdcData.principalSubdivision
-      ].filter(Boolean);
-      if (parts.length > 0) {
-        return {
-          locationName: parts.join(', '),
-          details: bdcData
-        };
+  if (!result) {
+    try {
+      const bdcUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=en`;
+      const bdcRes = await fetch(bdcUrl, { signal: AbortSignal.timeout(5000) });
+      if (bdcRes.ok) {
+        const bdcData = await bdcRes.json();
+        const parts = [
+          bdcData.locality || bdcData.city,
+          bdcData.principalSubdivision
+        ].filter(Boolean);
+        if (parts.length > 0) {
+          result = {
+            locationName: parts.join(', '),
+            details: bdcData
+          };
+        }
       }
+    } catch (err) {
+      console.warn('BigDataCloud reverse geocode error:', err.message);
     }
-  } catch (err) {
-    console.warn('BigDataCloud reverse geocode error:', err.message);
   }
 
-  return {
-    locationName: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
-    details: {}
-  };
+  if (!result) {
+    result = {
+      locationName: `${lat.toFixed(5)}, ${lng.toFixed(5)}`,
+      details: {}
+    };
+  }
+
+  // Cache for 7 days (7 * 86400 = 604800s)
+  cacheService.set(cacheKey, result, 604800).catch(() => {});
+
+  return result;
 }
 
 // Save field to database (PostgreSQL + JSON filesystem)

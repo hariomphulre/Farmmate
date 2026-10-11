@@ -61,7 +61,6 @@ class JSONFileHandler(FileSystemEventHandler):
                 subprocess.Popen(['python', 'I://Projects//Climate-Resilient-Agriculture//System//server//Google_Earth_Engine//vegetation_data.py'])
                 subprocess.Popen(['python', 'I://Projects//Climate-Resilient-Agriculture//System//server//Google_Earth_Engine//water_data.py'])
                 subprocess.Popen(['python', 'I://Projects//Climate-Resilient-Agriculture//System//server//Google_Earth_Engine/rainfall_data.py'])
-                # subprocess.Popen(['python', 'I://Projects//Climate-Resilient-Agriculture//System//server//Google_Earth_Engine//fire_data.py'])
                 subprocess.Popen(['python', 'I://Projects//Climate-Resilient-Agriculture//System//server//Google_Earth_Engine//soil_data.py'])
 
         except Exception as e:

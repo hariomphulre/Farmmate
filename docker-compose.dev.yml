@@ -10,11 +10,11 @@ name: farmmate
 
 services:
 
-  # Override nginx with the Vite dev server (hot reload)
-  nginx:
+  # Override client with the Vite dev server (hot reload)
+  client:
     build:
       context: ./client
-      target: builder          # stops after npm ci — no nginx in dev
+      target: builder          # stops after npm ci — runs Vite in dev
     command: ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
     ports:
       - "5173:5173"
@@ -23,6 +23,17 @@ services:
       - ./client/public:/app/public:ro
     environment:
       VITE_API_URL: http://server:5000
+    depends_on: []
+
+  # Nginx ingress gateway (optional in dev; developers access Vite on :5173 directly)
+  nginx:
+    profiles:
+      - gateway
+
+  # Local Redis with host port exposed for debugging
+  redis:
+    ports:
+      - "127.0.0.1:6379:6379"
 
   # Server with nodemon for hot reload
   server:
@@ -33,12 +44,16 @@ services:
       - ./server:/app
     environment:
       NODE_ENV: development
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-farmmate_redis_secure_pass_2026}
     ports:
       - "5000:5000"
-    depends_on: []
+    depends_on:
+      - redis
 
-  # ML service — same image, just override workers to 1 for dev
-  ml-service:
-    command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-    volumes:
-      - ./ml-service:/app
+  # ML service — disabled for now (uncomment if running ML locally)
+  # ml-service:
+  #   command: ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+  #   volumes:
+  #     - ./ml-service:/app

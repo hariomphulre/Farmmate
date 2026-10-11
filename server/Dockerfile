@@ -27,6 +27,8 @@ COPY --from=builder /app/AuthRoutes.js ./AuthRoutes.js
 COPY --from=builder /app/NeonSetup.js ./NeonSetup.js
 COPY --from=builder /app/fieldService.js ./fieldService.js
 COPY --from=builder /app/TraderRoutes ./TraderRoutes
+COPY --from=builder /app/redisClient.js ./redisClient.js
+COPY --from=builder /app/cacheService.js ./cacheService.js
 
 # Create runtime directories that are NOT mounted as volumes
 RUN mkdir -p crop_imgs/disease detect_results/disease field_corrdinates Field_co-ordinates

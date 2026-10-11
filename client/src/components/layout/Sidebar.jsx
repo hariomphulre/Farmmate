@@ -8,14 +8,10 @@ import {
   Search,
   Bot,
   MapPin,
-  PlusCircle,
-  List,
   CloudSun,
   Cloud,
   Leaf,
   CloudRain,
-  Flame,
-  AlertTriangle,
   CloudDrizzle,
   Layers,
   Droplets,
@@ -28,14 +24,34 @@ import {
   ChevronDown,
 } from 'lucide-react';
 
+const MAIN_LINKS = [
+  { to: '/dashboard', label: 'Dashboard', icon: Home },
+  { to: '/field-list', label: 'My Fields', icon: MapPin },
+  { to: '/crop-management', label: 'Crop Management', icon: Sprout },
+  { to: '/financial-aid', label: 'Financial Aid', icon: HandCoins },
+  { to: '/market-price', label: 'Market Prices', icon: TrendingUp },
+  { to: '/plant-disease-detection', label: 'Plant Disease', icon: Search },
+  { to: '/ai-assistant', label: 'AI Assistant', icon: Bot },
+];
+
+const CLIMATE_LINKS = [
+  { to: '/climate', label: 'Weather Forecast', icon: Cloud },
+  { to: '/vegetation', label: 'Vegetation & Crop Health', icon: Leaf },
+  { to: '/water', label: 'Water Irrigation', icon: CloudRain },
+  { to: '/rainfall', label: 'Rainfall & Monsoon', icon: CloudDrizzle },
+  { to: '/soil', label: 'Soil Info', icon: Layers },
+];
+
+const IRRIGATION_LINKS = [
+  { to: '/water-management', label: 'Water Management', icon: Droplet },
+  { to: '/irrigation-schedule', label: 'Schedule & Control', icon: CalendarClock },
+];
+
 const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
   const location = useLocation();
   const [expandedMenus, setExpandedMenus] = useState({
     climate: true,
     irrigation: true,
-    pests: false,
-    crops: false,
-    fields: false
   });
   
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -49,13 +65,10 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
   }, []);
 
   useEffect(() => {
-    const climatePaths = ['/climate', '/vegetation', '/water', '/fire', '/hazards', '/rainfall', '/soil'];
-    const irrigationPaths = ['/water-management', '/irrigation-schedule'];
-
-    if (climatePaths.some(p => location.pathname === p)) {
+    if (CLIMATE_LINKS.some(link => location.pathname === link.to)) {
       setExpandedMenus(prev => ({ ...prev, climate: true }));
     }
-    if (irrigationPaths.some(p => location.pathname === p)) {
+    if (IRRIGATION_LINKS.some(link => location.pathname === link.to)) {
       setExpandedMenus(prev => ({ ...prev, irrigation: true }));
     }
   }, [location.pathname]);
@@ -76,26 +89,17 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
   };
 
   const isActive = (path) => location.pathname === path;
+  const isClimateActive = CLIMATE_LINKS.some(link => location.pathname === link.to);
+  const isIrrigationActive = IRRIGATION_LINKS.some(link => location.pathname === link.to);
 
-  // ── zm-rail–style tokens ──
+  // Style tokens using the shade of white (#eef0f3)
   const btn = 'flex items-center rounded-full transition-all duration-100 cursor-pointer';
   const idle = 'text-[#9aa3af] hover:text-[#4b5563] hover:bg-[#e5e7eb]';
-  const on   = 'bg-white text-[#374151] font-medium shadow-[0_1px_2px_rgba(15,23,42,0.08)]';
-  const subIdle = 'text-[#9aa3af] hover:text-[#4b5563] hover:bg-[#e5e7eb]';
-  const subOn   = 'bg-white text-[#374151] font-medium shadow-[0_1px_2px_rgba(15,23,42,0.08)]';
-  const expOn   = 'bg-[#e5e7eb] text-[#4b5563]';
+  const on = 'bg-white text-[#374151] font-medium shadow-[0_1px_2px_rgba(15,23,42,0.08)]';
+  const ic = (active) => (active ? 'text-[#374151]' : '');
 
-  const ic = (active) => active ? 'text-[#374151]' : '';  // icon tint when active
-
-  // collapsed sizing
   const pill = (active) =>
     `${btn} ${isCollapsed ? 'w-9 h-9 justify-center' : 'w-full px-3 py-2'} ${active ? on : idle}`;
-
-  const sub = (active) =>
-    `${btn} w-full px-3 py-1.5 text-sm ${active ? subOn : subIdle}`;
-
-  const expander = (open) =>
-    `${btn} ${isCollapsed ? 'w-9 h-9 justify-center mx-auto' : 'w-full px-3 py-2'} text-left ${open ? expOn : idle}`;
 
   return (
     <aside 
@@ -105,33 +109,28 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
       } ${isMobile ? 'w-[85vw] max-w-[300px]' : ''} ${!isMobile && isCollapsed ? 'md:w-20' : 'md:w-64'}`}
       aria-label="Sidebar"
     >
-      <div className="h-full flex flex-col justify-between overflow-y-auto pb-20 md:pb-0 overscroll-contain scroll-smooth">
+      <div className="h-full flex flex-col justify-between overflow-y-auto pb-20 md:pb-0 overscroll-contain select-none">
         <div>
-          {/* ── Header + collapse toggle ── */}
-          <div className="flex items-center justify-between py-3.5 px-4 sticky top-0 bg-white z-10">
+          {/* ── Top Collapse Toggle (Circle Space) ── */}
+          <div className="flex items-center px-4 pt-3.5 pb-1 sticky top-0 bg-white z-10">
             {isCollapsed ? (
               <button
                 onClick={toggleSidebar}
-                className="mx-auto grid h-9 w-9 place-items-center rounded-xl text-[#4b5563] hover:bg-[#e5e7eb] hover:text-[#111827] transition-colors"
+                className="mx-auto w-9 h-9 rounded-full bg-[#eef0f3] hover:bg-[#e5e7eb] text-[#4b5563] flex items-center justify-center transition-colors cursor-pointer shadow-xs active:scale-95"
                 aria-label="Expand sidebar"
                 title="Expand sidebar"
               >
-                <ChevronRight size={18} />
+                <ChevronRight size={16} />
               </button>
             ) : (
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={toggleSidebar}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-[#6b7280] hover:bg-[#e5e7eb] hover:text-[#111827] transition-colors"
-                    aria-label="Collapse sidebar"
-                    title="Collapse sidebar"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-                  <span className="font-semibold text-[#111827] text-base tracking-tight truncate">Main</span>
-                </div>
-              </div>
+              <button
+                onClick={toggleSidebar}
+                className="w-8 h-8 rounded-full bg-[#eef0f3] hover:bg-[#e5e7eb] text-[#4b5563] flex items-center justify-center transition-colors cursor-pointer shadow-xs active:scale-95"
+                aria-label="Collapse sidebar"
+                title="Collapse sidebar"
+              >
+                <ChevronLeft size={16} />
+              </button>
             )}
           </div>
 
@@ -142,175 +141,142 @@ const Sidebar = ({ isSidebarOpen, isCollapsed, toggleSidebar }) => {
             </div>
           )}
 
-          {/* ── Main nav cluster (pill container) ── */}
-          <nav className="px-3 mt-2">
-            <div className={`bg-[#eef0f3] ${isCollapsed ? 'rounded-full py-2 px-1.5' : 'rounded-2xl py-3 px-2'} flex flex-col items-center gap-0.5`}>
-
-              <Link to="/dashboard" className={pill(isActive('/dashboard'))}>
-                <Home size={16} className={ic(isActive('/dashboard'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">Dashboard</span>}
-              </Link>
-
-              <Link to="/field-list" className={pill(isActive('/field-list'))}>
-                <MapPin size={16} className={ic(isActive('/field-list'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">My Fields</span>}
-              </Link>
-
-              <Link to="/crop-management" className={pill(isActive('/crop-management'))}>
-                <Sprout size={16} className={ic(isActive('/crop-management'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">Crop Management</span>}
-              </Link>
-
-              <Link to="/financial-aid" className={pill(isActive('/financial-aid'))}>
-                <HandCoins size={16} className={ic(isActive('/financial-aid'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">Financial Aid</span>}
-              </Link>
-
-              <Link to="/market-price" className={pill(isActive('/market-price'))}>
-                <TrendingUp size={16} className={ic(isActive('/market-price'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">Market Prices</span>}
-              </Link>
-
-              <Link to="/plant-disease-detection" className={pill(isActive('/plant-disease-detection'))}>
-                <Search size={16} className={ic(isActive('/plant-disease-detection'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">Plant Disease</span>}
-              </Link>
-
-              <Link to="/ai-assistant" className={pill(isActive('/ai-assistant'))}>
-                <Bot size={16} className={ic(isActive('/ai-assistant'))} />
-                {!isCollapsed && <span className="ml-3 text-sm truncate">AI Assistant</span>}
-              </Link>
+          {/* ── Navigation Divs with previous background color (#eef0f3) ── */}
+          <nav className="px-3 mt-1.5 space-y-2.5">
+            {/* 1st Div: Dashboard to AI Assistant */}
+            <div className={`bg-[#eef0f3] ${isCollapsed ? 'rounded-full py-2 px-1.5' : 'rounded-2xl py-2.5 px-2'} flex flex-col items-center gap-0.5`}>
+              {MAIN_LINKS.map(item => {
+                const active = isActive(item.to);
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    title={item.label}
+                    className={pill(active)}
+                  >
+                    <item.icon size={16} className={ic(active)} />
+                    {!isCollapsed && <span className="ml-3 text-sm truncate">{item.label}</span>}
+                  </Link>
+                );
+              })}
             </div>
 
-            {/* ── Climate Analysis Section ── */}
-            <div className="mt-3">
+            {/* 2nd Div: Climate Analysis */}
+            <div className={`bg-[#eef0f3] ${isCollapsed ? 'rounded-full py-2 px-1.5' : 'rounded-2xl p-2'} flex flex-col gap-0.5`}>
               <button
                 type="button"
-                className={expander(expandedMenus.climate)}
                 onClick={() => toggleMenu('climate')}
                 onKeyDown={(e) => handleKeyDown(e, 'climate')}
                 aria-expanded={expandedMenus.climate}
                 title="Climate Analysis"
+                className={`${btn} ${isCollapsed ? 'w-9 h-9 justify-center mx-auto' : 'w-full px-3 py-2 text-left'} ${
+                  isClimateActive ? on : idle
+                }`}
               >
-                <CloudSun size={16} />
+                <CloudSun size={16} className={ic(isClimateActive)} />
                 {!isCollapsed && (
                   <>
                     <span className="ml-3 mr-auto text-sm font-medium">Climate Analysis</span>
                     <ChevronDown
                       size={14}
-                      className={`transition-transform duration-200 ${expandedMenus.climate ? '' : '-rotate-90'}`}
+                      className={`transition-transform duration-200 ${expandedMenus.climate ? 'rotate-0' : '-rotate-90'}`}
                     />
                   </>
                 )}
               </button>
 
               {expandedMenus.climate && !isCollapsed && (
-                <ul className="mt-1 pl-7 space-y-0.5">
-                  <li>
-                    <Link to="/climate" className={sub(isActive('/climate'))}>
-                      <Cloud size={14} className={`mr-2 ${ic(isActive('/climate'))}`} />
-                      <span>Weather Forecast</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/vegetation" className={sub(isActive('/vegetation'))}>
-                      <Leaf size={14} className={`mr-2 ${ic(isActive('/vegetation'))}`} />
-                      <span>Vegetation & Crop Health</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/water" className={sub(isActive('/water'))}>
-                      <CloudRain size={14} className={`mr-2 ${ic(isActive('/water'))}`} />
-                      <span>Water Irrigation</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/fire" className={sub(isActive('/fire'))}>
-                      <Flame size={14} className={`mr-2 ${ic(isActive('/fire'))}`} />
-                      <span>Fire Info</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/hazards" className={sub(isActive('/hazards'))}>
-                      <AlertTriangle size={14} className={`mr-2 ${ic(isActive('/hazards'))}`} />
-                      <span>Hazard Activities</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/rainfall" className={sub(isActive('/rainfall'))}>
-                      <CloudDrizzle size={14} className={`mr-2 ${ic(isActive('/rainfall'))}`} />
-                      <span>Rainfall & Monsoon</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/soil" className={sub(isActive('/soil'))}>
-                      <Layers size={14} className={`mr-2 ${ic(isActive('/soil'))}`} />
-                      <span>Soil Info</span>
-                    </Link>
-                  </li>
-                </ul>
+                <div className="mt-1 pl-4 pr-1 space-y-0.5 border-l-2 border-[#d1d5db] ml-4 my-1">
+                  {CLIMATE_LINKS.map(item => {
+                    const active = isActive(item.to);
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`${btn} w-full px-3 py-1.5 text-xs font-medium ${
+                          active ? on : idle
+                        }`}
+                      >
+                        <item.icon size={13} className={`mr-2.5 ${ic(active)}`} />
+                        <span className="truncate">{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
             </div>
 
-            {/* ── Irrigation Section ── */}
-            <div className="mt-2">
+            {/* 3rd Div: Irrigation */}
+            <div className={`bg-[#eef0f3] ${isCollapsed ? 'rounded-full py-2 px-1.5' : 'rounded-2xl p-2'} flex flex-col gap-0.5`}>
               <button
                 type="button"
-                className={`${expander(expandedMenus.irrigation)} ${isCollapsed ? 'mt-1' : ''}`}
                 onClick={() => toggleMenu('irrigation')}
                 onKeyDown={(e) => handleKeyDown(e, 'irrigation')}
                 aria-expanded={expandedMenus.irrigation}
                 title="Irrigation"
+                className={`${btn} ${isCollapsed ? 'w-9 h-9 justify-center mx-auto' : 'w-full px-3 py-2 text-left'} ${
+                  isIrrigationActive ? on : idle
+                }`}
               >
-                <Droplets size={16} />
+                <Droplets size={16} className={ic(isIrrigationActive)} />
                 {!isCollapsed && (
                   <>
                     <span className="ml-3 mr-auto text-sm font-medium">Irrigation</span>
                     <ChevronDown
                       size={14}
-                      className={`transition-transform duration-200 ${expandedMenus.irrigation ? '' : '-rotate-90'}`}
+                      className={`transition-transform duration-200 ${expandedMenus.irrigation ? 'rotate-0' : '-rotate-90'}`}
                     />
                   </>
                 )}
               </button>
 
               {expandedMenus.irrigation && !isCollapsed && (
-                <ul className="mt-1 pl-7 space-y-0.5">
-                  <li>
-                    <Link to="/water-management" className={sub(isActive('/water-management'))}>
-                      <Droplet size={14} className={`mr-2 ${ic(isActive('/water-management'))}`} />
-                      <span>Water Management</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/irrigation-schedule" className={sub(isActive('/irrigation-schedule'))}>
-                      <CalendarClock size={14} className={`mr-2 ${ic(isActive('/irrigation-schedule'))}`} />
-                      <span>Schedule & Control</span>
-                    </Link>
-                  </li>
-                </ul>
+                <div className="mt-1 pl-4 pr-1 space-y-0.5 border-l-2 border-[#d1d5db] ml-4 my-1">
+                  {IRRIGATION_LINKS.map(item => {
+                    const active = isActive(item.to);
+                    return (
+                      <Link
+                        key={item.to}
+                        to={item.to}
+                        className={`${btn} w-full px-3 py-1.5 text-xs font-medium ${
+                          active ? on : idle
+                        }`}
+                      >
+                        <item.icon size={13} className={`mr-2.5 ${ic(active)}`} />
+                        <span className="truncate">{item.label}</span>
+                      </Link>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </nav>
         </div>
 
-        {/* ── Bottom — settings / logout / avatar ── */}
-        <div className="mt-auto flex flex-col items-center gap-2 pb-4 px-3">
-          <Link to="/profile" className={pill(isActive('/profile'))}>
+        {/* ── Bottom: Settings / Logout / Avatar ── */}
+        <div className="mt-auto flex flex-col items-center gap-1.5 pb-4 px-3">
+          <Link
+            to="/profile"
+            title="Settings"
+            className={`${btn} ${isCollapsed ? 'w-9 h-9 justify-center' : 'w-full px-3 py-2'} ${
+              isActive('/profile') ? on : idle
+            }`}
+          >
             <Settings size={16} className={ic(isActive('/profile'))} />
             {!isCollapsed && <span className="ml-3 text-sm truncate">Settings</span>}
           </Link>
 
           <Link
             to="/logout"
+            title="Logout"
             className={`${btn} ${isCollapsed ? 'w-9 h-9 justify-center' : 'w-full px-3 py-2'} text-[#9aa3af] hover:text-red-500 hover:bg-red-50`}
           >
             <LogOut size={16} />
             {!isCollapsed && <span className="ml-3 text-sm truncate">Logout</span>}
           </Link>
 
-          {/* Avatar — zm-rail-avatar */}
-          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#14532d] text-[#bef264] flex-shrink-0">
+          {/* Avatar */}
+          <div className="grid h-9 w-9 place-items-center rounded-full bg-[#14532d] text-[#bef264] flex-shrink-0 mt-1">
             <Leaf size={16} />
           </div>
         </div>

@@ -29,9 +29,16 @@ app.use(cors({
 }));
 app.use(bodyParser.json());
 
+// ── Cache Service (Redis) ────────────────────────────────────────────────────
+const cacheService = require('./cacheService');
+
 // ── Health check (Docker HEALTHCHECK + load balancers) ───────────────────────
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok', uptime: process.uptime() });
+  res.status(200).json({
+    status: 'ok',
+    uptime: process.uptime(),
+    redis: cacheService.isHealthy() ? 'connected' : 'offline',
+  });
 });
 
 // ── Auth routes ──────────────────────────────────────────────────────────────
@@ -546,10 +553,21 @@ app.post('/api/update-manipal', (req, res) => {
 });
 
 // API endpoint to get soil and land data for a field
-app.get('/api/soil/:fieldId', (req, res) => {
+app.get('/api/soil/:fieldId', async (req, res) => {
   try {
     const fieldId = req.params.fieldId;
-    
+    const cacheKey = `soil:field:${fieldId || 'default'}`;
+
+    // Check cache
+    const cachedSoil = await cacheService.get(cacheKey);
+    if (cachedSoil) {
+      return res.status(200).json({
+        success: true,
+        data: cachedSoil,
+        fromCache: true,
+      });
+    }
+
     // Here we would typically fetch soil data from a database based on the field ID
     // For now, we'll generate realistic mock data with some randomness but consistency
     
@@ -670,6 +688,9 @@ app.get('/api/soil/:fieldId', (req, res) => {
       source: 'SmartAgri Soil Analysis API'
     };
     
+    // Save to cache (1 hour TTL)
+    await cacheService.set(cacheKey, soilData, 3600);
+
     return res.status(200).json({
       success: true,
       data: soilData
@@ -707,25 +728,33 @@ app.post("/api/weather-coordinates", async (req, res) => {
       return res.status(400).json({ message: "Coordinates array is required" });
     }
 
-    // Fetch weather data for each coordinate
+    // Fetch weather data for each coordinate (with Redis caching)
     const weatherDataPromises = coordinates.map(async ({ lat, lng }) => {
+      const coordKey = `weather:coords:${Number(lat).toFixed(3)}:${Number(lng).toFixed(3)}`;
+      const cached = await cacheService.get(coordKey);
+      if (cached) return cached;
+
       const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lng}&appid=${weatherapikey}&units=metric`;
       const response = await fetch(url);
       const data = await response.json();
 
-      // Return only useful info
-      return {
+      const result = {
         simplified: {
           lat,
           lng,
-          weather: data.weather[0].description,
-          temperature: data.main.temp,
-          feels_like: data.main.feels_like,
-          humidity: data.main.humidity,
-          wind_speed: data.wind.speed,
+          weather: data.weather?.[0]?.description,
+          temperature: data.main?.temp,
+          feels_like: data.main?.feels_like,
+          humidity: data.main?.humidity,
+          wind_speed: data.wind?.speed,
         },
         raw: data
-      };      
+      };
+
+      if (response.ok) {
+        await cacheService.set(coordKey, result, 1800); // 30 mins TTL
+      }
+      return result;
     });
 
     const allWeatherData = await Promise.all(weatherDataPromises);
@@ -742,14 +771,21 @@ app.post("/api/weather-coordinates", async (req, res) => {
   }
 });
 
-// API endpoint: weather by location name (keeps API key on server)
+// API endpoint: weather by location name (keeps API key on server, cached with Redis)
 app.post("/api/weather-location", async (req, res) => {
   try {
     const { location } = req.body || {};
     if (!location || typeof location !== 'string') {
       return res.status(400).json({ success: false, message: "location string is required" });
     }
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${location}&appid=${weatherapikey}&units=metric`;
+
+    const cacheKey = `weather:location:${location.trim().toLowerCase()}`;
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ success: true, data: cached, fromCache: true });
+    }
+
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&appid=${weatherapikey}&units=metric`;
     const response = await fetch(url);
     const data = await response.json();
     if (!response.ok) {
@@ -762,7 +798,10 @@ app.post("/api/weather-location", async (req, res) => {
       humidity: data.main?.humidity,
       wind_speed: data.wind?.speed,
     };
-    return res.status(200).json({ success: true, data: { simplified} });
+    const payload = { simplified };
+
+    await cacheService.set(cacheKey, payload, 1800); // 30 mins TTL
+    return res.status(200).json({ success: true, data: payload });
   } catch (error) {
     console.error('Error fetching weather by location:', error);
     return res.status(500).json({ success: false, message: 'Server error while fetching weather by location' });
@@ -771,43 +810,58 @@ app.post("/api/weather-location", async (req, res) => {
 
 
 app.get("/api/agri-news", async (req, res) => {
-  console.log("📩 Incoming request:", req.query);
-
   try {
     const { state, type } = req.query;
-    console.log("🔍 Fetching news for:", state, type);
+    const cacheKey = `news:agri:${(state || 'all').toLowerCase()}:${(type || 'all').toLowerCase()}`;
+    const cached = await cacheService.get(cacheKey);
+    if (cached) {
+      return res.json({ status: "success", results: cached, fromCache: true });
+    }
 
     const response = await fetch(
-      `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_API_KEY}&q=${type}&country=in&language=en`
+      `https://newsdata.io/api/1/news?apikey=${process.env.NEWSDATA_API_KEY}&q=${encodeURIComponent(type || 'agriculture')}&country=in&language=en`
     );
     const data = await response.json();
-    
-    console.log("📰 Raw API response:", data);
 
     if (!data || data.status === "error") {
       return res.json({ status: "error", results: data });
     }
 
+    await cacheService.set(cacheKey, data, 1800); // 30 mins TTL
     return res.json({ status: "success", results: data });
   } catch (err) {
     console.error("❌ Backend error:", err);
     res.status(500).json({ status: "error", message: "Server error" });
   }
-
 });
 
 app.get("/api/weather-for-farmer", async (req, res) => {
   try {
-    const { lat, lng, start, end } = req.query; // GET uses req.query
+    const { lat, lng, start, end } = req.query;
 
     if (!lat || !lng || !start || !end) {
       return res.status(400).json({ error: "lat, lon, start, and end are required" });
+    }
+
+    const roundedLat = Number(lat).toFixed(3);
+    const roundedLng = Number(lng).toFixed(3);
+    const rangeKey = `weather:farmer:${roundedLat}:${roundedLng}:${start}:${end}`;
+    const cachedRange = await cacheService.get(rangeKey);
+    if (cachedRange) {
+      return res.json({ ...cachedRange, fromCache: true });
     }
 
     const dates = getDatesBetween(start, end);
     const results = [];
 
     for (const date of dates) {
+      const dayKey = `weather:hist:${roundedLat}:${roundedLng}:${date}`;
+      const cachedDay = await cacheService.get(dayKey);
+      if (cachedDay) {
+        results.push(cachedDay);
+        continue;
+      }
+
       const response = await fetch(
         `http://api.weatherapi.com/v1/history.json?key=${new_weather_api}&q=${lat},${lng}&dt=${date}`
       );
@@ -815,21 +869,25 @@ app.get("/api/weather-for-farmer", async (req, res) => {
 
       if (data.forecast) {
         const day = data.forecast.forecastday[0].day;
-
-        results.push({
+        const dayResult = {
           date,
-          value: day.avgtemp_c, // simplified structure
+          value: day.avgtemp_c,
           humidity: day.avghumidity,
           rainfall: day.totalprecip_mm,
-        });
+        };
+        results.push(dayResult);
+        await cacheService.set(dayKey, dayResult, 86400); // 24 hours TTL for past dates
       }
     }
-    console.log(results);
-    res.json({
+
+    const responseData = {
       temperature: results.map(r => ({ date: r.date, value: r.value })),
       humidity: results.map(r => ({ date: r.date, value: r.humidity })),
       rainfall: results.map(r => ({ date: r.date, value: r.rainfall })),
-    });
+    };
+
+    await cacheService.set(rangeKey, responseData, 3600); // 1 hour TTL
+    res.json(responseData);
   } catch (err) {
     console.error("Error fetching weather:", err);
     res.status(500).json({ error: "Failed to fetch weather data" });

@@ -164,36 +164,7 @@ export const fetchWaterData = (fieldId, location, dateRange) => {
   });
 };
 
-/**
- * Fetch fire and hazards data
- * @param {string} fieldId - Field identifier
- * @param {string} location - Location name
- * @param {Object} dateRange - Date range object with startDate and endDate
- * @returns {Promise} Promise resolving to hazard data
- */
-export const fetchHazardData = (fieldId, location, dateRange) => {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      try {
-        const hazardData = {
-          fireRiskIndex: parseFloat((Math.random() * 0.4 + 0.2).toFixed(2)),
-          hazardAlerts: [
-            {
-              type: 'information',
-              title: 'Low Fire Risk',
-              description: 'Current fire risk is low due to recent rainfall and moderate temperatures.'
-            }
-          ],
-          historicalEvents: []
-        };
-        
-        resolve(hazardData);
-      } catch (error) {
-        reject(error);
-      }
-    }, 1000);
-  });
-};
+
 
 /**
  * Fetch rainfall and monsoon data
@@ -398,76 +369,10 @@ function generateMockSoilData(fieldId, location) {
   };
 };
 
-/**
- * Fetch fire analysis data
- * @param {string} fieldId - Field identifier  
- * @param {string} location - Location name
- * @param {Object} dateRange - Date range object with startDate and endDate
- * @returns {Promise} Promise resolving to fire data
- */
-export const fetchFireData = async (fieldId, location, dateRange) => {
-  try {
-    console.log('Fetching fire data for:', { fieldId, location, dateRange });
-    
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Generate mock fire data
-    const startDate = dateRange?.startDate ? new Date(dateRange.startDate) : new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    const endDate = dateRange?.endDate ? new Date(dateRange.endDate) : new Date();
-    const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-    
-    const fireData = {
-      fieldSections: [
-        {
-          id: 'north',
-          name: 'North Section',
-          fireRisk: Math.random() * 0.3, // Low fire risk
-          lastIncident: '2024-03-15',
-          status: 'Low Risk'
-        },
-        {
-          id: 'central', 
-          name: 'Central Section',
-          fireRisk: Math.random() * 0.2,
-          lastIncident: 'None',
-          status: 'Very Low Risk'
-        },
-        {
-          id: 'south',
-          name: 'South Section', 
-          fireRisk: Math.random() * 0.4,
-          lastIncident: '2024-02-28',
-          status: 'Moderate Risk'
-        }
-      ],
-      summary: {
-        totalAlerts: Math.floor(Math.random() * 3),
-        riskLevel: 'LOW',
-        lastUpdate: new Date().toISOString(),
-        weatherConditions: {
-          temperature: 25 + Math.random() * 10,
-          humidity: 40 + Math.random() * 30,
-          windSpeed: Math.random() * 15
-        }
-      }
-    };
-    
-    console.log('Fire data fetched successfully:', fireData);
-    return fireData;
-    
-  } catch (error) {
-    console.error('Error fetching fire data:', error);
-    throw error;
-  }
-};
-
 export default {
   fetchWeatherData,
   fetchVegetationData,
   fetchWaterData,
-  fetchHazardData,
   fetchRainfallData,
-  fetchSoilData,
-  fetchFireData
+  fetchSoilData
 };

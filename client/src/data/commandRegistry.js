@@ -115,15 +115,6 @@ const commandRegistry = [
     icon: 'CloudRain',
   },
   {
-    id: 'fire',
-    name: 'Fire Info',
-    keywords: ['fire', 'fire-info', 'burn', 'wildfire', 'hotspot', 'thermal'],
-    description: 'Monitor fire activity and thermal hotspots',
-    route: '/fire',
-    category: 'Climate Analysis',
-    icon: 'Flame',
-  },
-  {
     id: 'rainfall',
     name: 'Rainfall & Monsoon',
     keywords: ['rainfall', 'rain', 'monsoon', 'precipitation', 'drizzle', 'downpour'],
