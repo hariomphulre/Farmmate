@@ -71,13 +71,14 @@ jobs:
           cache-to: type=gha,mode=max
 
       # --- 3. Build ML Service ---
-      # Disabled for now
-      # - name: Build and push ML Service
-      #   uses: docker/build-push-action@v5
-      #   with:
-      #     context: ./ml-service
-      #     push: true
-      #     tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-ml-service:latest
+      - name: Build and push ML Service
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ml-service
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.GITHUB_USERNAME }}/farmmate-ml-service:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy-to-vps:
     needs: build-and-push
@@ -126,11 +127,8 @@ jobs:
             # Login to GitHub Container Registry
             echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
             
-            # Prune dangling images BEFORE pull to free up disk space
-            echo "🧹 Pruning old unused Docker images and containers to free up space..."
-            docker system prune -af || true
-            
-            # Pull latest images
+            # Pull latest images (reuses existing layers, downloading only changed layers in seconds)
+            echo "📥 Pulling latest images..."
             docker compose pull --quiet
             
             # Bring up the containers, removing old orphans, wait for healthchecks
@@ -138,6 +136,10 @@ jobs:
                 
                 echo "✅ Deployment Successful! Current live containers:"
                 docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+                # Prune ONLY untagged/dangling images AFTER containers are up
+                echo "🧹 Pruning old dangling images..."
+                docker image prune -f || true
                 
             else
                 echo "❌ Deployment Failed or Timed Out! Check container logs."

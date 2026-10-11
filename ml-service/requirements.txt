@@ -9,10 +9,10 @@ joblib==1.4.2
 pandas==2.2.3
 numpy==1.26.4
 
-# ─── Computer vision / YOLO ──────────────────────────────────────────────────
-ultralytics==8.3.163
+# ─── High-performance ONNX Runtime inference & computer vision ───────────────
+onnxruntime==1.20.1
 opencv-python-headless==4.10.0.84
 
-# ─── Utils ───────────────────────────────────────────────────────────────────
+# ─── Utils & Cloud APIs ──────────────────────────────────────────────────────
 python-dotenv==1.0.1
 inference-sdk>=0.28.0

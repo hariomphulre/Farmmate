@@ -40,11 +40,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 try:
-    from ultralytics import YOLO
-    YOLO_AVAILABLE = True
+    from onnx_inference import YOLOOnnxDetector
+    ONNX_AVAILABLE = True
 except ImportError:
-    YOLO = None
-    YOLO_AVAILABLE = False
+    YOLOOnnxDetector = None
+    ONNX_AVAILABLE = False
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Roboflow crop scripts — dynamically loaded from scripts/<crop>.py
@@ -82,21 +82,21 @@ def load_crop_artifacts():
 load_crop_artifacts()
 
 # ──────────────────────────────────────────────────────────────────────────────
-# YOLO model cache  { "tea": <YOLO>, "tomato": <YOLO> }
+# ONNX YOLO model cache  { "tea": <YOLOOnnxDetector>, ... }
 # ──────────────────────────────────────────────────────────────────────────────
 _yolo_cache: dict = {}
 
 PLANT_MODEL_MAP = {
-    "tea":    "tea_leaf.pt",
-    "tomato": "tomato_leaf.pt",
-    "cotton": "cotton_leaf.pt",
-    "sugarcane": "sugarcane_leaf.pt",
+    "tea":       "tea_leaf.onnx",
+    "tomato":    "tomato_leaf.onnx",
+    "cotton":    "cotton_leaf.onnx",
+    "sugarcane": "sugarcane_leaf.onnx",
 }
 
 def get_yolo_model(plant_name: str):
-    if not YOLO_AVAILABLE:
+    if not ONNX_AVAILABLE or YOLOOnnxDetector is None:
         return None
-    key = plant_name.lower()
+    key = plant_name.lower().strip()
     if key in _yolo_cache:
         return _yolo_cache[key]
     model_file = PLANT_MODEL_MAP.get(key)
@@ -105,9 +105,9 @@ def get_yolo_model(plant_name: str):
     model_path = MODELS_DIR / model_file
     if not model_path.exists():
         return None
-    model = YOLO(str(model_path), task="detect")
-    _yolo_cache[key] = model
-    return model
+    detector = YOLOOnnxDetector(model_path)
+    _yolo_cache[key] = detector
+    return detector
 
 # ──────────────────────────────────────────────────────────────────────────────
 # FastAPI app
@@ -134,6 +134,7 @@ def health():
         "crop_model_loaded": crop_model is not None,
         "available_yolo_models": list(PLANT_MODEL_MAP.keys()),
         "available_roboflow_models": ROBOFLOW_CROPS,
+        "inference_engine": "onnxruntime",
     }
 
 
@@ -241,9 +242,9 @@ async def disease_detect(
                 detail=f"Roboflow script error ({key}): {str(exc)}",
             )
 
-    # ── Route 2: Local YOLO models (tea, tomato) ─────────────────────────
-    model = get_yolo_model(key)
-    if model is None:
+    # ── Route 2: Local ONNX YOLO models (tea, tomato, cotton, sugarcane) ─
+    detector = get_yolo_model(key)
+    if detector is None:
         return JSONResponse({
             "success": True,
             "mock": True,
@@ -253,34 +254,12 @@ async def disease_detect(
         })
 
     try:
-        img_array = np.frombuffer(contents, np.uint8)
-        frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-        if frame is None:
-            raise HTTPException(status_code=400, detail="Could not decode image")
-
-        frame = cv2.resize(frame, (480, 480))
-        results = model(frame, verbose=False)
-        detections = results[0].boxes
-        labels = model.names
-
-        found = []
-        for det in detections:
-            conf = float(det.conf.item())
-            if conf < MIN_CONFIDENCE:
-                continue
-            xyxy = det.xyxy.cpu().numpy().squeeze().astype(int).tolist()
-            classidx = int(det.cls.item())
-            found.append({
-                "class": labels[classidx],
-                "confidence": round(conf, 4),
-                "bbox": xyxy,
-            })
-
+        detections = detector.predict(contents, conf_threshold=MIN_CONFIDENCE)
         return JSONResponse({
             "success": True,
             "plant": key,
-            "total_detections": len(found),
-            "detections": found,
+            "total_detections": len(detections),
+            "detections": detections,
         })
 
     except HTTPException:

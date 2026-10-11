@@ -1,9 +1,13 @@
 __pycache__
 *.pyc
 *.pyo
-.env
-.env.*
-test-data
-*.log
+*.pyd
+.pytest_cache
+test-data/
+test_*.py
+crop_recommendation/*.csv
+.env*
 .git
 .gitignore
+*.pt
+convert_models_to_onnx.py
