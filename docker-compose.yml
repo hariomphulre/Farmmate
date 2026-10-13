@@ -98,7 +98,7 @@ services:
       - farmmate-net
 
     ports:
-      - "127.0.0.1:8083:80"
+      - "127.0.0.1:8082:80"
 
     volumes:
       # Production Nginx reverse-proxy configuration
